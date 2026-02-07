@@ -1,0 +1,45 @@
+{% macro footer(lang) %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <p class="footer__heading">{{ trans(key="footer_nav", lang=lang) }}</p>
+        <a class="footer__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/aktuelles/_index.md', lang=lang) }}">{{ trans(key="nav_aktuelles", lang=lang) }}</a>
+      </div>
+      <div>
+        <p class="footer__heading">{{ trans(key="footer_contact", lang=lang) }}</p>
+        <a class="footer__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+        <span class="footer__link">{{ config.extra.contact_city }}</span>
+        <a class="footer__link" href="mailto:{{ config.extra.contact_email }}">{{ config.extra.contact_email }}</a>
+      </div>
+      <div>
+        <p class="footer__heading">{{ trans(key="footer_legal", lang=lang) }}</p>
+        <a class="footer__link" href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
+        <a class="footer__link" href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
+        {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
+        {{ trans(key="footer_copyright", lang=lang) }}
+      </p>
+      <div class="lang-switcher" aria-label="Language">
+        {% set langs = ["de", "fr", "it"] %}
+        {% for l in langs %}
+          {% if l == lang %}
+            <span class="lang-switcher__link lang-switcher__link--active">{{ trans(key="lang_" ~ l, lang=lang) }}</span>
+          {% else %}
+            <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ trans(key="lang_" ~ l, lang=lang) }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</footer>
+{% endmacro %}

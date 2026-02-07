@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% import "macros/pillar_cards.html" as pillars %}
+
+{% block title %}{{ section.extra.hero_title | default(value=config.title) }}{% endblock %}
+
+{% block content %}
+{# Hero #}
+<section class="hero">
+  <div class="container">
+    <h1 class="hero__title">{{ section.extra.hero_title | default(value="Die Zukunft") }}</h1>
+    <p class="hero__subtitle">{{ section.extra.hero_subtitle | default(value="") }}</p>
+    <div class="hero__ctas">
+      <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" class="btn btn--primary">{{ trans(key="cta_join", lang=lang) }}</a>
+      <a href="{{ get_url(path='@/programm.md', lang=lang) }}" class="btn btn--secondary">{{ trans(key="cta_program", lang=lang) }}</a>
+    </div>
+  </div>
+</section>
+
+{# What's changing #}
+{% if section.extra.changes %}
+<section class="section section--alt">
+  <div class="container">
+    <h2 class="section__title text-center">{{ section.extra.changes_title | default(value="") }}</h2>
+    <div class="grid grid--3">
+      {% for item in section.extra.changes %}
+      <div class="card">
+        {% if item.icon %}<p class="card__icon">{{ item.icon }}</p>{% endif %}
+        <p class="card__title">{{ item.title }}</p>
+        <p class="card__text">{{ item.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# What we propose — Pillars #}
+{% if section.extra.pillars %}
+<section class="section">
+  <div class="container">
+    <h2 class="section__title text-center">{{ section.extra.pillars_title | default(value="") }}</h2>
+    {{ pillars::render(pillars=section.extra.pillars) }}
+  </div>
+</section>
+{% endif %}
+
+{# How we start — Timeline #}
+{% if section.extra.timeline %}
+<section class="section section--alt">
+  <div class="container">
+    <h2 class="section__title text-center">{{ section.extra.timeline_title | default(value="") }}</h2>
+    <div class="timeline">
+      {% for step in section.extra.timeline %}
+      <div class="timeline__item">
+        <p class="timeline__label">{{ step.phase }}</p>
+        <p class="timeline__title">{{ step.title }}</p>
+        <p class="timeline__text">{{ step.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# Get involved CTA #}
+<section class="section cta-section">
+  <div class="container">
+    <h2>{{ section.extra.cta_title | default(value=trans(key="cta_join", lang=lang)) }}</h2>
+    <p>{{ section.extra.cta_text | default(value="") }}</p>
+    <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" class="btn btn--primary">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endblock %}

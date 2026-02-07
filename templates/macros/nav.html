@@ -1,0 +1,58 @@
+{% macro header(lang, current_path) %}
+<a class="skip-link" href="#main">{{ trans(key="skip_to_content", lang=lang) }}</a>
+<header class="header">
+  <div class="container header__inner">
+    <a href="{{ get_url(path='@/_index.md', lang=lang) }}" class="header__logo">
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}
+    </a>
+
+    <div class="header__right">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="nav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+        <a class="nav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+        <a class="nav__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+        <a class="nav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+        <a class="nav__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+      </nav>
+
+      {{ self::lang_switcher(lang=lang, current_path=current_path) }}
+
+      <button class="nav-toggle" aria-label="{{ trans(key='menu_open', lang=lang) }}" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+    <a class="mobile-nav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/aktuelles/_index.md', lang=lang) }}">{{ trans(key="nav_aktuelles", lang=lang) }}</a>
+    <a class="mobile-nav__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+  </nav>
+</header>
+{% endmacro %}
+
+{% macro lang_switcher(lang, current_path) %}
+<div class="lang-switcher" aria-label="Language">
+{% set langs = ["de", "fr", "it"] %}
+  {% for l in langs %}
+    {% if l == lang %}
+      <span class="lang-switcher__link lang-switcher__link--active" aria-current="true">{{ trans(key="lang_" ~ l, lang=lang) }}</span>
+    {% else %}
+      {% if current_path and current_path.translations is defined %}
+        <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ trans(key="lang_" ~ l, lang=lang) }}</a>
+      {% else %}
+        <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ trans(key="lang_" ~ l, lang=lang) }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endmacro %}

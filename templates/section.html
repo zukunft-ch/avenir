@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1 class="page-header__title">{{ section.title }}</h1>
+    {% if section.description %}
+    <p class="page-header__lead">{{ section.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    {% if section.pages | length > 0 %}
+      {% for page in section.pages %}
+      <article style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #e0e0e0;">
+        <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
+        {% if page.date %}<p class="text-muted" style="font-size: 0.9rem;">{{ page.date | date(format="%d.%m.%Y") }}</p>{% endif %}
+        {% if page.description %}<p>{{ page.description }}</p>{% endif %}
+      </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>{{ trans(key="news_empty", lang=lang) }}</p>
+        <br>
+        <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" class="btn btn--primary">{{ trans(key="cta_newsletter", lang=lang) }}</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

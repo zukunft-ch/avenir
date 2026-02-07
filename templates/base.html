@@ -1,0 +1,81 @@
+{% import "macros/nav.html" as nav %}
+{% import "macros/footer.html" as footer %}
+
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}</title>
+  <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
+
+  {# Hreflang alternates #}
+  {% if page %}
+    <link rel="alternate" hreflang="de" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    {% for t in page.translations %}
+      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
+    {% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="canonical" href="{{ page.permalink }}">
+  {% elif section %}
+    <link rel="alternate" hreflang="de" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    {% for t in section.translations %}
+      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
+    {% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="canonical" href="{{ section.permalink }}">
+  {% endif %}
+
+  {# Open Graph #}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %}">
+  <meta property="og:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
+  <meta property="og:image" content="{{ get_url(path='favicon.svg') }}">
+  <meta property="og:locale" content="{{ lang }}">
+  <meta name="twitter:card" content="summary_large_image">
+
+  {# Favicon #}
+  <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml">
+
+  {# CSS #}
+  <link rel="stylesheet" href="{{ get_url(path='main.css') }}">
+
+  {# Feeds #}
+  {% if lang == "de" %}
+    <link rel="alternate" type="application/atom+xml" title="Die Zukunft — Feed" href="{{ get_url(path='atom.xml') }}">
+  {% elif lang == "fr" %}
+    <link rel="alternate" type="application/atom+xml" title="Le Futur — Feed" href="{{ get_url(path='fr/atom.xml') }}">
+  {% elif lang == "it" %}
+    <link rel="alternate" type="application/atom+xml" title="Il Futuro — Feed" href="{{ get_url(path='it/atom.xml') }}">
+  {% elif lang == "en" %}
+    <link rel="alternate" type="application/atom+xml" title="The Future — Feed" href="{{ get_url(path='en/atom.xml') }}">
+  {% endif %}
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {{ nav::header(lang=lang, current_path=current_path | default(value=false)) }}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {{ footer::footer(lang=lang) }}
+
+  <script>
+    (function() {
+      var toggle = document.querySelector('.nav-toggle');
+      var mobileNav = document.getElementById('mobile-nav');
+      if (!toggle || !mobileNav) return;
+      toggle.addEventListener('click', function() {
+        var isOpen = mobileNav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', isOpen);
+        toggle.setAttribute('aria-label',
+          isOpen ? '{{ trans(key="menu_close", lang=lang) }}' : '{{ trans(key="menu_open", lang=lang) }}'
+        );
+      });
+    })();
+  </script>
+</body>
+</html>

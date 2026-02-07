@@ -1,0 +1,32 @@
+# Avenir — A Zola theme for Die Zukunft / Le Futur / Il Futuro
+# https://github.com/zukunft-ch/avenir
+
+[theme]
+name = "avenir"
+description = "A minimal, multilingual Zola theme with Swiss-pragmatic design. Built for political and civic organisations."
+license = "MIT"
+homepage = "https://github.com/zukunft-ch/avenir"
+min_version = "0.19.0"
+demo = "https://die-zukunft.ch"
+
+[author]
+name = "Die Zukunft"
+homepage = "https://die-zukunft.ch"
+
+[extra]
+# Required config.extra keys:
+#   contact_email    — displayed in footer
+#   contact_city     — displayed in footer
+#   formspree_endpoint — action URL for contact + newsletter forms
+
+# Required translation keys (per language):
+#   nav_vision, nav_programm, nav_grundeinkommen,
+#   nav_digitale_souveraenitaet, nav_menschen, nav_mitmachen,
+#   nav_aktuelles, nav_kontakt,
+#   cta_join, cta_program, cta_newsletter, cta_send,
+#   footer_nav, footer_contact, footer_legal,
+#   footer_impressum, footer_datenschutz, footer_copyright,
+#   label_name, label_email, label_message, label_consent,
+#   news_empty,
+#   lang_de, lang_fr, lang_it,
+#   skip_to_content, menu_open, menu_close

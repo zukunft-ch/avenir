@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1 class="page-header__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-header__lead">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    {{ page.content | safe }}
+
+    <form class="form" action="{{ config.extra.formspree_endpoint }}" method="POST">
+      {# Honeypot #}
+      <div class="form__hp" aria-hidden="true">
+        <label for="_gotcha">Don't fill this out</label>
+        <input type="text" id="_gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="form__group">
+        <label class="form__label" for="name">{{ trans(key="label_name", lang=lang) }}</label>
+        <input class="form__input" type="text" id="name" name="name" required>
+      </div>
+
+      <div class="form__group">
+        <label class="form__label" for="email">{{ trans(key="label_email", lang=lang) }}</label>
+        <input class="form__input" type="email" id="email" name="email" required>
+      </div>
+
+      <div class="form__group">
+        <label class="form__label" for="message">{{ trans(key="label_message", lang=lang) }}</label>
+        <textarea class="form__textarea" id="message" name="message" required></textarea>
+      </div>
+
+      <div class="form__group">
+        <label class="form__checkbox">
+          <input type="checkbox" required>
+          <span>{{ trans(key="label_consent", lang=lang) }}</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn--primary">{{ trans(key="cta_send", lang=lang) }}</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

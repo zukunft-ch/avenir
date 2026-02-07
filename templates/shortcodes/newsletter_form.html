@@ -1,0 +1,8 @@
+<form class="newsletter-form" action="{{ config.extra.formspree_endpoint }}" method="POST">
+  <input type="hidden" name="_subject" value="Newsletter signup">
+  <div class="form__hp" aria-hidden="true">
+    <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
+  </div>
+  <input class="form__input" type="email" name="email" placeholder="{{ trans(key='label_email', lang=lang) }}" required>
+  <button type="submit" class="btn btn--primary">{{ trans(key="cta_newsletter", lang=lang) }}</button>
+</form>

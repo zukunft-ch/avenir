@@ -1,0 +1,11 @@
+{% macro render(pillars) %}
+<div class="grid grid--3">
+  {% for pillar in pillars %}
+  <div class="card">
+    {% if pillar.icon %}<p class="card__icon">{{ pillar.icon }}</p>{% endif %}
+    <p class="card__title">{{ pillar.title }}</p>
+    <p class="card__text">{{ pillar.text }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1 class="page-header__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-header__lead">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow page-content">
+    {{ page.content | safe }}
+  </div>
+</section>
+
+{% if page.extra.show_cta | default(value=false) %}
+<section class="section section--alt cta-section">
+  <div class="container">
+    <h2>{{ trans(key="cta_join", lang=lang) }}</h2>
+    <p>{{ page.extra.cta_text | default(value="") }}</p>
+    <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" class="btn btn--primary">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
