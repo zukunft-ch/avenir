@@ -20,25 +20,4 @@
   </div>
 </section>
 
-{# ===== Footer ===== #}
-<footer class="canvas footer">
-  <div class="container">
-    <p class="footer__wordmark">
-      {% if lang == "fr" %}le futur{% elif lang == "it" %}il futuro{% else %}die zukunft{% endif %}
-    </p>
-    <div class="footer__links">
-      <a href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
-      <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
-      <a href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
-      <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-      <a href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
-      <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
-    </div>
-    <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
-      {{ trans(key="footer_copyright", lang=lang) }}
-    </p>
-  </div>
-</footer>
-
 {% endblock %}

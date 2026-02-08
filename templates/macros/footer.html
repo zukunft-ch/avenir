@@ -1,2 +1,57 @@
-{# Footer macro — no longer used. Footer content moved to info.html tab. #}
-{% macro footer(lang) %}{% endmacro %}
+{% macro footer(lang) %}
+<footer class="canvas footer">
+  <div class="container">
+    <p class="footer__wordmark">
+      {% if lang == "fr" %}le futur{% elif lang == "it" %}il futuro{% else %}die zukunft{% endif %}
+    </p>
+
+    <div class="footer__columns">
+      <div class="footer__col">
+        <p class="footer__heading">{{ trans(key="footer_nav", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+      </div>
+
+      <div class="footer__col">
+        <p class="footer__heading">{{ trans(key="nav_programm", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/robotik.md', lang=lang) }}">{{ trans(key="nav_robotik", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/uebergaenge.md', lang=lang) }}">{{ trans(key="nav_uebergaenge", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/life-science.md', lang=lang) }}">{{ trans(key="nav_life_science", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/stadte-wohnen.md', lang=lang) }}">{{ trans(key="nav_stadte_wohnen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/research-innovation.md', lang=lang) }}">{{ trans(key="nav_research_innovation", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/energy-resilience.md', lang=lang) }}">{{ trans(key="nav_energy_resilience", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/offener-staat.md', lang=lang) }}">{{ trans(key="nav_offener_staat", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/neutralitaet-frieden.md', lang=lang) }}">{{ trans(key="nav_neutralitaet_frieden", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/talent-integration.md', lang=lang) }}">{{ trans(key="nav_talent_integration", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/sprache-verstaendigung.md', lang=lang) }}">{{ trans(key="nav_sprache_verstaendigung", lang=lang) }}</a>
+      </div>
+
+      <div class="footer__col">
+        <p class="footer__heading">{{ trans(key="footer_contact", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+        <span>{{ config.extra.contact_city }}</span>
+        <a href="mailto:{{ config.extra.contact_email }}">{{ config.extra.contact_email }}</a>
+      </div>
+
+      <div class="footer__col">
+        <p class="footer__heading">{{ trans(key="footer_legal", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
+      </div>
+    </div>
+
+    <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
+      {{ trans(key="footer_copyright", lang=lang) }}
+    </p>
+  </div>
+</footer>
+{% endmacro %}

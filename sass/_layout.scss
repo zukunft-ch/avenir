@@ -30,15 +30,14 @@ main {
   border-radius: $radius-lg;
   scroll-snap-align: start;
 
-  // Visible color gradients — different hues per stop
-  background: linear-gradient(135deg, #e8dff5 0%, #dde8f6 50%, #d6f0ef 100%);
+  background: var(--canvas-gradient-default);
 
   &:nth-child(odd) {
-    background: linear-gradient(135deg, #fce4ec 0%, #e8def8 50%, #d1e9fc 100%);
+    background: var(--canvas-gradient-odd);
   }
 
   &:nth-child(even) {
-    background: linear-gradient(135deg, #d6f0ef 0%, #dce8d6 50%, #f5eacc 100%);
+    background: var(--canvas-gradient-even);
   }
 }
 

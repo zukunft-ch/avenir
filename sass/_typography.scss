@@ -15,14 +15,14 @@ body {
   font-weight: $font-weight-normal;
   font-size: $font-size-base;
   line-height: 1.6;
-  color: $color-text;
-  background-color: $color-bg;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: $font-weight-bold;
   line-height: 1.15;
-  color: $color-text;
+  color: var(--color-text);
   letter-spacing: -0.02em;
 }
 
@@ -38,11 +38,11 @@ p {
 }
 
 a {
-  color: $color-accent;
+  color: var(--color-accent);
   transition: color $transition-fast;
 
   &:hover {
-    color: $color-accent-hover;
+    color: var(--color-accent-hover);
   }
 }
 

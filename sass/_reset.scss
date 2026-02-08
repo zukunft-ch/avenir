@@ -7,7 +7,6 @@
 }
 
 html {
-  color-scheme: light;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -24,8 +23,8 @@ body {
 }
 
 ::selection {
-  background: rgba($color-accent, 0.15);
-  color: $color-text;
+  background: var(--selection-bg);
+  color: var(--color-text);
 }
 
 img,

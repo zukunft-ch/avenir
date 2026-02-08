@@ -1,4 +1,5 @@
 {% import "macros/nav.html" as nav %}
+{% import "macros/footer.html" as site_footer %}
 
 <!DOCTYPE html>
 <html lang="{{ lang }}">
@@ -8,7 +9,17 @@
 
   <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}</title>
   <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#ffffff" id="meta-theme-color">
+  <script>
+  (function() {
+    var t = localStorage.getItem('theme');
+    var isDark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('meta-theme-color').setAttribute('content', '#0d0d0d');
+    }
+  })();
+  </script>
 
   {# Hreflang alternates #}
   {% if page %}
@@ -62,6 +73,8 @@
     {% block content %}{% endblock %}
   </main>
 
+  {% block footer %}{{ site_footer::footer(lang=lang) }}{% endblock %}
+
   <script>
   (function() {
     var btn = document.getElementById('sparkle-btn');
@@ -104,11 +117,28 @@
 
     backdrop.addEventListener('click', close);
 
+    // Close on Escape
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
         close();
       }
     });
+
+    // Clicking inside the overlay only closes if it's a nav link
+    overlay.addEventListener('click', function(e) {
+      var link = e.target.closest('.command-overlay__link');
+      if (link) {
+        close();
+      }
+    });
+
+    // Prevent lang switcher and settings from closing overlay
+    var settings = overlay.querySelector('.command-overlay__settings');
+    if (settings) {
+      settings.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
 
     if (searchInput) {
       searchInput.addEventListener('input', function() {
@@ -118,6 +148,24 @@
         if (e.key === 'Enter') {
           var visible = nav.querySelector('.command-overlay__link:not([style*="display: none"])');
           if (visible) window.location.href = visible.href;
+        }
+      });
+    }
+
+    // Theme toggle
+    var themeBtn = document.getElementById('theme-toggle');
+    var metaTheme = document.getElementById('meta-theme-color');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+          if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+          if (metaTheme) metaTheme.setAttribute('content', '#0d0d0d');
         }
       });
     }

@@ -1,0 +1,75 @@
+// =============================================
+// Theme — CSS custom properties for light/dark
+// =============================================
+
+:root {
+  // Core colors
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-text: #111111;
+  --color-text-muted: #666666;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+
+  // Glass
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  // Interactive states
+  --hover-bg: rgba(0, 0, 0, 0.05);
+  --active-bg: rgba(0, 0, 0, 0.07);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --selection-bg: rgba(99, 102, 241, 0.15);
+  --placeholder-color: rgba(0, 0, 0, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.06);
+
+  // Canvas gradients
+  --canvas-gradient-default: linear-gradient(135deg, #e8dff5 0%, #dde8f6 50%, #d6f0ef 100%);
+  --canvas-gradient-odd: linear-gradient(135deg, #fce4ec 0%, #e8def8 50%, #d1e9fc 100%);
+  --canvas-gradient-even: linear-gradient(135deg, #d6f0ef 0%, #dce8d6 50%, #f5eacc 100%);
+
+  // Overlay
+  --overlay-bg: rgba(255, 255, 255, 0.75);
+  --backdrop-bg: rgba(0, 0, 0, 0.06);
+
+  // Sparkle button
+  --sparkle-bg: rgba(240, 240, 240, 0.8);
+  --sparkle-border: rgba(0, 0, 0, 0.12);
+  --sparkle-hover-bg: rgba(230, 230, 230, 0.9);
+  --sparkle-hover-border: rgba(0, 0, 0, 0.18);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0d0d0d;
+  --color-surface: #1a1a1a;
+  --color-text: #eeeeee;
+  --color-text-muted: #999999;
+  --color-accent: #818cf8;
+  --color-accent-hover: #a5b4fc;
+
+  --glass-bg: rgba(30, 30, 30, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  --hover-bg: rgba(255, 255, 255, 0.06);
+  --active-bg: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --selection-bg: rgba(129, 140, 248, 0.2);
+  --placeholder-color: rgba(255, 255, 255, 0.25);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+
+  --canvas-gradient-default: linear-gradient(135deg, #1e1230 0%, #121a2d 50%, #0e1f28 100%);
+  --canvas-gradient-odd: linear-gradient(135deg, #2a1235 0%, #151e3a 50%, #102535 100%);
+  --canvas-gradient-even: linear-gradient(135deg, #0e2520 0%, #172210 50%, #251e08 100%);
+
+  --overlay-bg: rgba(20, 20, 20, 0.85);
+  --backdrop-bg: rgba(0, 0, 0, 0.4);
+
+  --sparkle-bg: rgba(40, 40, 40, 0.8);
+  --sparkle-border: rgba(255, 255, 255, 0.15);
+  --sparkle-hover-bg: rgba(60, 60, 60, 0.9);
+  --sparkle-hover-border: rgba(255, 255, 255, 0.22);
+
+  color-scheme: dark;
+}
