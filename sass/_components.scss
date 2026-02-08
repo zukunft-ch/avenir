@@ -923,6 +923,11 @@
   }
 }
 
+.btn--sm {
+  padding: $space-2 $space-4;
+  font-size: $font-size-sm;
+}
+
 .btn--outline {
   background: transparent;
   color: var(--color-text);
@@ -1242,11 +1247,24 @@
   display: flex;
   gap: $space-5;
   will-change: transform;
+  cursor: grab;
+  user-select: none;
 }
 
 .carousel__card {
   flex: 0 0 20rem;
   max-width: 20rem;
+  display: flex;
+  flex-direction: column;
+
+  .glass-card__text {
+    flex: 1;
+  }
+
+  .btn {
+    align-self: flex-start;
+    margin-top: $space-3;
+  }
 
   @media (max-width: $bp-md) {
     flex: 0 0 16rem;
@@ -1339,26 +1357,3 @@ body.hero-active {
   outline-offset: 2px;
 }
 
-// ---- Carousel pause button ----
-.carousel__pause {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  margin: $space-3 auto 0;
-  background: var(--glass-bg);
-  backdrop-filter: blur($glass-blur);
-  -webkit-backdrop-filter: blur($glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  padding: 0;
-  transition: background $transition-fast, border-color $transition-fast;
-
-  &:hover {
-    background: var(--hover-bg);
-    border-color: var(--color-text-muted);
-  }
-}

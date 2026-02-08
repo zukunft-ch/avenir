@@ -68,6 +68,7 @@
         {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
         <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
+        {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
       </div>
       {% endfor %}
       {% for item in section.extra.pillars %}
@@ -75,14 +76,11 @@
         {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
         <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
+        {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}" tabindex="-1">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
-  <button class="carousel__pause" id="carousel-pause" type="button" aria-label="{% if lang == 'de' %}Karussell anhalten{% elif lang == 'fr' %}Mettre le carrousel en pause{% elif lang == 'it' %}Metti in pausa il carosello{% else %}Pause carousel{% endif %}">
-    <svg id="carousel-pause-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-    <svg id="carousel-play-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
-  </button>
 </section>
 {% endif %}
 
@@ -217,7 +215,7 @@
   els.forEach(function(el) { io.observe(el); });
 })();
 
-// Pillar carousel — continuous slow scroll with pause control
+// Pillar carousel — continuous slow scroll, swipeable by touch/mouse drag
 (function() {
   var track = document.querySelector('.carousel__track');
   if (!track) return;
@@ -233,20 +231,24 @@
   var pos = 0;
   var speed = 0.5;
   var raf;
-  var userPaused = false;
+  var dragging = false;
   var hoverPaused = false;
   var offscreen = false;
 
-  var pauseBtn = document.getElementById('carousel-pause');
-  var pauseIcon = document.getElementById('carousel-pause-icon');
-  var playIcon = document.getElementById('carousel-play-icon');
+  // Drag/swipe state
+  var dragStartX = 0;
+  var dragStartPos = 0;
 
-  function isRunning() { return !userPaused && !hoverPaused && !offscreen; }
+  function isRunning() { return !dragging && !hoverPaused && !offscreen; }
+
+  function wrapPos() { while (pos > 0) pos -= totalWidth; while (pos < -totalWidth) pos += totalWidth; }
 
   function animate() {
     raf = requestAnimationFrame(animate);
-    pos -= speed;
-    if (Math.abs(pos) >= totalWidth) { pos += totalWidth; }
+    if (!dragging) {
+      pos -= speed;
+      wrapPos();
+    }
     track.style.transform = 'translateX(' + pos + 'px)';
   }
 
@@ -255,23 +257,45 @@
 
   function sync() { isRunning() ? start() : stop(); }
 
-  // Pause button
-  if (pauseBtn) {
-    pauseBtn.addEventListener('click', function() {
-      userPaused = !userPaused;
-      pauseIcon.style.display = userPaused ? 'none' : '';
-      playIcon.style.display = userPaused ? '' : 'none';
-      pauseBtn.setAttribute('aria-label', userPaused
-        ? pauseBtn.getAttribute('aria-label').replace(/anhalten|pause|pausa/i, function(m) { return {anhalten:'abspielen',pause:'lecture',pausa:'riproduci'}[m.toLowerCase()] || 'Play'; })
-        : pauseBtn.getAttribute('aria-label').replace(/abspielen|lecture|riproduci|play/i, function(m) { return {abspielen:'anhalten',lecture:'pause',riproduci:'pausa'}[m.toLowerCase()] || 'Pause'; })
-      );
-      track.setAttribute('aria-live', userPaused ? 'polite' : 'off');
-      sync();
-    });
+  // Pointer helpers (unified touch + mouse)
+  function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
+
+  function onDragStart(e) {
+    dragging = true;
+    dragStartX = getX(e);
+    dragStartPos = pos;
+    track.style.cursor = 'grabbing';
+    sync();
   }
 
-  // Pause on hover
-  track.addEventListener('mouseenter', function() { hoverPaused = true; sync(); });
+  function onDragMove(e) {
+    if (!dragging) return;
+    var dx = getX(e) - dragStartX;
+    pos = dragStartPos + dx;
+    wrapPos();
+    track.style.transform = 'translateX(' + pos + 'px)';
+  }
+
+  function onDragEnd() {
+    if (!dragging) return;
+    dragging = false;
+    track.style.cursor = '';
+    sync();
+  }
+
+  // Touch events
+  track.addEventListener('touchstart', function(e) { onDragStart(e); }, { passive: true });
+  track.addEventListener('touchmove', function(e) { onDragMove(e); }, { passive: true });
+  track.addEventListener('touchend', onDragEnd);
+  track.addEventListener('touchcancel', onDragEnd);
+
+  // Mouse drag
+  track.addEventListener('mousedown', function(e) { e.preventDefault(); onDragStart(e); });
+  document.addEventListener('mousemove', function(e) { if (dragging) onDragMove(e); });
+  document.addEventListener('mouseup', onDragEnd);
+
+  // Pause on hover (non-drag)
+  track.addEventListener('mouseenter', function() { if (!dragging) { hoverPaused = true; sync(); } });
   track.addEventListener('mouseleave', function() { hoverPaused = false; sync(); });
 
   // Pause when not visible
