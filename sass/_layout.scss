@@ -41,6 +41,30 @@ main {
   }
 }
 
+// When plasma WebGL is active, sections become windows into the plasma
+body.plasma-active .canvas {
+  background: transparent;
+  isolation: isolate;
+  overflow: hidden;
+
+  &:nth-child(odd) {
+    background: transparent;
+  }
+
+  &:nth-child(even) {
+    background: transparent;
+  }
+}
+
+// Plasma layer canvas injected inside each section by JS
+.plasma-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
 // Hex address anchor in top-left corner of each section
 .hex-anchor {
   position: absolute;

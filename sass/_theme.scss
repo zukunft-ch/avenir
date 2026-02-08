@@ -28,6 +28,11 @@
   --canvas-gradient-odd: linear-gradient(135deg, #fce4ec 0%, #e8def8 50%, #d1e9fc 100%);
   --canvas-gradient-even: linear-gradient(135deg, #d6f0ef 0%, #dce8d6 50%, #f5eacc 100%);
 
+  // Plasma tint overlays (semi-transparent versions of canvas gradients)
+  --canvas-tint-default: linear-gradient(135deg, rgba(232,223,245,0.78) 0%, rgba(221,232,246,0.78) 50%, rgba(214,240,239,0.78) 100%);
+  --canvas-tint-odd:     linear-gradient(135deg, rgba(252,228,236,0.78) 0%, rgba(232,222,248,0.78) 50%, rgba(209,233,252,0.78) 100%);
+  --canvas-tint-even:    linear-gradient(135deg, rgba(214,240,239,0.78) 0%, rgba(220,232,214,0.78) 50%, rgba(245,234,204,0.78) 100%);
+
   // Overlay
   --overlay-bg: rgba(255, 255, 255, 0.75);
   --backdrop-bg: rgba(0, 0, 0, 0.06);
@@ -65,6 +70,10 @@
   --canvas-gradient-default: linear-gradient(135deg, #1e1230 0%, #121a2d 50%, #0e1f28 100%);
   --canvas-gradient-odd: linear-gradient(135deg, #2a1235 0%, #151e3a 50%, #102535 100%);
   --canvas-gradient-even: linear-gradient(135deg, #0e2520 0%, #172210 50%, #251e08 100%);
+
+  --canvas-tint-default: linear-gradient(135deg, rgba(30,18,48,0.82) 0%, rgba(18,26,45,0.82) 50%, rgba(14,31,40,0.82) 100%);
+  --canvas-tint-odd:     linear-gradient(135deg, rgba(42,18,53,0.82) 0%, rgba(21,30,58,0.82) 50%, rgba(16,37,53,0.82) 100%);
+  --canvas-tint-even:    linear-gradient(135deg, rgba(14,37,32,0.82) 0%, rgba(23,34,16,0.82) 50%, rgba(37,30,8,0.82) 100%);
 
   --overlay-bg: rgba(20, 20, 20, 0.85);
   --backdrop-bg: rgba(0, 0, 0, 0.4);

@@ -288,6 +288,167 @@
   </script>
 
   <script>
+  // Animated plasma — offscreen WebGL rendered into each .canvas section
+  // 4 color presets cycle across sections for visual diversity
+  (function() {
+    var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (motionQuery.matches) return;
+
+    var sections = document.querySelectorAll('main > .canvas');
+    if (!sections.length) return;
+
+    var offscreen = document.createElement('canvas');
+    var gl = offscreen.getContext('webgl', { powerPreference: 'low-power', preserveDrawingBuffer: true });
+    if (!gl) return;
+
+    var vsSource = 'attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }';
+    var fsSource = 'precision mediump float; uniform float u_time; uniform vec2 u_resolution; uniform vec3 u_color0; uniform vec3 u_color1; uniform vec3 u_color2; uniform float u_scale; uniform float u_lift; uniform float u_saturation; void main() { vec2 uv = gl_FragCoord.xy / u_resolution * 3.0; float t = u_time * 0.08; float v = 0.0; v += sin(uv.x * 1.1 + t); v += sin(uv.y * 1.3 - t * 0.7); v += sin((uv.x + uv.y) * 0.7 + t * 0.5); v += sin(length(uv - vec2(1.5)) * 1.4 - t * 0.6); v = v * 0.25 + 0.5; vec3 col; if (v < 0.33) { col = mix(u_color0, u_color1, v / 0.33); } else if (v < 0.66) { col = mix(u_color1, u_color2, (v - 0.33) / 0.33); } else { col = mix(u_color2, u_color0, (v - 0.66) / 0.34); } float grey = dot(col, vec3(0.299, 0.587, 0.114)); col = mix(vec3(grey), col, u_saturation); col = col * u_scale + vec3(u_lift); gl_FragColor = vec4(col, 1.0); }';
+
+    function compileShader(src, type) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { gl.deleteShader(s); return null; }
+      return s;
+    }
+
+    var vs = compileShader(vsSource, gl.VERTEX_SHADER);
+    var fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
+    if (!vs || !fs) return;
+
+    var program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    gl.useProgram(program);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    var aPos = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    var uTime = gl.getUniformLocation(program, 'u_time');
+    var uRes = gl.getUniformLocation(program, 'u_resolution');
+    var uColor0 = gl.getUniformLocation(program, 'u_color0');
+    var uColor1 = gl.getUniformLocation(program, 'u_color1');
+    var uColor2 = gl.getUniformLocation(program, 'u_color2');
+    var uScale = gl.getUniformLocation(program, 'u_scale');
+    var uLift = gl.getUniformLocation(program, 'u_lift');
+    var uSat = gl.getUniformLocation(program, 'u_saturation');
+
+    // 4 palettes per theme — each: [color0, color1, color2]
+    // Light: very pastel (scale compresses range, lift pushes toward white)
+    var lightPresets = [
+      { c: [[0.72,0.55,1.0], [0.45,0.65,1.0], [0.30,0.85,0.90]], scale: 0.30, lift: 0.68, sat: 0.55 },
+      { c: [[1.0,0.60,0.70], [0.85,0.55,0.90], [1.0,0.75,0.60]], scale: 0.30, lift: 0.68, sat: 0.55 },
+      { c: [[0.30,0.90,0.80], [0.45,0.90,0.55], [0.50,0.75,1.0]], scale: 0.30, lift: 0.68, sat: 0.55 },
+      { c: [[1.0,0.85,0.40], [1.0,0.70,0.50], [0.95,0.60,0.65]], scale: 0.30, lift: 0.68, sat: 0.55 }
+    ];
+    // Dark: richer, more visible
+    var darkPresets = [
+      { c: [[0.55,0.30,0.85], [0.20,0.35,0.75], [0.15,0.55,0.65]], scale: 0.35, lift: 0.06, sat: 0.6 },
+      { c: [[0.75,0.20,0.55], [0.55,0.25,0.75], [0.25,0.35,0.70]], scale: 0.35, lift: 0.06, sat: 0.6 },
+      { c: [[0.15,0.65,0.55], [0.20,0.60,0.35], [0.20,0.45,0.70]], scale: 0.35, lift: 0.06, sat: 0.6 },
+      { c: [[0.75,0.55,0.25], [0.70,0.40,0.20], [0.65,0.30,0.45]], scale: 0.35, lift: 0.06, sat: 0.6 }
+    ];
+    var presetCount = 4;
+    var timeOffset = 25.0;
+
+    // Inject a 2D canvas into each section
+    var layers = [];
+    sections.forEach(function(sec, idx) {
+      var c = document.createElement('canvas');
+      c.className = 'plasma-layer';
+      c.setAttribute('aria-hidden', 'true');
+      sec.appendChild(c);
+      layers.push({ canvas: c, ctx: c.getContext('2d'), section: sec, visible: false, preset: idx % presetCount });
+    });
+
+    var dprCap = 1.5;
+    function resize() {
+      var dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+      var w = sections[0].offsetWidth;
+      var h = sections[0].offsetHeight;
+      offscreen.width = w * dpr;
+      offscreen.height = h * dpr;
+      gl.viewport(0, 0, offscreen.width, offscreen.height);
+      gl.uniform2f(uRes, offscreen.width, offscreen.height);
+      layers.forEach(function(l) {
+        l.canvas.width = l.section.offsetWidth * dpr;
+        l.canvas.height = l.section.offsetHeight * dpr;
+      });
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 100);
+    });
+
+    resize();
+
+    // Track which sections are visible
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        for (var i = 0; i < layers.length; i++) {
+          if (layers[i].section === e.target) { layers[i].visible = e.isIntersecting; break; }
+        }
+      });
+    }, { threshold: 0 });
+    sections.forEach(function(s) { io.observe(s); });
+
+    var raf;
+    var paused = false;
+    var startTime = performance.now();
+
+    function render() {
+      raf = requestAnimationFrame(render);
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var presets = isDark ? darkPresets : lightPresets;
+      var t = (performance.now() - startTime) / 1000;
+      for (var i = 0; i < layers.length; i++) {
+        if (!layers[i].visible) continue;
+        var p = presets[layers[i].preset];
+        gl.uniform1f(uTime, t + layers[i].preset * timeOffset);
+        gl.uniform3fv(uColor0, p.c[0]);
+        gl.uniform3fv(uColor1, p.c[1]);
+        gl.uniform3fv(uColor2, p.c[2]);
+        gl.uniform1f(uScale, p.scale);
+        gl.uniform1f(uLift, p.lift);
+        gl.uniform1f(uSat, p.sat);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        layers[i].ctx.drawImage(offscreen, 0, 0, offscreen.width, offscreen.height, 0, 0, layers[i].canvas.width, layers[i].canvas.height);
+      }
+    }
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) { paused = true; cancelAnimationFrame(raf); }
+      else if (paused) { paused = false; render(); }
+    });
+
+    motionQuery.addEventListener('change', function(e) {
+      if (e.matches) {
+        cancelAnimationFrame(raf);
+        paused = true;
+        document.body.classList.remove('plasma-active');
+        layers.forEach(function(l) { l.canvas.style.display = 'none'; });
+      } else {
+        layers.forEach(function(l) { l.canvas.style.display = ''; });
+        document.body.classList.add('plasma-active');
+        paused = false;
+        render();
+      }
+    });
+
+    document.body.classList.add('plasma-active');
+    render();
+  })();
+  </script>
+
+  <script>
   // Shared Swiss cross mesh helper
   window.SwissCross = (function() {
     function buildPositions(arm, thick) {

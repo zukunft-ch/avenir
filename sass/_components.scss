@@ -27,6 +27,11 @@
   border: 1px solid var(--glass-border);
   border-radius: $radius-pill;
   font-family: $font-family-headline;
+
+  @media (max-width: $bp-md) {
+    top: auto;
+    bottom: calc($space-3 + $space-4);
+  }
 }
 
 .topnav__logo {
@@ -425,6 +430,10 @@
   clip-path: circle(1.25rem at calc(100% - $space-4 - 1.25rem) calc($space-4 + 1.25rem));
   pointer-events: none;
   transition: clip-path 0.6s $ease-out-expo, opacity 0.3s ease;
+
+  @media (max-width: $bp-md) {
+    clip-path: circle(1.25rem at calc(100% - $space-4 - 1.25rem) calc(100% - $space-4 - 1.25rem));
+  }
 
   &.is-open {
     opacity: 1;
@@ -1269,6 +1278,11 @@
   transform: translateY(0.5rem);
   transition: opacity $transition-normal, transform $transition-normal, background $transition-fast, border-color $transition-fast;
 
+  // On narrow screens, sit above the bottom nav pill to avoid overlap
+  @media (max-width: 30rem) {
+    bottom: calc($space-3 + $space-4 + 2.75rem + $space-2);
+  }
+
   &.is-visible {
     opacity: 1;
     pointer-events: auto;
@@ -1309,6 +1323,13 @@ body.hero-active {
     opacity: 0 !important;
     pointer-events: none !important;
     transition: opacity $transition-normal;
+  }
+
+  .topnav {
+    @media (max-width: $bp-md) {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
   }
 }
 
