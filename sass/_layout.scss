@@ -23,12 +23,24 @@ main {
   flex-shrink: 0;
   height: calc(100dvh - $canvas-gap * 2);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   position: relative;
   padding: $space-8 $space-5;
   border-radius: $radius-lg;
   scroll-snap-align: start;
+
+  // Spacer before content keeps it below the hex anchor
+  &::before {
+    content: "";
+    flex: 1;
+  }
+
+  // Spacer after content balances the centering
+  &::after {
+    content: "";
+    flex: 1;
+  }
 
   background: var(--canvas-gradient-default);
 
@@ -82,6 +94,12 @@ body.plasma-active .canvas {
 
   &:hover {
     opacity: 0.7;
+  }
+
+  @media (max-width: $bp-md) {
+    top: $space-3;
+    left: $space-3;
+    font-size: 1rem;
   }
 }
 
