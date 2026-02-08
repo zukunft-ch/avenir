@@ -266,7 +266,15 @@
 
     // Theme switch
     var themeBtn = document.getElementById('theme-toggle');
-    var metaTheme = document.getElementById('meta-theme-color');
+    function setThemeColor(color) {
+      var old = document.getElementById('meta-theme-color');
+      if (old) old.remove();
+      var m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.id = 'meta-theme-color';
+      m.content = color;
+      document.head.appendChild(m);
+    }
     if (themeBtn) {
       if (document.documentElement.getAttribute('data-theme') === 'dark') {
         themeBtn.setAttribute('aria-checked', 'true');
@@ -277,12 +285,12 @@
           document.documentElement.removeAttribute('data-theme');
           localStorage.setItem('theme', 'light');
           themeBtn.setAttribute('aria-checked', 'false');
-          if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
+          setThemeColor('#ffffff');
         } else {
           document.documentElement.setAttribute('data-theme', 'dark');
           localStorage.setItem('theme', 'dark');
           themeBtn.setAttribute('aria-checked', 'true');
-          if (metaTheme) metaTheme.setAttribute('content', '#0d0d0d');
+          setThemeColor('#0d0d0d');
         }
       });
     }
@@ -485,9 +493,10 @@
       var cubeSize = opts.cubeSize || 0.88;
       var fov = opts.fov || 35;
 
-      var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+      var mobile = w < 768;
+      var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !mobile, powerPreference: 'low-power' });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(dpr);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2));
 
       var scene = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(fov, w / h, 0.1, 100);
@@ -564,7 +573,7 @@
     // Element always has full dimensions (hidden via scale+margin),
     // so init the mesh right away
     function initNav() {
-      if (navCanvas) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
+      if (navCanvas && window.innerWidth >= 768) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
     }
     if (typeof THREE !== 'undefined') { initNav(); }
     else {
@@ -585,8 +594,9 @@
     }
   })();
 
-  // Footer mesh
+  // Footer mesh (desktop only — saves GPU memory on mobile)
   (function() {
+    if (window.innerWidth < 768) return;
     var canvas = document.getElementById('footer-mesh');
     if (!canvas) return;
     function init() {
