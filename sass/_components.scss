@@ -1220,9 +1220,6 @@
   align-items: center;
   gap: $space-3;
 
-  @media (max-width: $bp-md) {
-    display: none;
-  }
 }
 
 .progress-tracker__dot {
