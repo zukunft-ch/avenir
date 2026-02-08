@@ -4,18 +4,22 @@
 {
   "@context": "https://schema.org",
   "@type": "PoliticalParty",
-  "@id": "https://die-zukunft.ch/#organization",
+  "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization",
   "name": "Die Zukunft",
   "alternateName": ["Le Futur", "Il Futuro", "The Future"],
-  "url": "https://die-zukunft.ch",
-  "logo": "https://die-zukunft.ch/favicon.svg",
-  "email": "kontakt@die-zukunft.ch",
+  "url": "{{ config.base_url | trim_end_matches(pat='/') }}",
+  "logo": "{{ config.base_url | trim_end_matches(pat='/') }}/favicon.svg",
+  "email": "hey@die-zukunft.ch",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "Basel",
     "addressCountry": "CH"
   },
-  "sameAs": []
+  "sameAs": [],
+  "foundingLocation": {
+    "@type": "Place",
+    "name": "Basel, Switzerland"
+  }
 }
 </script>
 {% endmacro %}
@@ -26,11 +30,16 @@
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "@id": "https://die-zukunft.ch/#website",
+  "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#website",
   "name": "{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}",
-  "url": "https://die-zukunft.ch",
+  "url": "{{ config.base_url | trim_end_matches(pat='/') }}",
   "inLanguage": "{{ lang }}",
-  "publisher": { "@id": "https://die-zukunft.ch/#organization" }
+  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization" },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ config.base_url | trim_end_matches(pat='/') }}{% if lang != 'de' %}/{{ lang }}{% endif %}/#search={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
 }
 </script>
 {% endmacro %}
@@ -45,8 +54,13 @@
   "description": {{ description | json_encode() | safe }},
   "url": {{ url | json_encode() | safe }},
   "inLanguage": "{{ lang }}",
-  "isPartOf": { "@id": "https://die-zukunft.ch/#website" },
-  "publisher": { "@id": "https://die-zukunft.ch/#organization" }
+  "isPartOf": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#website" },
+  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization" },
+  "mainEntityOfPage": {{ url | json_encode() | safe }},
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".page-hero__title", ".page-hero__desc", ".hero__big", ".hero__subline"]
+  }
 }
 </script>
 {% endmacro %}
@@ -62,7 +76,7 @@
       "@type": "ListItem",
       "position": 1,
       "name": "{% if lang == 'fr' %}Accueil{% elif lang == 'it' %}Home{% elif lang == 'en' %}Home{% else %}Start{% endif %}",
-      "item": "https://die-zukunft.ch{% if lang != 'de' %}/{{ lang }}/{% else %}/{% endif %}"
+      "item": "{{ config.base_url | trim_end_matches(pat='/') }}{% if lang != 'de' %}/{{ lang }}/{% else %}/{% endif %}"
     },
     {
       "@type": "ListItem",
@@ -71,6 +85,45 @@
       "item": {{ url | json_encode() | safe }}
     }
   ]
+}
+</script>
+{% endmacro %}
+
+{# ---- ItemList — programm page (pillar listing) ---- #}
+{% macro itemlist(chapters, lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "{% if lang == 'fr' %}Programme{% elif lang == 'it' %}Programma{% elif lang == 'en' %}Program{% else %}Programm{% endif %}",
+  "numberOfItems": {{ chapters | length }},
+  "itemListElement": [
+    {% for ch in chapters %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "name": {{ ch.title | json_encode() | safe }},
+      "description": {{ ch.text | json_encode() | safe }}{% if ch.link %},
+      "url": {{ ch.link | json_encode() | safe }}{% endif %}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endmacro %}
+
+{# ---- ContactPage — kontakt page ---- #}
+{% macro contactpage(url, lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "{% if lang == 'fr' %}Contact{% elif lang == 'it' %}Contatto{% elif lang == 'en' %}Contact{% else %}Kontakt{% endif %}",
+  "url": {{ url | json_encode() | safe }},
+  "mainEntity": {
+    "@type": "Organization",
+    "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization"
+  }
 }
 </script>
 {% endmacro %}
