@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero" aria-label="{{ page.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-hero__desc">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Intro ===== #}
+{% if page.content %}
+<section class="canvas" aria-label="{{ page.extra.intro_title | default(value=page.title) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {{ page.content | safe }}
+  </div>
+</section>
+{% endif %}
+
+{# ===== Chapters — each its own section ===== #}
+{% if page.extra.chapters %}
+  {% for ch in page.extra.chapters %}
+  <section class="canvas canvas--content" aria-label="{{ ch.title }}">
+    <div class="container container--narrow">
+      <div class="program-chapter glass-card">
+        {% if ch.icon %}<p class="glass-card__icon">{{ ch.icon }}</p>{% endif %}
+        <h2 class="program-chapter__title">{{ ch.title }}</h2>
+        <p class="program-chapter__text">{{ ch.text }}</p>
+        {% if ch.link %}
+        <a class="btn btn--outline" href="{{ ch.link }}">{{ trans(key="cta_learn_more", lang=lang) }} →</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+{% endif %}
+
+{# ===== CTA ===== #}
+{% if page.extra.show_cta %}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if page.extra.cta_text %}
+    <p class="cta-section__text">{{ page.extra.cta_text }}</p>
+    {% endif %}
+    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -615,6 +615,37 @@
   margin-bottom: 0;
 }
 
+// ---- Program chapter card ----
+.program-chapter {
+  max-width: $max-width-text;
+  margin: 0 auto;
+  text-align: center;
+  padding: $space-7 $space-6;
+
+  &:hover {
+    transform: none;
+  }
+
+  .glass-card__icon {
+    font-size: $font-size-5xl;
+    margin-bottom: $space-4;
+  }
+}
+
+.program-chapter__title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $space-4;
+  @include gradient-text();
+}
+
+.program-chapter__text {
+  font-size: $font-size-lg;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin-bottom: $space-6;
+}
+
 // ---- Bento grid (card layout) ----
 .bento-grid {
   display: grid;
