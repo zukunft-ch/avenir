@@ -1,3 +1,47 @@
+// =============================================
+// Layout — section canvases, scroll-based
+// =============================================
+
+$canvas-gap: $space-3;
+
+// Scroll snap + padding so snap targets land with a gap at top
+html {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: $canvas-gap;
+}
+
+// Main is a flex column — no margin collapsing, gap controls spacing
+main {
+  display: flex;
+  flex-direction: column;
+  gap: $canvas-gap;
+  padding: $canvas-gap $space-3;
+}
+
+// Every .canvas fits the viewport minus top+bottom gap
+.canvas {
+  flex-shrink: 0;
+  height: calc(100dvh - $canvas-gap * 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: $space-8 $space-5;
+  border-radius: $radius-lg;
+  scroll-snap-align: start;
+
+  // Visible color gradients — different hues per stop
+  background: linear-gradient(135deg, #e8dff5 0%, #dde8f6 50%, #d6f0ef 100%);
+
+  &:nth-child(odd) {
+    background: linear-gradient(135deg, #fce4ec 0%, #e8def8 50%, #d1e9fc 100%);
+  }
+
+  &:nth-child(even) {
+    background: linear-gradient(135deg, #d6f0ef 0%, #dce8d6 50%, #f5eacc 100%);
+  }
+}
+
 .container {
   width: 100%;
   max-width: $max-width;
@@ -9,79 +53,4 @@
 
 .container--narrow {
   max-width: $max-width-text;
-}
-
-.section {
-  padding-top: $space-8;
-  padding-bottom: $space-8;
-}
-
-.section--alt {
-  background-color: $color-bg-alt;
-}
-
-.section__title {
-  margin-bottom: $space-6;
-}
-
-.grid {
-  display: grid;
-  gap: $space-5;
-}
-
-.grid--2 {
-  grid-template-columns: 1fr;
-
-  @media (min-width: $bp-md) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.grid--3 {
-  grid-template-columns: 1fr;
-
-  @media (min-width: $bp-md) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: $bp-lg) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.page-content {
-  h2 {
-    margin-top: $space-7;
-    margin-bottom: $space-4;
-  }
-
-  h3 {
-    margin-top: $space-6;
-    margin-bottom: $space-3;
-  }
-
-  ul, ol {
-    margin-bottom: $space-4;
-    padding-left: $space-5;
-  }
-
-  ul {
-    list-style: disc;
-  }
-
-  ol {
-    list-style: decimal;
-  }
-
-  li {
-    margin-bottom: $space-2;
-  }
-
-  blockquote {
-    border-left: 3px solid $color-accent;
-    padding-left: $space-5;
-    margin: $space-5 0;
-    color: $color-text-muted;
-    font-style: italic;
-  }
 }

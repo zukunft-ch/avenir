@@ -1,39 +1,84 @@
-// Colors
-$color-text: #1a1a1a;
-$color-text-muted: #555555;
-$color-bg: #ffffff;
-$color-bg-alt: #f7f7f7;
-$color-accent: #0055a4;
-$color-accent-hover: #003d7a;
-$color-border: #e0e0e0;
-$color-white: #ffffff;
+// =============================================
+// Design tokens — light theme
+// =============================================
 
-// Typography
+// --- Colors (light) ---
+$color-bg:          #ffffff;
+$color-surface:     #f5f5f5;
+$color-text:        #111111;
+$color-text-muted:  #666666;
+$color-accent:      #6366f1;
+$color-accent-hover:#4f46e5;
+
+// Gradient anchors (used by brandmark)
+$gradient-purple:   #a855f7;
+$gradient-blue:     #3b82f6;
+$gradient-teal:     #06b6d4;
+
+// Glass (light theme)
+$glass-bg:          rgba(255, 255, 255, 0.65);
+$glass-border:      rgba(0, 0, 0, 0.08);
+$glass-blur:        20px;
+
+// --- Typography ---
 $font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+// Fluid type scale (375px → 1440px)
+$font-size-xs:    clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);
+$font-size-sm:    clamp(0.85rem, 0.8rem + 0.2vw, 0.9375rem);
+$font-size-base:  clamp(0.95rem, 0.9rem + 0.2vw, 1.0625rem);
+$font-size-lg:    clamp(1.1rem, 1rem + 0.4vw, 1.25rem);
+$font-size-xl:    clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+$font-size-2xl:   clamp(1.5rem, 1.2rem + 1vw, 2rem);
+$font-size-3xl:   clamp(1.85rem, 1.4rem + 1.5vw, 2.75rem);
+$font-size-4xl:   clamp(2.25rem, 1.6rem + 2vw, 3.5rem);
+$font-size-5xl:   clamp(2.75rem, 1.8rem + 3vw, 4.5rem);
+$font-size-6xl:   clamp(3.25rem, 2rem + 4vw, 6.5rem);
+
+// Weights
 $font-weight-normal: 400;
-$font-weight-bold: 700;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold:   700;
 
-// Spacing (8px scale)
-$space-1: 0.25rem;  // 4px
-$space-2: 0.5rem;   // 8px
-$space-3: 0.75rem;  // 12px
-$space-4: 1rem;     // 16px
-$space-5: 1.5rem;   // 24px
-$space-6: 2rem;     // 32px
-$space-7: 3rem;     // 48px
-$space-8: 4rem;     // 64px
-$space-9: 6rem;     // 96px
+// --- Spacing (8px scale) ---
+$space-1:   0.25rem;   // 4px
+$space-2:   0.5rem;    // 8px
+$space-3:   0.75rem;   // 12px
+$space-4:   1rem;      // 16px
+$space-5:   1.5rem;    // 24px
+$space-6:   2rem;      // 32px
+$space-7:   3rem;      // 48px
+$space-8:   4rem;      // 64px
+$space-9:   6rem;      // 96px
+$space-10:  8rem;      // 128px
 
-// Layout
-$max-width: 72rem;
-$max-width-text: 48rem;
+// --- Layout ---
+$max-width:      80rem;   // 1280px
+$max-width-text: 48rem;   // 768px
 
-// Breakpoints
-$bp-sm: 576px;
-$bp-md: 768px;
-$bp-lg: 992px;
-$bp-xl: 1200px;
+// --- Breakpoints ---
+$bp-sm:  576px;
+$bp-md:  768px;
+$bp-lg:  992px;
+$bp-xl:  1200px;
 
-// Transitions
-$transition-fast: 150ms ease;
-$transition-normal: 250ms ease;
+// --- Transitions / Easing ---
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+$transition-fast:   150ms $ease-out-quart;
+$transition-normal: 300ms $ease-out-expo;
+$transition-slow:   500ms $ease-out-expo;
+
+// --- Z-index scale ---
+$z-base:       1;
+$z-sticky:     100;
+$z-overlay:    500;
+$z-modal:      1000;
+$z-skip:       2000;
+
+// --- Border radius ---
+$radius-sm:   6px;
+$radius-md:   12px;
+$radius-lg:   20px;
+$radius-pill: 100px;

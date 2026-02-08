@@ -1,58 +1,74 @@
-{% macro header(lang, current_path) %}
+{# ---- Skip link ---- #}
+{% macro skip_link(lang) %}
 <a class="skip-link" href="#main">{{ trans(key="skip_to_content", lang=lang) }}</a>
-<header class="header">
-  <div class="container header__inner">
-    <a href="{{ get_url(path='@/_index.md', lang=lang) }}" class="header__logo">
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}
-    </a>
-
-    <div class="header__right">
-      <nav class="nav" aria-label="Main navigation">
-        <a class="nav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
-        <a class="nav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
-        <a class="nav__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
-        <a class="nav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
-        <a class="nav__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-      </nav>
-
-      {{ self::lang_switcher(lang=lang, current_path=current_path) }}
-
-      <button class="nav-toggle" aria-label="{{ trans(key='menu_open', lang=lang) }}" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-    <a class="mobile-nav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/aktuelles/_index.md', lang=lang) }}">{{ trans(key="nav_aktuelles", lang=lang) }}</a>
-    <a class="mobile-nav__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-  </nav>
-</header>
 {% endmacro %}
 
-{% macro lang_switcher(lang, current_path) %}
-<div class="lang-switcher" aria-label="Language">
-{% set langs = ["de", "fr", "it"] %}
-  {% for l in langs %}
-    {% if l == lang %}
-      <span class="lang-switcher__link lang-switcher__link--active" aria-current="true">{{ trans(key="lang_" ~ l, lang=lang) }}</span>
-    {% else %}
-      {% if current_path and current_path.translations is defined %}
-        <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ trans(key="lang_" ~ l, lang=lang) }}</a>
-      {% else %}
-        <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ trans(key="lang_" ~ l, lang=lang) }}</a>
-      {% endif %}
-    {% endif %}
-  {% endfor %}
+{# ---- Top nav bar (glassmorphic, centered, max 3 items) ---- #}
+{% macro topnav(lang) %}
+<nav class="topnav" aria-label="Main navigation">
+  <a class="topnav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}" data-nav>{{ trans(key="nav_programm", lang=lang) }}</a>
+  <a class="topnav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}" data-nav>{{ trans(key="nav_vision", lang=lang) }}</a>
+  <a class="topnav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" data-nav>{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+</nav>
+{% endmacro %}
+
+{# ---- Sparkle button (top-right, opens command overlay) ---- #}
+{% macro sparkle_button() %}
+<button class="sparkle-btn" id="sparkle-btn" type="button" aria-label="Menu" aria-expanded="false">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+    <path d="M20 3v4"/>
+    <path d="M22 5h-4"/>
+  </svg>
+</button>
+{% endmacro %}
+
+{# ---- Command overlay (glassmorphic panel) ---- #}
+{% macro command_overlay(lang) %}
+<div class="overlay-backdrop" id="overlay-backdrop" aria-hidden="true"></div>
+<div class="command-overlay" id="command-overlay" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div class="command-overlay__inner">
+
+    {# Search #}
+    <div class="command-overlay__search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="command-search" placeholder="{{ trans(key='search_placeholder', lang=lang) }}" autocomplete="off">
+    </div>
+
+    {# Navigation links #}
+    <nav class="command-overlay__nav" id="command-nav">
+      <a class="command-overlay__link" href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
+      <a class="command-overlay__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+      <a class="command-overlay__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+      <a class="command-overlay__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+      <a class="command-overlay__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+      <a class="command-overlay__link" href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
+    </nav>
+
+    {# Settings row: language + theme #}
+    <div class="command-overlay__settings">
+      <div class="command-overlay__setting">
+        <span class="command-overlay__label">{{ trans(key="footer_nav", lang=lang) }}</span>
+        <div class="lang-switcher">
+          {% set langs = ["de", "fr", "it"] %}
+          {% for l in langs %}
+            {% if l == lang %}
+              <span class="lang-switcher__link lang-switcher__link--active" aria-current="true">{{ l | upper }}</span>
+            {% else %}
+              <a class="lang-switcher__link" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ l | upper }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <div class="command-overlay__setting">
+        <span class="command-overlay__label">Theme</span>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+          <svg class="theme-toggle__sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-toggle__moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endmacro %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article>
+  <div class="container">
+    <p>
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}
+    </p>
+    <p>
+      {% if lang == "fr" %}Un parti suisse pour la transition structurelle.
+      {% elif lang == "it" %}Un partito svizzero per la transizione strutturale.
+      {% else %}Eine Schweizer Partei für den strukturellen Wandel.{% endif %}
+    </p>
+
+    <nav>
+      <div>
+        <p>{{ trans(key="footer_nav", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+      </div>
+      <div>
+        <p>{{ trans(key="nav_programm", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/stadte-wohnen.md', lang=lang) }}">{{ trans(key="nav_stadte_wohnen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/research-innovation.md', lang=lang) }}">{{ trans(key="nav_research_innovation", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/energy-resilience.md', lang=lang) }}">{{ trans(key="nav_energy_resilience", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/offener-staat.md', lang=lang) }}">{{ trans(key="nav_offener_staat", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
+      </div>
+      <div>
+        <p>{{ trans(key="footer_contact", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+        <span>{{ config.extra.contact_city }}</span>
+        <a href="mailto:{{ config.extra.contact_email }}">{{ config.extra.contact_email }}</a>
+      </div>
+      <div>
+        <p>{{ trans(key="footer_legal", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
+      </div>
+    </nav>
+
+    <p>&copy; {{ now() | date(format="%Y") }}
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
+      {{ trans(key="footer_copyright", lang=lang) }}
+    </p>
+  </div>
+</article>
+{% endblock %}

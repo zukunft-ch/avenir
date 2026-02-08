@@ -3,7 +3,7 @@
 
 [theme]
 name = "avenir"
-description = "A minimal, multilingual Zola theme with Swiss-pragmatic design. Built for political and civic organisations."
+description = "A dark glassmorphic Zola theme with mesh gradients, tab navigation, and command-palette search. Built for political and civic organisations."
 license = "MIT"
 homepage = "https://github.com/zukunft-ch/avenir"
 min_version = "0.19.0"
@@ -22,11 +22,13 @@ homepage = "https://die-zukunft.ch"
 # Required translation keys (per language):
 #   nav_vision, nav_programm, nav_grundeinkommen,
 #   nav_digitale_souveraenitaet, nav_menschen, nav_mitmachen,
-#   nav_aktuelles, nav_kontakt,
-#   cta_join, cta_program, cta_newsletter, cta_send,
+#   nav_aktuelles, nav_kontakt, nav_home, nav_more,
+#   cta_join, cta_program, cta_newsletter, cta_send, cta_learn_more,
 #   footer_nav, footer_contact, footer_legal,
 #   footer_impressum, footer_datenschutz, footer_copyright,
+#   footer_newsletter_title,
 #   label_name, label_email, label_message, label_consent,
 #   news_empty,
+#   search_placeholder, search_no_results, search_shortcut,
 #   lang_de, lang_fr, lang_it,
 #   skip_to_content, menu_open, menu_close

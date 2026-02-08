@@ -1,14 +1,14 @@
 {% import "macros/nav.html" as nav %}
-{% import "macros/footer.html" as footer %}
 
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}</title>
   <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
+  <meta name="theme-color" content="#ffffff">
 
   {# Hreflang alternates #}
   {% if page %}
@@ -48,34 +48,80 @@
     <link rel="alternate" type="application/atom+xml" title="Le Futur — Feed" href="{{ get_url(path='fr/atom.xml') }}">
   {% elif lang == "it" %}
     <link rel="alternate" type="application/atom+xml" title="Il Futuro — Feed" href="{{ get_url(path='it/atom.xml') }}">
-  {% elif lang == "en" %}
-    <link rel="alternate" type="application/atom+xml" title="The Future — Feed" href="{{ get_url(path='en/atom.xml') }}">
   {% endif %}
 
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  {{ nav::header(lang=lang, current_path=current_path | default(value=false)) }}
+  {{ nav::skip_link(lang=lang) }}
+  {{ nav::topnav(lang=lang) }}
+  {{ nav::sparkle_button() }}
+  {{ nav::command_overlay(lang=lang) }}
 
   <main id="main">
     {% block content %}{% endblock %}
   </main>
 
-  {{ footer::footer(lang=lang) }}
-
   <script>
-    (function() {
-      var toggle = document.querySelector('.nav-toggle');
-      var mobileNav = document.getElementById('mobile-nav');
-      if (!toggle || !mobileNav) return;
-      toggle.addEventListener('click', function() {
-        var isOpen = mobileNav.classList.toggle('is-open');
-        toggle.setAttribute('aria-expanded', isOpen);
-        toggle.setAttribute('aria-label',
-          isOpen ? '{{ trans(key="menu_close", lang=lang) }}' : '{{ trans(key="menu_open", lang=lang) }}'
-        );
+  (function() {
+    var btn = document.getElementById('sparkle-btn');
+    var overlay = document.getElementById('command-overlay');
+    var backdrop = document.getElementById('overlay-backdrop');
+    var searchInput = document.getElementById('command-search');
+    var nav = document.getElementById('command-nav');
+    var links = nav ? nav.querySelectorAll('.command-overlay__link') : [];
+
+    function open() {
+      overlay.classList.add('is-open');
+      backdrop.classList.add('is-open');
+      btn.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      btn.setAttribute('aria-expanded', 'true');
+      setTimeout(function() { searchInput.focus(); }, 150);
+    }
+
+    function close() {
+      overlay.classList.remove('is-open');
+      backdrop.classList.remove('is-open');
+      btn.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      searchInput.value = '';
+      filterLinks('');
+    }
+
+    function filterLinks(q) {
+      q = q.toLowerCase().trim();
+      links.forEach(function(link) {
+        var match = !q || link.textContent.toLowerCase().includes(q);
+        link.style.display = match ? '' : 'none';
       });
-    })();
+    }
+
+    btn.addEventListener('click', function() {
+      overlay.classList.contains('is-open') ? close() : open();
+    });
+
+    backdrop.addEventListener('click', close);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+        close();
+      }
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        filterLinks(this.value);
+      });
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          var visible = nav.querySelector('.command-overlay__link:not([style*="display: none"])');
+          if (visible) window.location.href = visible.href;
+        }
+      });
+    }
+  })();
   </script>
 </body>
 </html>

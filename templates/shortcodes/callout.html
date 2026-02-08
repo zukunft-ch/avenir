@@ -1,4 +1,4 @@
-<div class="callout">
+<div class="callout{% if type %} callout--{{ type }}{% endif %}">
   {% if title %}<p class="callout__title">{{ title }}</p>{% endif %}
   {{ body }}
 </div>
