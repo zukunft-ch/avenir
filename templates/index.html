@@ -2,10 +2,15 @@
 
 {% block title %}{{ section.extra.hero_title | default(value=config.title) }}{% endblock %}
 
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+{% endblock %}
+
 {% block content %}
 
 {# ===== Hero — brandmark ===== #}
 <section class="hero" aria-label="Hero">
+  <canvas class="hero__mesh" id="hero-mesh" aria-hidden="true"></canvas>
   <div class="hero__display">
     <h1 class="hero__big">
       {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}
@@ -19,5 +24,144 @@
     <h2>{{ section.extra.hero_subtitle | default(value="") }}</h2>
   </div>
 </section>
+
+<script>
+(function() {
+  var canvas = document.getElementById('hero-mesh');
+  if (!canvas) return;
+
+  function init() {
+    if (typeof THREE === 'undefined') return;
+    var hero = canvas.parentElement;
+    var w = hero.offsetWidth;
+    var h = hero.offsetHeight;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // Renderer
+    var renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(dpr);
+
+    // Scene & camera
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
+    camera.position.z = 22;
+
+    // Build Swiss cross positions (3D cross visible from all axes)
+    // Grid from -3 to 3, arms are 3 units wide (indices -1,0,1)
+    var positions = [];
+    var seen = {};
+
+    function add(x, y, z) {
+      var key = x + ',' + y + ',' + z;
+      if (!seen[key]) {
+        seen[key] = true;
+        positions.push([x, y, z]);
+      }
+    }
+
+    // Bar along X axis
+    for (var x = -3; x <= 3; x++)
+      for (var y = -1; y <= 1; y++)
+        for (var z = -1; z <= 1; z++)
+          add(x, y, z);
+
+    // Bar along Y axis
+    for (var x = -1; x <= 1; x++)
+      for (var y = -3; y <= 3; y++)
+        for (var z = -1; z <= 1; z++)
+          add(x, y, z);
+
+    // Bar along Z axis
+    for (var x = -1; x <= 1; x++)
+      for (var y = -1; y <= 1; y++)
+        for (var z = -3; z <= 3; z++)
+          add(x, y, z);
+
+    // Create instanced mesh — cube edges
+    var cubeSize = 0.88;
+    var boxGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+    var edgesGeo = new THREE.EdgesGeometry(boxGeo);
+
+    // Determine color based on theme
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var edgeColor = isDark ? 0x7c3aed : 0xa855f7;
+    var edgeOpacity = isDark ? 0.25 : 0.18;
+
+    var lineMat = new THREE.LineBasicMaterial({
+      color: edgeColor,
+      transparent: true,
+      opacity: edgeOpacity
+    });
+
+    var group = new THREE.Group();
+
+    for (var i = 0; i < positions.length; i++) {
+      var p = positions[i];
+      var line = new THREE.LineSegments(edgesGeo, lineMat);
+      line.position.set(p[0], p[1], p[2]);
+      group.add(line);
+    }
+
+    scene.add(group);
+
+    // Initial tilt
+    group.rotation.x = 0.4;
+    group.rotation.y = 0.6;
+
+    // Animation loop
+    var raf;
+    function animate() {
+      raf = requestAnimationFrame(animate);
+      group.rotation.y += 0.002;
+      group.rotation.x += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize handler
+    function onResize() {
+      w = hero.offsetWidth;
+      h = hero.offsetHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    // Theme change observer
+    var observer = new MutationObserver(function() {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      lineMat.color.setHex(dark ? 0x7c3aed : 0xa855f7);
+      lineMat.opacity = dark ? 0.25 : 0.18;
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // Pause when not visible
+    var paused = false;
+    var io = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting) {
+        if (paused) { paused = false; animate(); }
+      } else {
+        paused = true;
+        cancelAnimationFrame(raf);
+      }
+    }, { threshold: 0 });
+    io.observe(hero);
+  }
+
+  // Wait for Three.js to load
+  if (typeof THREE !== 'undefined') {
+    init();
+  } else {
+    var script = document.querySelector('script[src*="three"]');
+    if (script) script.addEventListener('load', init);
+  }
+})();
+</script>
 
 {% endblock %}
