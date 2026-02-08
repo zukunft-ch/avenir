@@ -1,0 +1,98 @@
+{# ---- Organization (PoliticalParty) — every page ---- #}
+{% macro organization() %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PoliticalParty",
+  "@id": "https://die-zukunft.ch/#organization",
+  "name": "Die Zukunft",
+  "alternateName": ["Le Futur", "Il Futuro", "The Future"],
+  "url": "https://die-zukunft.ch",
+  "logo": "https://die-zukunft.ch/favicon.svg",
+  "email": "kontakt@die-zukunft.ch",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Basel",
+    "addressCountry": "CH"
+  },
+  "sameAs": []
+}
+</script>
+{% endmacro %}
+
+{# ---- WebSite — every page ---- #}
+{% macro website(lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://die-zukunft.ch/#website",
+  "name": "{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}",
+  "url": "https://die-zukunft.ch",
+  "inLanguage": "{{ lang }}",
+  "publisher": { "@id": "https://die-zukunft.ch/#organization" }
+}
+</script>
+{% endmacro %}
+
+{# ---- WebPage — every page ---- #}
+{% macro webpage(title, description, url, lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": {{ title | json_encode() | safe }},
+  "description": {{ description | json_encode() | safe }},
+  "url": {{ url | json_encode() | safe }},
+  "inLanguage": "{{ lang }}",
+  "isPartOf": { "@id": "https://die-zukunft.ch/#website" },
+  "publisher": { "@id": "https://die-zukunft.ch/#organization" }
+}
+</script>
+{% endmacro %}
+
+{# ---- BreadcrumbList — content pages (not homepage) ---- #}
+{% macro breadcrumb(title, url, lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "{% if lang == 'fr' %}Accueil{% elif lang == 'it' %}Home{% elif lang == 'en' %}Home{% else %}Start{% endif %}",
+      "item": "https://die-zukunft.ch{% if lang != 'de' %}/{{ lang }}/{% else %}/{% endif %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": {{ title | json_encode() | safe }},
+      "item": {{ url | json_encode() | safe }}
+    }
+  ]
+}
+</script>
+{% endmacro %}
+
+{# ---- FAQPage — grundeinkommen template ---- #}
+{% macro faqpage(faq_items) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in faq_items %}
+    {
+      "@type": "Question",
+      "name": {{ item.q | json_encode() | safe }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ item.a | json_encode() | safe }}
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endmacro %}

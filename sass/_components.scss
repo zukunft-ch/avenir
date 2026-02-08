@@ -153,6 +153,19 @@
   margin-bottom: 0;
 }
 
+// ---- Screen-reader only (a11y) ----
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 // ---- Skip link (a11y) ----
 .skip-link {
   position: absolute;
@@ -256,21 +269,26 @@
   }
 }
 
-// Overlay inner content — centered, spacious
+// Overlay inner content — flex column, search + nav + settings
 .command-overlay__inner {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 28rem;
+  max-height: 100%;
   padding: $space-6;
+  overflow: hidden;
 }
 
 // Search input
 .command-overlay__search {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: $space-3;
   padding: $space-4 0;
   border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: $space-5;
+  margin-bottom: $space-4;
 
   svg {
     flex-shrink: 0;
@@ -293,18 +311,61 @@
   }
 }
 
-// Nav links — large, spacious
+// Nav wrapper — scrollable area between search and settings
+.command-overlay__nav-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+// Scroll arrow buttons
+.command-overlay__scroll {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: $space-2 0;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity $transition-fast;
+
+  &.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+// Nav links — scrollable, hidden scrollbar
 .command-overlay__nav {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: $space-1;
-  margin-bottom: $space-6;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .command-overlay__link {
   display: block;
-  padding: $space-3 $space-2;
-  font-size: $font-size-xl;
+  flex-shrink: 0;
+  padding: $space-2 $space-2;
+  font-size: $font-size-lg;
   font-weight: $font-weight-medium;
   color: var(--color-text);
   border-radius: $radius-md;
@@ -315,8 +376,9 @@
   }
 }
 
-// Settings row
+// Settings row — always visible at bottom
 .command-overlay__settings {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: $space-6;
@@ -339,7 +401,7 @@
 // ---- Language switch (segmented slider) ----
 .lang-switch {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   background: var(--active-bg);
   border: 1px solid var(--glass-border);
   border-radius: $radius-pill;

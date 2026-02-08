@@ -5,16 +5,16 @@
 {% block content %}
 
 {# ===== Hero — brandmark ===== #}
-<section class="hero">
+<section class="hero" aria-label="Hero">
   <div class="hero__display">
     <h1 class="hero__big">
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}
     </h1>
   </div>
 </section>
 
 {# ===== Subtitle / positioning ===== #}
-<section class="canvas">
+<section class="canvas" aria-label="Subtitle">
   <div class="container container--narrow" style="text-align: center;">
     <h2>{{ section.extra.hero_subtitle | default(value="") }}</h2>
   </div>

@@ -35,37 +35,45 @@
       <input type="text" id="command-search" placeholder="{{ trans(key='search_placeholder', lang=lang) }}" autocomplete="off">
     </div>
 
-    {# Navigation links #}
-    <nav class="command-overlay__nav" id="command-nav">
-      <a class="command-overlay__link" href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/robotik.md', lang=lang) }}">{{ trans(key="nav_robotik", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/uebergaenge.md', lang=lang) }}">{{ trans(key="nav_uebergaenge", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/life-science.md', lang=lang) }}">{{ trans(key="nav_life_science", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/stadte-wohnen.md', lang=lang) }}">{{ trans(key="nav_stadte_wohnen", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/research-innovation.md', lang=lang) }}">{{ trans(key="nav_research_innovation", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/energy-resilience.md', lang=lang) }}">{{ trans(key="nav_energy_resilience", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/offener-staat.md', lang=lang) }}">{{ trans(key="nav_offener_staat", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/neutralitaet-frieden.md', lang=lang) }}">{{ trans(key="nav_neutralitaet_frieden", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/talent-integration.md', lang=lang) }}">{{ trans(key="nav_talent_integration", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/sprache-verstaendigung.md', lang=lang) }}">{{ trans(key="nav_sprache_verstaendigung", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-      <a class="command-overlay__link" href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
-    </nav>
+    {# Navigation links (scrollable) #}
+    <div class="command-overlay__nav-wrap">
+      <button class="command-overlay__scroll command-overlay__scroll--up" id="nav-scroll-up" type="button" aria-label="Scroll up">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+      </button>
+      <nav class="command-overlay__nav" id="command-nav" aria-label="All pages">
+        <a class="command-overlay__link" href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/robotik.md', lang=lang) }}">{{ trans(key="nav_robotik", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/uebergaenge.md', lang=lang) }}">{{ trans(key="nav_uebergaenge", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/life-science.md', lang=lang) }}">{{ trans(key="nav_life_science", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ trans(key="nav_grundeinkommen", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/stadte-wohnen.md', lang=lang) }}">{{ trans(key="nav_stadte_wohnen", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/research-innovation.md', lang=lang) }}">{{ trans(key="nav_research_innovation", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/energy-resilience.md', lang=lang) }}">{{ trans(key="nav_energy_resilience", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/offener-staat.md', lang=lang) }}">{{ trans(key="nav_offener_staat", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/neutralitaet-frieden.md', lang=lang) }}">{{ trans(key="nav_neutralitaet_frieden", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/talent-integration.md', lang=lang) }}">{{ trans(key="nav_talent_integration", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/sprache-verstaendigung.md', lang=lang) }}">{{ trans(key="nav_sprache_verstaendigung", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
+      </nav>
+      <button class="command-overlay__scroll command-overlay__scroll--down is-visible" id="nav-scroll-down" type="button" aria-label="Scroll down">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
 
     {# Settings row: language + theme #}
     <div class="command-overlay__settings">
       <div class="command-overlay__setting">
         <span class="command-overlay__label">{{ trans(key="footer_nav", lang=lang) }}</span>
         <div class="lang-switch">
-          {% set langs = ["de", "fr", "it"] %}
+          {% set langs = ["de", "fr", "it", "en"] %}
           {% for l in langs %}
             {% if l == lang %}
               <span class="lang-switch__option lang-switch__option--active" aria-current="true">{{ l | upper }}</span>

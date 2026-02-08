@@ -1,4 +1,12 @@
 {% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% if page.extra.faq %}
+{{ jsonld::faqpage(faq_items=page.extra.faq) }}
+{% endif %}
+{% endblock %}
 
 {% block content %}
 <article>
@@ -16,7 +24,7 @@
   </div>
 
   {% if page.extra.faq %}
-  <section>
+  <section aria-label="FAQ">
     <div class="container container--narrow">
       <h2>{{ page.extra.faq_title | default(value="FAQ") }}</h2>
       {% for item in page.extra.faq %}

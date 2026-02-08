@@ -4,15 +4,16 @@
 <article>
   <div class="container">
     <p>
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}
     </p>
     <p>
       {% if lang == "fr" %}Un parti suisse pour la transition structurelle.
       {% elif lang == "it" %}Un partito svizzero per la transizione strutturale.
+      {% elif lang == "en" %}A Swiss party for structural transformation.
       {% else %}Eine Schweizer Partei für den strukturellen Wandel.{% endif %}
     </p>
 
-    <nav>
+    <nav aria-label="Footer navigation">
       <div>
         <p>{{ trans(key="footer_nav", lang=lang) }}</p>
         <a href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
@@ -47,7 +48,7 @@
     </nav>
 
     <p>&copy; {{ now() | date(format="%Y") }}
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}.
       {{ trans(key="footer_copyright", lang=lang) }}
     </p>
   </div>

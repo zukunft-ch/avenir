@@ -2,10 +2,10 @@
 <footer class="canvas footer">
   <div class="container">
     <p class="footer__wordmark">
-      {% if lang == "fr" %}le futur{% elif lang == "it" %}il futuro{% else %}die zukunft{% endif %}
+      {% if lang == "fr" %}le futur{% elif lang == "it" %}il futuro{% elif lang == "en" %}the future{% else %}die zukunft{% endif %}
     </p>
 
-    <div class="footer__columns">
+    <nav class="footer__columns" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__heading">{{ trans(key="footer_nav", lang=lang) }}</p>
         <a href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
@@ -46,10 +46,10 @@
         <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
         <a href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
       </div>
-    </div>
+    </nav>
 
     <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}.
+      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}.
       {{ trans(key="footer_copyright", lang=lang) }}
     </p>
   </div>

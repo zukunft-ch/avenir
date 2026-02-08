@@ -1,5 +1,6 @@
 {% import "macros/nav.html" as nav %}
 {% import "macros/footer.html" as site_footer %}
+{% import "macros/jsonld.html" as jsonld %}
 
 <!DOCTYPE html>
 <html lang="{{ lang }}">
@@ -7,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% else %}Die Zukunft{% endif %}</title>
+  <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}</title>
   <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
   <meta name="theme-color" content="#ffffff" id="meta-theme-color">
   <script>
@@ -23,18 +24,18 @@
 
   {# Hreflang alternates #}
   {% if page %}
-    <link rel="alternate" hreflang="de" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="alternate" hreflang="de" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     {% for t in page.translations %}
       <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
     {% endfor %}
-    <link rel="alternate" hreflang="x-default" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="alternate" hreflang="x-default" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     <link rel="canonical" href="{{ page.permalink }}">
   {% elif section %}
-    <link rel="alternate" hreflang="de" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="alternate" hreflang="de" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     {% for t in section.translations %}
       <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
     {% endfor %}
-    <link rel="alternate" hreflang="x-default" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") }}">
+    <link rel="alternate" hreflang="x-default" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     <link rel="canonical" href="{{ section.permalink }}">
   {% endif %}
 
@@ -44,7 +45,14 @@
   <meta property="og:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
   <meta property="og:image" content="{{ get_url(path='favicon.svg') }}">
   <meta property="og:locale" content="{{ lang }}">
+  <meta property="og:url" content="{% if page %}{{ page.permalink }}{% elif section %}{{ section.permalink }}{% else %}{{ config.base_url }}{% endif %}">
+  <meta property="og:site_name" content="{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
+
+  {# Twitter Card #}
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title | default(value=section.title | default(value=config.title)) }}">
+  <meta name="twitter:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
+  <meta name="twitter:image" content="{{ get_url(path='favicon.svg') }}">
 
   {# Favicon #}
   <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml">
@@ -59,7 +67,14 @@
     <link rel="alternate" type="application/atom+xml" title="Le Futur — Feed" href="{{ get_url(path='fr/atom.xml') }}">
   {% elif lang == "it" %}
     <link rel="alternate" type="application/atom+xml" title="Il Futuro — Feed" href="{{ get_url(path='it/atom.xml') }}">
+  {% elif lang == "en" %}
+    <link rel="alternate" type="application/atom+xml" title="The Future — Feed" href="{{ get_url(path='en/atom.xml') }}">
   {% endif %}
+
+  {# JSON-LD structured data #}
+  {{ jsonld::organization() }}
+  {{ jsonld::website(lang=lang) }}
+  {{ jsonld::webpage(title=page.title | default(value=section.title | default(value=config.title)), description=page.description | default(value=section.description | default(value=config.description)), url=current_url | default(value=config.base_url), lang=lang) }}
 
   {% block head_extra %}{% endblock %}
 </head>
@@ -143,6 +158,7 @@
     if (searchInput) {
       searchInput.addEventListener('input', function() {
         filterLinks(this.value);
+        updateScrollArrows();
       });
       searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
@@ -151,6 +167,42 @@
         }
       });
     }
+
+    // Nav scroll arrows
+    var scrollUp = document.getElementById('nav-scroll-up');
+    var scrollDown = document.getElementById('nav-scroll-down');
+
+    function updateScrollArrows() {
+      if (!nav) return;
+      var atTop = nav.scrollTop <= 0;
+      var atBottom = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 1;
+      var canScroll = nav.scrollHeight > nav.clientHeight;
+      if (scrollUp) scrollUp.classList.toggle('is-visible', canScroll && !atTop);
+      if (scrollDown) scrollDown.classList.toggle('is-visible', canScroll && !atBottom);
+    }
+
+    if (nav) {
+      nav.addEventListener('scroll', updateScrollArrows);
+    }
+    if (scrollUp) {
+      scrollUp.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nav.scrollBy({ top: -120, behavior: 'smooth' });
+      });
+    }
+    if (scrollDown) {
+      scrollDown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nav.scrollBy({ top: 120, behavior: 'smooth' });
+      });
+    }
+
+    // Update arrows when overlay opens
+    var origOpen = open;
+    open = function() {
+      origOpen();
+      setTimeout(updateScrollArrows, 50);
+    };
 
     // Theme switch
     var themeBtn = document.getElementById('theme-toggle');
