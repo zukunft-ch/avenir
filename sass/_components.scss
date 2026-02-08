@@ -763,6 +763,17 @@
   }
 }
 
+// ---- Subtitle descriptor ----
+.subtitle-descriptor {
+  font-family: $font-family-headline;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+  margin-bottom: $space-4;
+}
+
 // ---- CTA canvas section ----
 .cta-section {
   text-align: center;

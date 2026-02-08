@@ -20,10 +20,17 @@
   </div>
 </section>
 
-{# ===== Subtitle / positioning ===== #}
+{# ===== Subtitle / positioning + CTA ===== #}
 <section class="canvas canvas--hex" aria-label="Subtitle">
   <div class="container container--narrow" style="text-align: center;">
+    {% if section.extra.hero_descriptor %}
+    <p class="subtitle-descriptor">{{ section.extra.hero_descriptor }}</p>
+    {% endif %}
     <h2>{{ section.extra.hero_subtitle | default(value="") }}</h2>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+      <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      <a class="btn btn--outline" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="cta_program", lang=lang) }}</a>
+    </div>
   </div>
 </section>
 
