@@ -249,7 +249,13 @@
 
   // Drag/swipe state
   var dragStartX = 0;
+  var dragStartY = 0;
   var dragStartPos = 0;
+  var dragLocked = false;   // true once we know it's a horizontal swipe
+  var dragRejected = false; // true once we know it's a vertical scroll
+  var lastX = 0;
+  var lastTime = 0;
+  var velocity = 0;
 
   function isRunning() { return !dragging && !hoverPaused && !offscreen; }
 
@@ -258,8 +264,15 @@
   function animate() {
     raf = requestAnimationFrame(animate);
     if (!dragging) {
-      pos -= speed;
-      wrapPos();
+      if (Math.abs(velocity) > 0.3) {
+        pos += velocity;
+        velocity *= 0.95;
+        wrapPos();
+      } else {
+        velocity = 0;
+        pos -= speed;
+        wrapPos();
+      }
     }
     track.style.transform = 'translateX(' + pos + 'px)';
   }
@@ -271,33 +284,63 @@
 
   // Pointer helpers (unified touch + mouse)
   function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
+  function getY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
 
   function onDragStart(e) {
     dragging = true;
+    dragLocked = false;
+    dragRejected = false;
     dragStartX = getX(e);
+    dragStartY = getY(e);
     dragStartPos = pos;
+    lastX = dragStartX;
+    lastTime = Date.now();
+    velocity = 0;
     track.style.cursor = 'grabbing';
     sync();
   }
 
   function onDragMove(e) {
-    if (!dragging) return;
-    var dx = getX(e) - dragStartX;
+    if (!dragging || dragRejected) return;
+    var cx = getX(e);
+    var cy = getY(e);
+    var dx = cx - dragStartX;
+    var dy = cy - dragStartY;
+
+    if (!dragLocked) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        dragRejected = true;
+        dragging = false;
+        track.style.cursor = '';
+        sync();
+        return;
+      }
+      dragLocked = true;
+    }
+
+    if (e.cancelable) e.preventDefault();
+    var now = Date.now();
+    var dt = now - lastTime;
+    if (dt > 0) velocity = (cx - lastX) / dt * 16;
+    lastX = cx;
+    lastTime = now;
     pos = dragStartPos + dx;
     wrapPos();
     track.style.transform = 'translateX(' + pos + 'px)';
   }
 
   function onDragEnd() {
-    if (!dragging) return;
+    if (!dragging && !dragLocked) return;
     dragging = false;
+    dragLocked = false;
     track.style.cursor = '';
     sync();
   }
 
   // Touch events
   track.addEventListener('touchstart', function(e) { onDragStart(e); }, { passive: true });
-  track.addEventListener('touchmove', function(e) { onDragMove(e); }, { passive: true });
+  track.addEventListener('touchmove', function(e) { onDragMove(e); }, { passive: false });
   track.addEventListener('touchend', onDragEnd);
   track.addEventListener('touchcancel', onDragEnd);
 
