@@ -152,19 +152,24 @@
       });
     }
 
-    // Theme toggle
+    // Theme switch
     var themeBtn = document.getElementById('theme-toggle');
     var metaTheme = document.getElementById('meta-theme-color');
     if (themeBtn) {
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        themeBtn.setAttribute('aria-checked', 'true');
+      }
       themeBtn.addEventListener('click', function() {
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         if (isDark) {
           document.documentElement.removeAttribute('data-theme');
           localStorage.setItem('theme', 'light');
+          themeBtn.setAttribute('aria-checked', 'false');
           if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
         } else {
           document.documentElement.setAttribute('data-theme', 'dark');
           localStorage.setItem('theme', 'dark');
+          themeBtn.setAttribute('aria-checked', 'true');
           if (metaTheme) metaTheme.setAttribute('content', '#0d0d0d');
         }
       });

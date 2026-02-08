@@ -336,65 +336,66 @@
   font-weight: $font-weight-medium;
 }
 
-// ---- Language switcher (pill, inline) ----
-.lang-switcher {
-  display: flex;
-  background: var(--hover-bg);
+// ---- Language switch (segmented slider) ----
+.lang-switch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--active-bg);
   border: 1px solid var(--glass-border);
   border-radius: $radius-pill;
-  overflow: hidden;
+  padding: 3px;
 }
 
-.lang-switcher__link {
-  padding: $space-1 $space-3;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  color: var(--color-text-muted);
-  transition: all $transition-fast;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--color-text);
-    background: var(--hover-bg);
-  }
-}
-
-.lang-switcher__link--active {
-  color: var(--color-text);
-  background: var(--active-bg);
-  font-weight: $font-weight-semibold;
-}
-
-// ---- Theme toggle ----
-.theme-toggle {
+.lang-switch__option {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  background: var(--hover-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 50%;
-  cursor: pointer;
+  padding: $space-1 $space-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
   color: var(--color-text-muted);
-  transition: all $transition-fast;
+  border-radius: $radius-pill;
+  cursor: pointer;
+  transition: color $transition-fast;
 
   &:hover {
     color: var(--color-text);
-    background: var(--active-bg);
   }
+}
 
-  // Show sun by default (light theme), hide moon
-  .theme-toggle__sun {
-    display: block;
-  }
+.lang-switch__option--active {
+  color: var(--color-text);
+  background: var(--switch-knob);
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 1px 3px var(--shadow-color);
+  cursor: default;
+}
 
-  .theme-toggle__moon {
-    display: none;
-  }
+// ---- Theme switch (toggle slider) ----
+.theme-switch {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  background: var(--active-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-pill;
+  cursor: pointer;
+  padding: 0;
+  transition: background $transition-fast;
+}
+
+.theme-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1rem;
+  height: 1rem;
+  background: var(--switch-knob);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px var(--shadow-color);
+  transition: transform 0.3s $ease-out-expo;
 
   [data-theme="dark"] & {
-    .theme-toggle__sun { display: none; }
-    .theme-toggle__moon { display: block; }
+    transform: translateX(1.25rem);
   }
 }

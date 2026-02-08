@@ -38,6 +38,9 @@
   --sparkle-hover-bg: rgba(230, 230, 230, 0.9);
   --sparkle-hover-border: rgba(0, 0, 0, 0.18);
 
+  // Switch / slider knob
+  --switch-knob: #ffffff;
+
   color-scheme: light;
 }
 
@@ -70,6 +73,8 @@
   --sparkle-border: rgba(255, 255, 255, 0.15);
   --sparkle-hover-bg: rgba(60, 60, 60, 0.9);
   --sparkle-hover-border: rgba(255, 255, 255, 0.22);
+
+  --switch-knob: rgba(255, 255, 255, 0.18);
 
   color-scheme: dark;
 }
