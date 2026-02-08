@@ -126,7 +126,11 @@
   var canvas = document.getElementById('hero-mesh');
   if (!canvas) return;
   function init() {
-    SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
+    if (typeof SwissCross !== 'undefined') {
+      SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
+    } else {
+      setTimeout(init, 50);
+    }
   }
   if (typeof THREE !== 'undefined') { init(); }
   else {
