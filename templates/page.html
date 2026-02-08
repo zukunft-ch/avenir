@@ -6,18 +6,32 @@
 {% endblock %}
 
 {% block content %}
-<article>
-  <header>
-    <div class="container container--narrow">
-      <h1>{{ page.title }}</h1>
-      {% if page.description %}
-      <p>{{ page.description }}</p>
-      {% endif %}
-    </div>
-  </header>
+{# ===== Page hero ===== #}
+<section class="page-hero" aria-label="{{ page.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-hero__desc">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
 
+{# ===== Content ===== #}
+<section class="canvas canvas--content">
   <div class="container container--narrow">
     {{ page.content | safe }}
   </div>
-</article>
+</section>
+
+{# ===== CTA (if enabled in frontmatter) ===== #}
+{% if page.extra.show_cta %}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if page.extra.cta_text %}
+    <p class="cta-section__text">{{ page.extra.cta_text }}</p>
+    {% endif %}
+    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

@@ -1,30 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<article>
-  <header>
-    <div class="container">
-      <h1>{{ section.title }}</h1>
-      {% if section.description %}
-      <p>{{ section.description }}</p>
-      {% endif %}
-    </div>
-  </header>
+{# ===== Section hero ===== #}
+<section class="page-hero" aria-label="{{ section.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ section.title }}</h1>
+    {% if section.description %}
+    <p class="page-hero__desc">{{ section.description }}</p>
+    {% endif %}
+  </div>
+</section>
 
-  <div class="container" role="list" aria-label="{{ section.title }}">
+{# ===== Article listing ===== #}
+<section class="canvas canvas--content">
+  <div class="container container--narrow">
     {% if section.pages | length > 0 %}
-      {% for page in section.pages %}
-      <div role="listitem">
-        <a href="{{ page.permalink }}">
+      <div class="section-list" role="list" aria-label="{{ section.title }}">
+        {% for page in section.pages %}
+        <a class="section-list__item" href="{{ page.permalink }}" role="listitem">
           <h2>{{ page.title }}</h2>
           {% if page.date %}<p>{{ page.date | date(format="%d.%m.%Y") }}</p>{% endif %}
           {% if page.description %}<p>{{ page.description }}</p>{% endif %}
         </a>
+        {% endfor %}
       </div>
-      {% endfor %}
     {% else %}
       <p>{{ trans(key="news_empty", lang=lang) }}</p>
     {% endif %}
   </div>
-</article>
+</section>
 {% endblock %}
