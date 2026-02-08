@@ -3,6 +3,9 @@
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% if page.extra.faq is defined %}
+{{ jsonld::faqpage(faq_items=page.extra.faq) }}
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -16,18 +19,84 @@
   </div>
 </section>
 
-{# ===== Content ===== #}
-<section class="canvas canvas--content">
+{% if page.extra.sections is defined %}
+  {# ===== Frontmatter-driven sections ===== #}
+  {% for sec in page.extra.sections %}
+  <section class="canvas canvas--content" aria-label="{{ sec.title }}">
+    <div class="container container--narrow">
+      <h2>{{ sec.title }}</h2>
+      {% if sec.text is defined and sec.text %}
+      <p>{{ sec.text | safe }}</p>
+      {% endif %}
+
+      {% if sec.subsections is defined %}
+        {% for sub in sec.subsections %}
+        <h3>{{ sub.title }}</h3>
+        {% if sub.text is defined and sub.text %}
+        <p>{{ sub.text | safe }}</p>
+        {% endif %}
+        {% if sub.points is defined %}
+        <ul>
+          {% for point in sub.points %}
+          <li>{{ point | safe }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% if sec.points is defined %}
+      <ul>
+        {% for point in sec.points %}
+        <li>{{ point | safe }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if sec.items is defined %}
+      <ul>
+        {% for item in sec.items %}
+        <li><strong>{{ item.label }}</strong>: {{ item.text | safe }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}
+{% else %}
+  {# ===== Markdown content (fallback) ===== #}
+  <section class="canvas canvas--content">
+    <div class="container container--narrow">
+      {{ page.content | safe }}
+    </div>
+  </section>
+{% endif %}
+
+{# ===== FAQ ===== #}
+{% if page.extra.faq is defined %}
+<section class="canvas canvas--content" aria-label="FAQ">
   <div class="container container--narrow">
-    {{ page.content | safe }}
+    <h2>{{ page.extra.faq_title | default(value="FAQ") }}</h2>
+    {% for item in page.extra.faq %}
+    <details class="faq__item glass-card">
+      <summary>
+        {{ item.q }}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="faq__answer">
+        <p>{{ item.a }}</p>
+      </div>
+    </details>
+    {% endfor %}
   </div>
 </section>
+{% endif %}
 
 {# ===== CTA (if enabled in frontmatter) ===== #}
 {% if page.extra.show_cta %}
 <section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
   <div class="container container--narrow" style="text-align: center;">
-    {% if page.extra.cta_text %}
+    {% if page.extra.cta_text is defined %}
     <p class="cta-section__text">{{ page.extra.cta_text }}</p>
     {% endif %}
     <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>

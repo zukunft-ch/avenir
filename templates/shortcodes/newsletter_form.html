@@ -1,11 +1,7 @@
 <div class="glass-card">
-  <form class="newsletter-form" action="{{ config.extra.formspree_endpoint }}" method="POST" aria-label="{{ trans(key='footer_newsletter_title', lang=lang) }}">
-    <input type="hidden" name="_subject" value="Newsletter signup">
-    <div class="form__hp" aria-hidden="true">
-      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off">
-    </div>
-    <label for="newsletter-email" class="sr-only">{{ trans(key="label_email", lang=lang) }}</label>
-    <input class="form__input" type="email" id="newsletter-email" name="email" placeholder="{{ trans(key='label_email', lang=lang) }}" required autocomplete="email">
-    <button type="submit" class="btn btn--glow">{{ trans(key="cta_newsletter", lang=lang) }}</button>
-  </form>
+  <div class="newsletter-form">
+    <label for="newsletter-email-sc" class="sr-only">{{ trans(key='label_email', lang=lang) }}</label>
+    <input class="form__input" id="newsletter-email-sc" type="email" placeholder="{{ trans(key='label_email', lang=lang) }}" disabled>
+    <button type="button" class="btn btn--disabled" disabled>Coming Soon</button>
+  </div>
 </div>

@@ -10,6 +10,7 @@
 
   <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}</title>
   <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
+  <meta name="author" content="{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
   <meta name="theme-color" content="#ffffff" id="meta-theme-color">
   <script>
   (function() {
@@ -43,8 +44,16 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="{% block og_title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %}">
   <meta property="og:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
-  <meta property="og:image" content="{{ get_url(path='favicon.svg') }}">
-  <meta property="og:locale" content="{{ lang }}">
+  <meta property="og:image" content="{{ get_url(path='og-' ~ lang ~ '.png') }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ page.title | default(value=section.title | default(value=config.title)) }} — {% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
+  <meta property="og:locale" content="{% if lang == 'de' %}de_CH{% elif lang == 'fr' %}fr_CH{% elif lang == 'it' %}it_CH{% elif lang == 'en' %}en_GB{% else %}{{ lang }}{% endif %}">
+  {% set all_locales = ["de_CH", "fr_CH", "it_CH", "en_GB"] %}
+  {% set current_locale = "de_CH" %}{% if lang == "fr" %}{% set current_locale = "fr_CH" %}{% elif lang == "it" %}{% set current_locale = "it_CH" %}{% elif lang == "en" %}{% set current_locale = "en_GB" %}{% endif %}
+  {% for loc in all_locales %}{% if loc != current_locale %}
+  <meta property="og:locale:alternate" content="{{ loc }}">
+  {% endif %}{% endfor %}
   <meta property="og:url" content="{% if page %}{{ page.permalink }}{% elif section %}{{ section.permalink }}{% else %}{{ config.base_url }}{% endif %}">
   <meta property="og:site_name" content="{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
 
@@ -52,13 +61,21 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ page.title | default(value=section.title | default(value=config.title)) }}">
   <meta name="twitter:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
-  <meta name="twitter:image" content="{{ get_url(path='favicon.svg') }}">
+  <meta name="twitter:image" content="{{ get_url(path='og-' ~ lang ~ '.png') }}">
+
+  {# Preconnect hints #}
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
   {# Favicon #}
   <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ get_url(path='favicon.ico') }}" sizes="32x32">
+  <link rel="apple-touch-icon" href="{{ get_url(path='apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ get_url(path='site.webmanifest') }}">
 
   {# CSS #}
   <link rel="stylesheet" href="{{ get_url(path='main.css') }}">
+  <noscript><style>.hero__subline,.reveal-up{opacity:1!important;transform:none!important;pointer-events:auto!important}</style></noscript>
 
   {# Feeds #}
   {% if lang == "de" %}
@@ -76,15 +93,22 @@
   {{ jsonld::website(lang=lang) }}
   {{ jsonld::webpage(title=page.title | default(value=section.title | default(value=config.title)), description=page.description | default(value=section.description | default(value=config.description)), url=current_url | default(value=config.base_url), lang=lang) }}
 
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
   {% block head_extra %}{% endblock %}
 </head>
 <body>
   {{ nav::skip_link(lang=lang) }}
   {{ nav::topnav(lang=lang) }}
-  {{ nav::sparkle_button() }}
+  {{ nav::sparkle_button(lang=lang) }}
   {{ nav::command_overlay(lang=lang) }}
 
-  <main id="main">
+  <nav class="progress-tracker" id="progress-tracker" aria-label="{{ trans(key='aria_reading_progress', lang=lang) }}"></nav>
+
+  <button class="to-top" id="to-top" type="button" aria-label="{{ trans(key='aria_scroll_top', lang=lang) }}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+  </button>
+
+  <main id="main" data-hex-page="{% if page %}{{ page.relative_path | split(pat='.') | first }}{% elif section %}{{ section.relative_path | split(pat='.') | first }}{% endif %}">
     {% block content %}{% endblock %}
   </main>
 
@@ -92,50 +116,84 @@
 
   <script>
   (function() {
-    var btn = document.getElementById('sparkle-btn');
+    var btns = document.querySelectorAll('.sparkle-btn');
     var overlay = document.getElementById('command-overlay');
     var backdrop = document.getElementById('overlay-backdrop');
     var searchInput = document.getElementById('command-search');
     var nav = document.getElementById('command-nav');
+    var topnav = document.querySelector('.topnav');
     var links = nav ? nav.querySelectorAll('.command-overlay__link') : [];
 
     function open() {
       overlay.classList.add('is-open');
       backdrop.classList.add('is-open');
-      btn.classList.add('is-open');
+      btns.forEach(function(b) { b.classList.add('is-open'); b.setAttribute('aria-expanded', 'true'); });
       overlay.setAttribute('aria-hidden', 'false');
-      btn.setAttribute('aria-expanded', 'true');
+      if (topnav) topnav.style.display = 'none';
       setTimeout(function() { searchInput.focus(); }, 150);
     }
 
     function close() {
       overlay.classList.remove('is-open');
       backdrop.classList.remove('is-open');
-      btn.classList.remove('is-open');
+      btns.forEach(function(b) { b.classList.remove('is-open'); b.setAttribute('aria-expanded', 'false'); });
       overlay.setAttribute('aria-hidden', 'true');
-      btn.setAttribute('aria-expanded', 'false');
+      if (topnav) topnav.style.display = '';
       searchInput.value = '';
       filterLinks('');
+      if (triggerBtn) { triggerBtn.focus(); triggerBtn = null; }
     }
+
+    var liveRegion = document.getElementById('search-live');
+    var searchResultOne = '{{ trans(key="search_result_one", lang=lang) }}';
+    var searchResultMany = '{{ trans(key="search_result_many", lang=lang) }}';
 
     function filterLinks(q) {
       q = q.toLowerCase().trim();
+      var count = 0;
       links.forEach(function(link) {
         var match = !q || link.textContent.toLowerCase().includes(q);
         link.style.display = match ? '' : 'none';
+        if (match) count++;
       });
+      if (liveRegion) {
+        liveRegion.textContent = q ? (count + ' ' + (count === 1 ? searchResultOne : searchResultMany)) : '';
+      }
     }
 
-    btn.addEventListener('click', function() {
-      overlay.classList.contains('is-open') ? close() : open();
+    var triggerBtn = null;
+
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (overlay.classList.contains('is-open')) {
+          close();
+        } else {
+          triggerBtn = btn;
+          open();
+        }
+      });
     });
 
     backdrop.addEventListener('click', close);
 
-    // Close on Escape
+    // Close on Escape + focus trap
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+      if (!overlay.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
         close();
+        return;
+      }
+      // Focus trap: keep Tab within overlay
+      if (e.key === 'Tab') {
+        var focusable = overlay.querySelectorAll('a:not([style*="display: none"]), button, input, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
       }
     });
 
@@ -226,6 +284,266 @@
         }
       });
     }
+  })();
+  </script>
+
+  <script>
+  // Shared Swiss cross mesh helper
+  window.SwissCross = (function() {
+    function buildPositions(arm, thick) {
+      arm = arm != null ? arm : 3;
+      thick = thick != null ? thick : 1;
+      var positions = [];
+      var seen = {};
+      function add(x, y, z) {
+        var key = x + ',' + y + ',' + z;
+        if (!seen[key]) { seen[key] = true; positions.push([x, y, z]); }
+      }
+      for (var x = -arm; x <= arm; x++)
+        for (var y = -thick; y <= thick; y++)
+          for (var z = -thick; z <= thick; z++) add(x, y, z);
+      for (var x = -thick; x <= thick; x++)
+        for (var y = -arm; y <= arm; y++)
+          for (var z = -thick; z <= thick; z++) add(x, y, z);
+      for (var x = -thick; x <= thick; x++)
+        for (var y = -thick; y <= thick; y++)
+          for (var z = -arm; z <= arm; z++) add(x, y, z);
+      return positions;
+    }
+
+    function create(canvas, opts) {
+      if (typeof THREE === 'undefined' || !canvas) return;
+      opts = opts || {};
+      var container = canvas.parentElement;
+      var w = container.offsetWidth;
+      var h = container.offsetHeight;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var camZ = opts.cameraZ || 22;
+      var cubeSize = opts.cubeSize || 0.88;
+      var fov = opts.fov || 35;
+
+      var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(dpr);
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(fov, w / h, 0.1, 100);
+      camera.position.set(opts.camX || 0, opts.camY || 0, camZ);
+
+      var positions = buildPositions(opts.arm, opts.thick);
+      var boxGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+      var edgesGeo = new THREE.EdgesGeometry(boxGeo);
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var baseOpacity = opts.opacity || (isDark ? 0.25 : 0.18);
+      var lineMat = new THREE.LineBasicMaterial({
+        color: isDark ? 0x7c3aed : 0xa855f7,
+        transparent: true,
+        opacity: baseOpacity
+      });
+
+      var group = new THREE.Group();
+      for (var i = 0; i < positions.length; i++) {
+        var p = positions[i];
+        var line = new THREE.LineSegments(edgesGeo, lineMat);
+        line.position.set(p[0], p[1], p[2]);
+        group.add(line);
+      }
+      scene.add(group);
+      group.rotation.x = 0.4;
+      group.rotation.y = 0.6;
+
+      var raf;
+      function animate() {
+        raf = requestAnimationFrame(animate);
+        group.rotation.y += 0.002;
+        group.rotation.x += 0.0005;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', function() {
+        w = container.offsetWidth;
+        h = container.offsetHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      });
+
+      var observer = new MutationObserver(function() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        lineMat.color.setHex(dark ? 0x7c3aed : 0xa855f7);
+        lineMat.opacity = dark ? 0.25 : 0.18;
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      var paused = false;
+      var io = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          if (paused) { paused = false; animate(); }
+        } else {
+          paused = true;
+          cancelAnimationFrame(raf);
+        }
+      }, { threshold: 0 });
+      io.observe(container);
+    }
+
+    return { create: create };
+  })();
+
+  // Topnav logo — show when hero scrolls away (or immediately on sub pages)
+  (function() {
+    var logo = document.getElementById('topnav-logo');
+    var navCanvas = document.getElementById('topnav-mesh');
+    var hero = document.querySelector('.hero');
+    if (!logo) return;
+
+    // Element always has full dimensions (hidden via scale+margin),
+    // so init the mesh right away
+    function initNav() {
+      if (navCanvas) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
+    }
+    if (typeof THREE !== 'undefined') { initNav(); }
+    else {
+      var s = document.querySelector('script[src*="three"]');
+      if (s) s.addEventListener('load', initNav);
+    }
+
+    if (!hero) {
+      logo.classList.add('is-visible');
+    } else {
+      document.body.classList.add('hero-active');
+      var io = new IntersectionObserver(function(entries) {
+        var gone = entries[0].intersectionRatio < 0.5;
+        logo.classList.toggle('is-visible', gone);
+        document.body.classList.toggle('hero-active', !gone);
+      }, { threshold: [0, 0.5, 1] });
+      io.observe(hero);
+    }
+  })();
+
+  // Footer mesh
+  (function() {
+    var canvas = document.getElementById('footer-mesh');
+    if (!canvas) return;
+    function init() {
+      SwissCross.create(canvas, { cameraZ: 16, cubeSize: 0.88, fov: 35 });
+    }
+    if (typeof THREE !== 'undefined') { init(); }
+    else {
+      var s = document.querySelector('script[src*="three"]');
+      if (s) s.addEventListener('load', init);
+    }
+  })();
+  </script>
+
+  <script>
+  // Progress tracker — vertical dot nav
+  (function() {
+    var tracker = document.getElementById('progress-tracker');
+    var main = document.getElementById('main');
+    if (!tracker || !main) return;
+
+    var sections = main.querySelectorAll(':scope > section, :scope > .hero');
+    if (sections.length < 2) { tracker.style.display = 'none'; return; }
+
+    // Build dots
+    sections.forEach(function(sec, i) {
+      var dot = document.createElement('button');
+      dot.className = 'progress-tracker__dot';
+      dot.setAttribute('aria-label', sec.getAttribute('aria-label') || ('Section ' + (i + 1)));
+      dot.addEventListener('click', function() {
+        sec.scrollIntoView({ behavior: 'smooth' });
+      });
+      tracker.appendChild(dot);
+    });
+
+    var dots = tracker.querySelectorAll('.progress-tracker__dot');
+
+    // Track which section is most visible
+    var visibleRatios = new Array(sections.length).fill(0);
+
+    function updateActive() {
+      var maxIdx = 0;
+      var maxVal = 0;
+      for (var i = 0; i < visibleRatios.length; i++) {
+        if (visibleRatios[i] > maxVal) { maxVal = visibleRatios[i]; maxIdx = i; }
+      }
+      dots.forEach(function(d, i) {
+        d.classList.toggle('is-active', i === maxIdx);
+      });
+    }
+
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var idx = Array.prototype.indexOf.call(sections, entry.target);
+        if (idx !== -1) visibleRatios[idx] = entry.intersectionRatio;
+      });
+      updateActive();
+    }, { threshold: [0, 0.1, 0.2, 0.3, 0.5, 0.7, 1] });
+
+    sections.forEach(function(sec) { io.observe(sec); });
+
+    // Activate first dot initially
+    if (dots.length) dots[0].classList.add('is-active');
+  })();
+
+  // Hex address anchors — each page gets a unique base (0x00, 0x10, 0x20…)
+  (function() {
+    var main = document.getElementById('main');
+    if (!main) return;
+    var pageKey = main.getAttribute('data-hex-page') || '_index';
+    // 0xPPSS — PP = page (0x00–0xFF), SS = section (0x00–0xFF)
+    var hexMap = {
+      // Core nav (0x00–0x0F)
+      '_index': 0x00, 'vision': 0x01, 'programm': 0x02, 'mitmachen': 0x03,
+      // Framing (0x10–0x1F)
+      'manifest': 0x10, 'kein-links-rechts': 0x11,
+      // Pillars (0x20–0x3F)
+      'digitale-souveraenitaet': 0x20, 'robotik': 0x21,
+      'uebergaenge': 0x22, 'life-science': 0x23,
+      'grundeinkommen': 0x24, 'stadte-wohnen': 0x25,
+      'research-innovation': 0x26, 'energy-resilience': 0x27,
+      'offener-staat': 0x28, 'neutralitaet-frieden': 0x29,
+      'talent-integration': 0x2A, 'sprache-verstaendigung': 0x2B,
+      // People & community (0x40–0x4F)
+      'menschen': 0x40, 'kontakt': 0x41,
+      // Legal & meta (0xF0–0xFF)
+      'impressum': 0xF0, 'datenschutz': 0xF1,
+      'info': 0xF2, 'aktuelles/_index': 0xF3
+    };
+    var page = hexMap[pageKey] != null ? hexMap[pageKey] : 0x00;
+    var sections = main.querySelectorAll(':scope > section, :scope > .hero');
+    sections.forEach(function(sec, i) {
+      var addr = (page << 8) | i;
+      var hex = '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+      sec.id = sec.id || hex;
+      var a = document.createElement('a');
+      a.className = 'hex-anchor';
+      a.href = '#' + sec.id;
+      a.textContent = hex;
+      a.setAttribute('aria-hidden', 'true');
+      sec.appendChild(a);
+    });
+  })();
+
+  // Scroll-to-top button
+  (function() {
+    var btn = document.getElementById('to-top');
+    var main = document.getElementById('main');
+    if (!btn || !main) return;
+
+    var first = main.querySelector(':scope > section, :scope > .hero');
+    if (!first) return;
+
+    var io = new IntersectionObserver(function(entries) {
+      btn.classList.toggle('is-visible', !entries[0].isIntersecting);
+    }, { threshold: 0 });
+    io.observe(first);
+
+    btn.addEventListener('click', function() {
+      first.scrollIntoView({ behavior: 'smooth' });
+    });
   })();
   </script>
 </body>

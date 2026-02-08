@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero page-hero--brandmark" aria-label="{{ page.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ page.title }}.</h1>
+    {% if page.description %}
+    <p class="page-hero__desc">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Intro ===== #}
+{% if page.extra.intro %}
+<section class="canvas" aria-label="{{ page.title }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <h2>{{ page.extra.intro }}</h2>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Sections — each its own canvas ===== #}
+{% if page.extra.sections %}
+  {% for sec in page.extra.sections %}
+  <section class="canvas canvas--content" aria-label="{{ sec.title }}">
+    <div class="container container--narrow">
+      <h2>{{ sec.title }}</h2>
+      <p>{{ sec.text }}</p>
+      {% if sec.shortcode is defined and sec.shortcode == "newsletter_form" %}
+      <div class="glass-card">
+        <div class="newsletter-form">
+          <label for="newsletter-email" class="sr-only">{{ trans(key='label_email', lang=lang) }}</label>
+          <input class="form__input" id="newsletter-email" type="email" placeholder="{{ trans(key='label_email', lang=lang) }}" disabled>
+          <button type="button" class="btn btn--disabled" disabled>Coming Soon</button>
+        </div>
+      </div>
+      {% endif %}
+      {% if sec.link_text is defined %}
+      <a class="btn btn--outline" href="{{ sec.link }}">{{ sec.link_text }}</a>
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}
+{% endif %}
+{% endblock %}

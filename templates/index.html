@@ -1,41 +1,48 @@
 {% extends "base.html" %}
 {% import "macros/pillar_cards.html" as cards %}
 
-{% block title %}{{ section.extra.hero_title | default(value=config.title) }}{% endblock %}
+{% block title %}{{ section.title | default(value=section.extra.hero_title | default(value=config.title)) }}{% endblock %}
 
-{% block head_extra %}
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
-{% endblock %}
+{% block head_extra %}{% endblock %}
 
 {% block content %}
 
 {# ===== Hero — brandmark ===== #}
-<section class="hero" aria-label="Hero">
+<section class="hero" id="hero" aria-label="Hero">
   <canvas class="hero__mesh" id="hero-mesh" aria-hidden="true"></canvas>
   <div class="hero__display">
     <h1 class="hero__big">
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}
+      {% if lang == "fr" %}Le Futur.{% elif lang == "it" %}Il Futuro.{% elif lang == "en" %}The Future.{% else %}Die Zukunft.{% endif %}
     </h1>
+    {% if section.extra.hero_subline %}
+    <p class="hero__subline" id="hero-subline">{{ section.extra.hero_subline }}</p>
+    {% endif %}
   </div>
 </section>
 
 {# ===== Subtitle / positioning ===== #}
-<section class="canvas" aria-label="Subtitle">
+<section class="canvas canvas--hex" aria-label="Subtitle">
   <div class="container container--narrow" style="text-align: center;">
     <h2>{{ section.extra.hero_subtitle | default(value="") }}</h2>
   </div>
 </section>
 
-{# ===== What's changing ===== #}
+{# ===== What's changing — title ===== #}
 {% if section.extra.changes %}
-<section class="canvas" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
+<section class="canvas canvas--hex" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <h2>{{ section.extra.changes_title | default(value="") }}</h2>
+  </div>
+</section>
+
+{# ===== What's changing — cards ===== #}
+<section class="canvas canvas--hex" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
   <div class="container">
-    <h2 style="text-align: center; margin-bottom: 2rem;">{{ section.extra.changes_title | default(value="") }}</h2>
     <div class="bento-grid">
       {% for item in section.extra.changes %}
       <div class="glass-card reveal-up reveal-delay-{{ loop.index }}">
         {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
-        <p class="glass-card__title">{{ item.title }}</p>
+        <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
       </div>
       {% endfor %}
@@ -44,19 +51,44 @@
 </section>
 {% endif %}
 
-{# ===== What we propose (pillars) ===== #}
+{# ===== What we propose — title + carousel ===== #}
 {% if section.extra.pillars %}
-<section class="canvas" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}">
-  <div class="container">
-    <h2 style="text-align: center; margin-bottom: 2rem;">{{ section.extra.pillars_title | default(value="") }}</h2>
-    {{ cards::render(pillars=section.extra.pillars) }}
+<section class="canvas canvas--hex" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <h2>{{ section.extra.pillars_title | default(value="") }}</h2>
   </div>
+</section>
+
+<section class="canvas canvas--carousel" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}" aria-roledescription="carousel">
+  <div class="carousel" id="pillar-carousel">
+    <div class="carousel__track" aria-live="off" id="carousel-track">
+      {# Duplicate cards for seamless loop #}
+      {% for item in section.extra.pillars %}
+      <div class="glass-card carousel__card" role="group" aria-roledescription="slide" aria-label="{{ item.title }}">
+        {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
+        <h3 class="glass-card__title">{{ item.title }}</h3>
+        <p class="glass-card__text">{{ item.text }}</p>
+      </div>
+      {% endfor %}
+      {% for item in section.extra.pillars %}
+      <div class="glass-card carousel__card" aria-hidden="true">
+        {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
+        <h3 class="glass-card__title">{{ item.title }}</h3>
+        <p class="glass-card__text">{{ item.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <button class="carousel__pause" id="carousel-pause" type="button" aria-label="{% if lang == 'de' %}Karussell anhalten{% elif lang == 'fr' %}Mettre le carrousel en pause{% elif lang == 'it' %}Metti in pausa il carosello{% else %}Pause carousel{% endif %}">
+    <svg id="carousel-pause-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <svg id="carousel-play-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5,3 19,12 5,21"/></svg>
+  </button>
 </section>
 {% endif %}
 
 {# ===== How we start (timeline) ===== #}
 {% if section.extra.timeline %}
-<section class="canvas" aria-label="{{ section.extra.timeline_title | default(value='Timeline') }}">
+<section class="canvas canvas--hex" aria-label="{{ section.extra.timeline_title | default(value='Timeline') }}">
   <div class="container" style="display: flex; flex-direction: column; align-items: center;">
     <h2 style="text-align: center; margin-bottom: 2rem;">{{ section.extra.timeline_title | default(value="") }}</h2>
     <div class="timeline">
@@ -95,137 +127,79 @@
 (function() {
   var canvas = document.getElementById('hero-mesh');
   if (!canvas) return;
-
   function init() {
-    if (typeof THREE === 'undefined') return;
-    var hero = canvas.parentElement;
-    var w = hero.offsetWidth;
-    var h = hero.offsetHeight;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
+  }
+  if (typeof THREE !== 'undefined') { init(); }
+  else {
+    var s = document.querySelector('script[src*="three"]');
+    if (s) s.addEventListener('load', init);
+  }
+})();
 
-    // Renderer
-    var renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      alpha: true,
-      antialias: true
-    });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(dpr);
+// Hero subline — reveal on first scroll-down, block scroll during animation
+(function() {
+  var subline = document.getElementById('hero-subline');
+  var hero = document.getElementById('hero');
+  if (!subline || !hero) return;
+  var state = 'waiting'; // waiting → blocking → done
 
-    // Scene & camera
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
-    camera.position.z = 22;
-
-    // Build Swiss cross positions (3D cross visible from all axes)
-    var positions = [];
-    var seen = {};
-
-    function add(x, y, z) {
-      var key = x + ',' + y + ',' + z;
-      if (!seen[key]) {
-        seen[key] = true;
-        positions.push([x, y, z]);
-      }
-    }
-
-    // Bar along X axis
-    for (var x = -3; x <= 3; x++)
-      for (var y = -1; y <= 1; y++)
-        for (var z = -1; z <= 1; z++)
-          add(x, y, z);
-
-    // Bar along Y axis
-    for (var x = -1; x <= 1; x++)
-      for (var y = -3; y <= 3; y++)
-        for (var z = -1; z <= 1; z++)
-          add(x, y, z);
-
-    // Bar along Z axis
-    for (var x = -1; x <= 1; x++)
-      for (var y = -1; y <= 1; y++)
-        for (var z = -3; z <= 3; z++)
-          add(x, y, z);
-
-    // Create instanced mesh — cube edges
-    var cubeSize = 0.88;
-    var boxGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-    var edgesGeo = new THREE.EdgesGeometry(boxGeo);
-
-    // Determine color based on theme
-    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    var edgeColor = isDark ? 0x7c3aed : 0xa855f7;
-    var edgeOpacity = isDark ? 0.25 : 0.18;
-
-    var lineMat = new THREE.LineBasicMaterial({
-      color: edgeColor,
-      transparent: true,
-      opacity: edgeOpacity
-    });
-
-    var group = new THREE.Group();
-
-    for (var i = 0; i < positions.length; i++) {
-      var p = positions[i];
-      var line = new THREE.LineSegments(edgesGeo, lineMat);
-      line.position.set(p[0], p[1], p[2]);
-      group.add(line);
-    }
-
-    scene.add(group);
-
-    // Initial tilt
-    group.rotation.x = 0.4;
-    group.rotation.y = 0.6;
-
-    // Animation loop
-    var raf;
-    function animate() {
-      raf = requestAnimationFrame(animate);
-      group.rotation.y += 0.002;
-      group.rotation.x += 0.0005;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Resize handler
-    function onResize() {
-      w = hero.offsetWidth;
-      h = hero.offsetHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    }
-    window.addEventListener('resize', onResize);
-
-    // Theme change observer
-    var observer = new MutationObserver(function() {
-      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-      lineMat.color.setHex(dark ? 0x7c3aed : 0xa855f7);
-      lineMat.opacity = dark ? 0.25 : 0.18;
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    // Pause when not visible
-    var paused = false;
-    var io = new IntersectionObserver(function(entries) {
-      if (entries[0].isIntersecting) {
-        if (paused) { paused = false; animate(); }
-      } else {
-        paused = true;
-        cancelAnimationFrame(raf);
-      }
-    }, { threshold: 0 });
-    io.observe(hero);
+  function cleanup() {
+    window.removeEventListener('wheel', onWheel, { passive: false });
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove, { passive: false });
+    window.removeEventListener('keydown', onKeyDown);
   }
 
-  // Wait for Three.js to load
-  if (typeof THREE !== 'undefined') {
-    init();
-  } else {
-    var script = document.querySelector('script[src*="three"]');
-    if (script) script.addEventListener('load', init);
+  function reveal() {
+    if (state !== 'waiting') return;
+    state = 'blocking';
+    subline.classList.add('is-visible');
+    setTimeout(function() {
+      state = 'done';
+      cleanup();
+    }, 800);
   }
+
+  function heroInView() {
+    var r = hero.getBoundingClientRect();
+    return r.top > -r.height * 0.5 && r.top < window.innerHeight * 0.5;
+  }
+
+  var touchY = null;
+
+  function onWheel(e) {
+    if (state === 'blocking') { e.preventDefault(); return; }
+    if (state === 'waiting' && e.deltaY > 0 && heroInView()) {
+      e.preventDefault();
+      reveal();
+    }
+  }
+  function onTouchStart(e) {
+    touchY = e.touches[0].clientY;
+  }
+  function onTouchMove(e) {
+    if (state === 'blocking') { e.preventDefault(); return; }
+    if (touchY === null) return;
+    var dy = touchY - e.changedTouches[0].clientY;
+    if (state === 'waiting' && dy > 10 && heroInView()) {
+      e.preventDefault();
+      reveal();
+    }
+    touchY = null;
+  }
+  function onKeyDown(e) {
+    if (state === 'done') return;
+    var keys = ['ArrowDown', 'PageDown', ' ', 'Space'];
+    if (keys.indexOf(e.key) !== -1 && heroInView()) {
+      if (state === 'waiting') { reveal(); }
+    }
+  }
+
+  window.addEventListener('wheel', onWheel, { passive: false });
+  window.addEventListener('touchstart', onTouchStart);
+  window.addEventListener('touchmove', onTouchMove, { passive: false });
+  window.addEventListener('keydown', onKeyDown);
 })();
 
 // Reveal-on-scroll
@@ -241,6 +215,76 @@
     });
   }, { threshold: 0.15 });
   els.forEach(function(el) { io.observe(el); });
+})();
+
+// Pillar carousel — continuous slow scroll with pause control
+(function() {
+  var track = document.querySelector('.carousel__track');
+  if (!track) return;
+  var cards = track.children;
+  var half = cards.length / 2;
+  var totalWidth = 0;
+  for (var i = 0; i < half; i++) {
+    totalWidth += cards[i].offsetWidth;
+  }
+  var gap = parseFloat(getComputedStyle(track).gap) || 24;
+  totalWidth += gap * half;
+
+  var pos = 0;
+  var speed = 0.5;
+  var raf;
+  var userPaused = false;
+  var hoverPaused = false;
+  var offscreen = false;
+
+  var pauseBtn = document.getElementById('carousel-pause');
+  var pauseIcon = document.getElementById('carousel-pause-icon');
+  var playIcon = document.getElementById('carousel-play-icon');
+
+  function isRunning() { return !userPaused && !hoverPaused && !offscreen; }
+
+  function animate() {
+    raf = requestAnimationFrame(animate);
+    pos -= speed;
+    if (Math.abs(pos) >= totalWidth) { pos += totalWidth; }
+    track.style.transform = 'translateX(' + pos + 'px)';
+  }
+
+  function start() { if (!raf) animate(); }
+  function stop() { cancelAnimationFrame(raf); raf = null; }
+
+  function sync() { isRunning() ? start() : stop(); }
+
+  // Pause button
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', function() {
+      userPaused = !userPaused;
+      pauseIcon.style.display = userPaused ? 'none' : '';
+      playIcon.style.display = userPaused ? '' : 'none';
+      pauseBtn.setAttribute('aria-label', userPaused
+        ? pauseBtn.getAttribute('aria-label').replace(/anhalten|pause|pausa/i, function(m) { return {anhalten:'abspielen',pause:'lecture',pausa:'riproduci'}[m.toLowerCase()] || 'Play'; })
+        : pauseBtn.getAttribute('aria-label').replace(/abspielen|lecture|riproduci|play/i, function(m) { return {abspielen:'anhalten',lecture:'pause',riproduci:'pausa'}[m.toLowerCase()] || 'Pause'; })
+      );
+      track.setAttribute('aria-live', userPaused ? 'polite' : 'off');
+      sync();
+    });
+  }
+
+  // Pause on hover
+  track.addEventListener('mouseenter', function() { hoverPaused = true; sync(); });
+  track.addEventListener('mouseleave', function() { hoverPaused = false; sync(); });
+
+  // Pause when not visible
+  var section = track.closest('.canvas--carousel');
+  if (section) {
+    var io = new IntersectionObserver(function(entries) {
+      offscreen = !entries[0].isIntersecting;
+      sync();
+    }, { threshold: 0 });
+    io.observe(section);
+  } else {
+    sync();
+  }
 })();
 </script>
 

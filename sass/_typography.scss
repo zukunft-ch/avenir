@@ -1,13 +1,13 @@
 // =============================================
-// Typography — Inter variable font, fluid scale
+// Typography — Mozilla Headline (body) + Switzer (headings)
 // =============================================
 
 @font-face {
-  font-family: "Inter";
+  font-family: "Mozilla Headline";
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 200 700;
   font-display: swap;
-  src: url("/fonts/inter-latin-variable.woff2") format("woff2");
+  src: url("/fonts/MozillaHeadline-Variable.woff2") format("woff2");
 }
 
 body {
@@ -20,6 +20,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-headline;
   font-weight: $font-weight-bold;
   line-height: 1.15;
   color: var(--color-text);

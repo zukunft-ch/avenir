@@ -41,6 +41,26 @@ main {
   }
 }
 
+// Hex address anchor in top-left corner of each section
+.hex-anchor {
+  position: absolute;
+  top: $space-5;
+  left: $space-5;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  text-decoration: none;
+  z-index: 1;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
 .container {
   width: 100%;
   max-width: $max-width;

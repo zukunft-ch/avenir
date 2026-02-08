@@ -1,9 +1,13 @@
 {% macro footer(lang) %}
 <footer class="canvas footer">
   <div class="container">
-    <p class="footer__wordmark">
-      {% if lang == "fr" %}le futur{% elif lang == "it" %}il futuro{% elif lang == "en" %}the future{% else %}die zukunft{% endif %}
-    </p>
+    <div class="footer__brandmark">
+      <canvas class="footer__mesh" id="footer-mesh" aria-hidden="true"></canvas>
+      <p class="footer__wordmark">
+        {% if lang == "fr" %}le futur.{% elif lang == "it" %}il futuro.{% elif lang == "en" %}the future.{% else %}die zukunft.{% endif %}
+      </p>
+      <p class="footer__subline">{{ trans(key="brand_subline", lang=lang) }}</p>
+    </div>
 
     <nav class="footer__columns" aria-label="Footer navigation">
       <div class="footer__col">
@@ -13,8 +17,6 @@
         <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
         <a href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
         <a href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
       </div>
 
       <div class="footer__col">
@@ -36,8 +38,8 @@
       <div class="footer__col">
         <p class="footer__heading">{{ trans(key="footer_contact", lang=lang) }}</p>
         <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-        <span>{{ config.extra.contact_city }}</span>
-        <a href="mailto:{{ config.extra.contact_email }}">{{ config.extra.contact_email }}</a>
+        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
       </div>
 
       <div class="footer__col">

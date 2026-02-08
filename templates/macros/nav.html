@@ -3,44 +3,65 @@
 <a class="skip-link" href="#main">{{ trans(key="skip_to_content", lang=lang) }}</a>
 {% endmacro %}
 
-{# ---- Top nav bar (glassmorphic, centered, max 3 items) ---- #}
+{# ---- Top nav bar (glassmorphic, centered) ---- #}
 {% macro topnav(lang) %}
 <nav class="topnav" aria-label="Main navigation">
-  <a class="topnav__link" href="{{ get_url(path='@/programm.md', lang=lang) }}" data-nav>{{ trans(key="nav_programm", lang=lang) }}</a>
-  <a class="topnav__link" href="{{ get_url(path='@/vision.md', lang=lang) }}" data-nav>{{ trans(key="nav_vision", lang=lang) }}</a>
-  <a class="topnav__link" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}" data-nav>{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+  <a class="topnav__logo" id="topnav-logo" href="{% if lang == 'de' %}/{% else %}/{{ lang }}/{% endif %}" aria-label="Home">
+    <canvas class="topnav__logo-canvas" id="topnav-mesh" aria-hidden="true"></canvas>
+  </a>
+  {% set current_path = current_path | default(value="") %}
+  {% set programm_url = get_url(path='@/programm.md', lang=lang) %}
+  {% set vision_url = get_url(path='@/vision.md', lang=lang) %}
+  {% set mitmachen_url = get_url(path='@/mitmachen.md', lang=lang) %}
+  <a class="topnav__link{% if current_url is defined and current_url == vision_url %} is-active{% endif %}" href="{{ vision_url }}" data-nav{% if current_url is defined and current_url == vision_url %} aria-current="page"{% endif %}>{{ trans(key="nav_vision", lang=lang) }}</a>
+  <a class="topnav__link{% if current_url is defined and current_url == programm_url %} is-active{% endif %}" href="{{ programm_url }}" data-nav{% if current_url is defined and current_url == programm_url %} aria-current="page"{% endif %}>{{ trans(key="nav_programm", lang=lang) }}</a>
+  <a class="topnav__link{% if current_url is defined and current_url == mitmachen_url %} is-active{% endif %}" href="{{ mitmachen_url }}" data-nav{% if current_url is defined and current_url == mitmachen_url %} aria-current="page"{% endif %}>{{ trans(key="nav_mitmachen", lang=lang) }}</a>
+  <button class="sparkle-btn sparkle-btn--mobile" type="button" aria-label="{{ trans(key='aria_menu', lang=lang) }}" aria-expanded="false">
+    <span class="sparkle-btn__flipper">
+      <span class="sparkle-btn__face sparkle-btn__face--front">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+      </span>
+      <span class="sparkle-btn__face sparkle-btn__face--back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </span>
+    </span>
+  </button>
 </nav>
 {% endmacro %}
 
-{# ---- Sparkle button (top-right, opens command overlay) ---- #}
-{% macro sparkle_button() %}
-<button class="sparkle-btn" id="sparkle-btn" type="button" aria-label="Menu" aria-expanded="false">
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-    <path d="M20 3v4"/>
-    <path d="M22 5h-4"/>
-  </svg>
+{# ---- Sparkle button (standalone, fixed top-right on desktop) ---- #}
+{% macro sparkle_button(lang) %}
+<button class="sparkle-btn sparkle-btn--desktop" id="sparkle-btn" type="button" aria-label="{{ trans(key='aria_menu', lang=lang) }}" aria-expanded="false">
+  <span class="sparkle-btn__flipper">
+    <span class="sparkle-btn__face sparkle-btn__face--front">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+    </span>
+    <span class="sparkle-btn__face sparkle-btn__face--back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </span>
+  </span>
 </button>
 {% endmacro %}
 
 {# ---- Command overlay (glassmorphic panel) ---- #}
 {% macro command_overlay(lang) %}
 <div class="overlay-backdrop" id="overlay-backdrop" aria-hidden="true"></div>
-<div class="command-overlay" id="command-overlay" aria-hidden="true" role="dialog" aria-label="Menu">
+<div class="command-overlay" id="command-overlay" aria-hidden="true" role="dialog" aria-label="{{ trans(key='aria_menu', lang=lang) }}">
   <div class="command-overlay__inner">
 
     {# Search #}
     <div class="command-overlay__search">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="command-search" placeholder="{{ trans(key='search_placeholder', lang=lang) }}" autocomplete="off">
+      <input type="text" id="command-search" placeholder="{{ trans(key='search_placeholder', lang=lang) }}" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="command-nav" aria-autocomplete="list">
     </div>
+    <div id="search-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     {# Navigation links (scrollable) #}
     <div class="command-overlay__nav-wrap">
-      <button class="command-overlay__scroll command-overlay__scroll--up" id="nav-scroll-up" type="button" aria-label="Scroll up">
+      <button class="command-overlay__scroll command-overlay__scroll--up" id="nav-scroll-up" type="button" aria-label="{{ trans(key='aria_scroll_up', lang=lang) }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
       </button>
-      <nav class="command-overlay__nav" id="command-nav" aria-label="All pages">
+      <nav class="command-overlay__nav" id="command-nav" aria-label="{{ trans(key='aria_all_pages', lang=lang) }}">
         <a class="command-overlay__link" href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
@@ -63,7 +84,7 @@
         <a class="command-overlay__link" href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
       </nav>
-      <button class="command-overlay__scroll command-overlay__scroll--down is-visible" id="nav-scroll-down" type="button" aria-label="Scroll down">
+      <button class="command-overlay__scroll command-overlay__scroll--down is-visible" id="nav-scroll-down" type="button" aria-label="{{ trans(key='aria_scroll_down', lang=lang) }}">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
     </div>
@@ -72,20 +93,46 @@
     <div class="command-overlay__settings">
       <div class="command-overlay__setting">
         <span class="command-overlay__label">{{ trans(key="footer_nav", lang=lang) }}</span>
-        <div class="lang-switch">
+        <div class="lang-switch" role="navigation" aria-label="{{ trans(key='aria_language', lang=lang) }}">
+          {# Build translation URL map from page/section translations #}
+          {% set_global lang_urls = [] %}
+          {% if page is defined and page.translations is defined %}
+            {% for t in page.translations %}
+              {% set_global lang_urls = lang_urls | concat(with=[t]) %}
+            {% endfor %}
+          {% elif section is defined and section.translations is defined %}
+            {% for t in section.translations %}
+              {% set_global lang_urls = lang_urls | concat(with=[t]) %}
+            {% endfor %}
+          {% endif %}
           {% set langs = ["de", "fr", "it", "en"] %}
           {% for l in langs %}
             {% if l == lang %}
               <span class="lang-switch__option lang-switch__option--active" aria-current="true">{{ l | upper }}</span>
             {% else %}
-              <a class="lang-switch__option" href="{% if l == 'de' %}/{% else %}/{{ l }}/{% endif %}">{{ l | upper }}</a>
+              {% set_global target_url = "" %}
+              {% for t in lang_urls %}
+                {% if t.lang == l %}{% set_global target_url = t.permalink %}{% endif %}
+              {% endfor %}
+              {% if l == "de" and target_url == "" %}
+                {# Default language: derive from current URL #}
+                {% if page is defined %}
+                  {% set_global target_url = page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") %}
+                {% elif section is defined %}
+                  {% set_global target_url = section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") %}
+                {% else %}
+                  {% set_global target_url = "/" %}
+                {% endif %}
+              {% endif %}
+              {% if target_url == "" %}{% set_global target_url = "/" ~ l ~ "/" %}{% endif %}
+              <a class="lang-switch__option" href="{{ target_url }}" hreflang="{{ l }}">{{ l | upper }}</a>
             {% endif %}
           {% endfor %}
         </div>
       </div>
       <div class="command-overlay__setting">
-        <span class="command-overlay__label">Theme</span>
-        <button class="theme-switch" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle theme">
+        <span class="command-overlay__label">{{ trans(key="aria_theme", lang=lang) }}</span>
+        <button class="theme-switch" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="{{ trans(key='aria_toggle_theme', lang=lang) }}">
           <span class="theme-switch__thumb"></span>
         </button>
       </div>
