@@ -15,7 +15,7 @@
   <script>
   (function() {
     var t = localStorage.getItem('theme');
-    var isDark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var isDark = t === 'dark';
     if (isDark) {
       document.documentElement.setAttribute('data-theme', 'dark');
       document.getElementById('meta-theme-color').setAttribute('content', '#0d0d0d');
@@ -72,6 +72,8 @@
   <link rel="icon" href="{{ get_url(path='favicon.ico') }}" sizes="32x32">
   <link rel="apple-touch-icon" href="{{ get_url(path='apple-touch-icon.png') }}">
   <link rel="manifest" href="{{ get_url(path='site.webmanifest') }}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   {# CSS #}
   <link rel="stylesheet" href="{{ get_url(path='main.css') }}">
@@ -706,6 +708,11 @@
       first.scrollIntoView({ behavior: 'smooth' });
     });
   })();
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
   </script>
 </body>
 </html>
