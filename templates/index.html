@@ -135,40 +135,52 @@
   }
 })();
 
-// Hero subline — reveal on first scroll-down, block scroll during animation
+// Hero subline — reveal on first scroll-down, lock scroll during animation
 (function() {
   var subline = document.getElementById('hero-subline');
   var hero = document.getElementById('hero');
   if (!subline || !hero) return;
-  var state = 'waiting'; // waiting → blocking → done
-
-  function cleanup() {
-    window.removeEventListener('wheel', onWheel, { passive: false });
-    window.removeEventListener('touchstart', onTouchStart);
-    window.removeEventListener('touchmove', onTouchMove, { passive: false });
-    window.removeEventListener('keydown', onKeyDown);
-  }
-
-  function reveal() {
-    if (state !== 'waiting') return;
-    state = 'blocking';
-    subline.classList.add('is-visible');
-    setTimeout(function() {
-      state = 'done';
-      cleanup();
-    }, 800);
-  }
+  var done = false;
+  var root = document.documentElement;
 
   function heroInView() {
     var r = hero.getBoundingClientRect();
     return r.top > -r.height * 0.5 && r.top < window.innerHeight * 0.5;
   }
 
+  function lock() {
+    root.style.overflow = 'hidden';
+    root.style.scrollSnapType = 'none';
+  }
+
+  function unlock() {
+    root.style.overflow = '';
+    root.style.scrollSnapType = '';
+  }
+
+  function reveal() {
+    if (done) return;
+    done = true;
+    lock();
+    subline.classList.add('is-visible');
+    setTimeout(function() {
+      unlock();
+      cleanup();
+    }, 800);
+  }
+
+  function cleanup() {
+    window.removeEventListener('wheel', onWheel);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('keydown', onKeyDown);
+  }
+
   var touchY = null;
 
   function onWheel(e) {
-    if (state === 'blocking') { e.preventDefault(); return; }
-    if (state === 'waiting' && e.deltaY > 0 && heroInView()) {
+    if (done && root.style.overflow === 'hidden') return;
+    if (!done && e.deltaY > 0 && heroInView()) {
       e.preventDefault();
       reveal();
     }
@@ -177,25 +189,25 @@
     touchY = e.touches[0].clientY;
   }
   function onTouchMove(e) {
-    if (state === 'blocking') { e.preventDefault(); return; }
     if (touchY === null) return;
     var dy = touchY - e.changedTouches[0].clientY;
-    if (state === 'waiting' && dy > 10 && heroInView()) {
+    touchY = null;
+    if (!done && dy > 10 && heroInView()) {
       e.preventDefault();
       reveal();
     }
-    touchY = null;
   }
   function onKeyDown(e) {
-    if (state === 'done') return;
-    var keys = ['ArrowDown', 'PageDown', ' ', 'Space'];
+    if (done) return;
+    var keys = ['ArrowDown', 'PageDown', ' '];
     if (keys.indexOf(e.key) !== -1 && heroInView()) {
-      if (state === 'waiting') { reveal(); }
+      e.preventDefault();
+      reveal();
     }
   }
 
   window.addEventListener('wheel', onWheel, { passive: false });
-  window.addEventListener('touchstart', onTouchStart);
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('keydown', onKeyDown);
 })();
