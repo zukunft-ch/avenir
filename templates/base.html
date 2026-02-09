@@ -457,7 +457,7 @@
     if (!gl) return;
 
     var vsSource = 'attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }';
-    var fsSource = 'precision mediump float; uniform float u_time; uniform vec2 u_resolution; uniform vec3 u_color0; uniform vec3 u_color1; uniform vec3 u_color2; uniform float u_scale; uniform float u_lift; uniform float u_saturation; void main() { vec2 uv = gl_FragCoord.xy / u_resolution * 3.0; float t = u_time * 0.08; float v = 0.0; v += sin(uv.x * 1.1 + t); v += sin(uv.y * 1.3 - t * 0.7); v += sin((uv.x + uv.y) * 0.7 + t * 0.5); v += sin(length(uv - vec2(1.5)) * 1.4 - t * 0.6); v = v * 0.25 + 0.5; vec3 col; if (v < 0.33) { col = mix(u_color0, u_color1, v / 0.33); } else if (v < 0.66) { col = mix(u_color1, u_color2, (v - 0.33) / 0.33); } else { col = mix(u_color2, u_color0, (v - 0.66) / 0.34); } float grey = dot(col, vec3(0.299, 0.587, 0.114)); col = mix(vec3(grey), col, u_saturation); col = col * u_scale + vec3(u_lift); gl_FragColor = vec4(col, 1.0); }';
+    var fsSource = 'precision mediump float; uniform float u_time; uniform vec2 u_resolution; uniform vec3 u_color0; uniform vec3 u_color1; uniform vec3 u_color2; uniform float u_scale; uniform float u_lift; uniform float u_saturation; void main() { vec2 uv = gl_FragCoord.xy / u_resolution * 3.0; float t = u_time * 0.12; float v = 0.0; v += sin(uv.x * 1.1 + t); v += sin(uv.y * 1.3 - t * 0.7); v += sin((uv.x + uv.y) * 0.7 + t * 0.5); v += sin(length(uv - vec2(1.5)) * 1.4 - t * 0.6); v = v * 0.25 + 0.5; vec3 col; if (v < 0.33) { col = mix(u_color0, u_color1, v / 0.33); } else if (v < 0.66) { col = mix(u_color1, u_color2, (v - 0.33) / 0.33); } else { col = mix(u_color2, u_color0, (v - 0.66) / 0.34); } float grey = dot(col, vec3(0.299, 0.587, 0.114)); col = mix(vec3(grey), col, u_saturation); col = col * u_scale + vec3(u_lift); gl_FragColor = vec4(col, 1.0); }';
 
     function compileShader(src, type) {
       var s = gl.createShader(type);
@@ -497,17 +497,17 @@
     // 4 palettes per theme — each: [color0, color1, color2]
     // Light: very pastel (scale compresses range, lift pushes toward white)
     var lightPresets = [
-      { c: [[0.72,0.55,1.0], [0.45,0.65,1.0], [0.30,0.85,0.90]], scale: 0.30, lift: 0.68, sat: 0.55 },
-      { c: [[1.0,0.60,0.70], [0.85,0.55,0.90], [1.0,0.75,0.60]], scale: 0.30, lift: 0.68, sat: 0.55 },
-      { c: [[0.30,0.90,0.80], [0.45,0.90,0.55], [0.50,0.75,1.0]], scale: 0.30, lift: 0.68, sat: 0.55 },
-      { c: [[1.0,0.85,0.40], [1.0,0.70,0.50], [0.95,0.60,0.65]], scale: 0.30, lift: 0.68, sat: 0.55 }
+      { c: [[0.72,0.55,1.0], [0.45,0.65,1.0], [0.30,0.85,0.90]], scale: 0.33, lift: 0.65, sat: 0.65 },
+      { c: [[1.0,0.60,0.70], [0.85,0.55,0.90], [1.0,0.75,0.60]], scale: 0.33, lift: 0.65, sat: 0.65 },
+      { c: [[0.30,0.90,0.80], [0.45,0.90,0.55], [0.50,0.75,1.0]], scale: 0.33, lift: 0.65, sat: 0.65 },
+      { c: [[1.0,0.85,0.40], [1.0,0.70,0.50], [0.95,0.60,0.65]], scale: 0.33, lift: 0.65, sat: 0.65 }
     ];
     // Dark: richer, more visible
     var darkPresets = [
-      { c: [[0.55,0.30,0.85], [0.20,0.35,0.75], [0.15,0.55,0.65]], scale: 0.35, lift: 0.06, sat: 0.6 },
-      { c: [[0.75,0.20,0.55], [0.55,0.25,0.75], [0.25,0.35,0.70]], scale: 0.35, lift: 0.06, sat: 0.6 },
-      { c: [[0.15,0.65,0.55], [0.20,0.60,0.35], [0.20,0.45,0.70]], scale: 0.35, lift: 0.06, sat: 0.6 },
-      { c: [[0.75,0.55,0.25], [0.70,0.40,0.20], [0.65,0.30,0.45]], scale: 0.35, lift: 0.06, sat: 0.6 }
+      { c: [[0.55,0.30,0.85], [0.20,0.35,0.75], [0.15,0.55,0.65]], scale: 0.38, lift: 0.06, sat: 0.7 },
+      { c: [[0.75,0.20,0.55], [0.55,0.25,0.75], [0.25,0.35,0.70]], scale: 0.38, lift: 0.06, sat: 0.7 },
+      { c: [[0.15,0.65,0.55], [0.20,0.60,0.35], [0.20,0.45,0.70]], scale: 0.38, lift: 0.06, sat: 0.7 },
+      { c: [[0.75,0.55,0.25], [0.70,0.40,0.20], [0.65,0.30,0.45]], scale: 0.38, lift: 0.06, sat: 0.7 }
     ];
     var presetCount = 4;
     var timeOffset = 25.0;
