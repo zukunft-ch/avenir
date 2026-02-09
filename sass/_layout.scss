@@ -6,8 +6,9 @@ $canvas-gap: $space-3;
 
 // Scroll snap + padding so snap targets land with a gap at top
 html {
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   scroll-padding-top: $canvas-gap;
+  scroll-behavior: smooth;
 }
 
 // Main is a flex column — no margin collapsing, gap controls spacing
@@ -21,7 +22,7 @@ main {
 // Every .canvas fits the viewport minus top+bottom gap
 .canvas {
   flex-shrink: 0;
-  height: calc(100dvh - $canvas-gap * 2);
+  min-height: calc(100dvh - $canvas-gap * 2);
   display: flex;
   flex-direction: column;
   align-items: center;
