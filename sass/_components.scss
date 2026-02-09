@@ -261,6 +261,10 @@
 .footer__copy {
   font-size: $font-size-xs;
   margin-bottom: 0;
+
+  @media (max-width: $bp-md) {
+    margin-bottom: 4rem;
+  }
 }
 
 // ---- Screen-reader only (a11y) ----
