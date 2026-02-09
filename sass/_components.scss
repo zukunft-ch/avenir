@@ -1268,6 +1268,7 @@
   will-change: transform;
   cursor: grab;
   user-select: none;
+  touch-action: pan-y;
 }
 
 .carousel__card {
