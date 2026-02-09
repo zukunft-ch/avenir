@@ -573,13 +573,10 @@
     // Element always has full dimensions (hidden via scale+margin),
     // so init the mesh right away
     function initNav() {
+      if (typeof THREE === 'undefined' || typeof SwissCross === 'undefined') { setTimeout(initNav, 50); return; }
       if (navCanvas && window.innerWidth >= 768) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
     }
-    if (typeof THREE !== 'undefined') { initNav(); }
-    else {
-      var s = document.querySelector('script[src*="three"]');
-      if (s) s.addEventListener('load', initNav);
-    }
+    initNav();
 
     if (!hero) {
       logo.classList.add('is-visible');
@@ -600,13 +597,10 @@
     var canvas = document.getElementById('footer-mesh');
     if (!canvas) return;
     function init() {
+      if (typeof THREE === 'undefined' || typeof SwissCross === 'undefined') { setTimeout(init, 50); return; }
       SwissCross.create(canvas, { cameraZ: 16, cubeSize: 0.88, fov: 35 });
     }
-    if (typeof THREE !== 'undefined') { init(); }
-    else {
-      var s = document.querySelector('script[src*="three"]');
-      if (s) s.addEventListener('load', init);
-    }
+    init();
   })();
   </script>
 
