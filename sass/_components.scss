@@ -870,29 +870,12 @@
 // ---- Bento grid (card layout) ----
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: $space-4;
   width: 100%;
 
-  // First card spans 2 columns
-  > :first-child {
-    grid-column: span 2;
-  }
-
-  @media (max-width: $bp-md) {
-    grid-template-columns: repeat(2, 1fr);
-
-    > :first-child {
-      grid-column: span 2;
-    }
-  }
-
   @media (max-width: $bp-sm) {
     grid-template-columns: 1fr;
-
-    > :first-child {
-      grid-column: span 1;
-    }
   }
 }
 

@@ -55,7 +55,7 @@ main {
 body.plasma-active .canvas {
   background: transparent;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
 
   &:nth-child(odd) {
     background: transparent;
