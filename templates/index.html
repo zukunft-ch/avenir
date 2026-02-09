@@ -39,6 +39,9 @@
 <section class="canvas canvas--hex" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
   <div class="container container--narrow" style="text-align: center;">
     <h2>{{ section.extra.changes_title | default(value="") }}</h2>
+    {% if section.extra.changes_intro %}
+    <p style="margin-top: 1rem; opacity: 0.85;">{{ section.extra.changes_intro }}</p>
+    {% endif %}
   </div>
 </section>
 
@@ -54,6 +57,9 @@
       </div>
       {% endfor %}
     </div>
+    {% if section.extra.changes_cta %}
+    <p style="text-align: center; margin-top: 2rem; font-weight: 600;">{{ section.extra.changes_cta }}</p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
