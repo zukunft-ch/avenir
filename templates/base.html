@@ -64,8 +64,6 @@
   <meta name="twitter:image" content="{{ get_url(path='og-' ~ lang ~ '.png') }}">
 
   {# Preconnect hints #}
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
   {# Favicon #}
   <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml">
@@ -95,8 +93,152 @@
   {{ jsonld::website(lang=lang) }}
   {{ jsonld::webpage(title=page.title | default(value=section.title | default(value=config.title)), description=page.description | default(value=section.description | default(value=config.description)), url=current_url | default(value=config.base_url), lang=lang) }}
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
   {% block head_extra %}{% endblock %}
+
+  <script>
+  // Shared Swiss cross mesh helper — Canvas 2D (no WebGL)
+  window.SwissCross = (function() {
+    function buildPositions(arm, thick) {
+      arm = arm != null ? arm : 3;
+      thick = thick != null ? thick : 1;
+      var positions = [];
+      var seen = {};
+      function add(x, y, z) {
+        var key = x + ',' + y + ',' + z;
+        if (!seen[key]) { seen[key] = true; positions.push([x, y, z]); }
+      }
+      for (var x = -arm; x <= arm; x++)
+        for (var y = -thick; y <= thick; y++)
+          for (var z = -thick; z <= thick; z++) add(x, y, z);
+      for (var x = -thick; x <= thick; x++)
+        for (var y = -arm; y <= arm; y++)
+          for (var z = -thick; z <= thick; z++) add(x, y, z);
+      for (var x = -thick; x <= thick; x++)
+        for (var y = -thick; y <= thick; y++)
+          for (var z = -arm; z <= arm; z++) add(x, y, z);
+      return positions;
+    }
+
+    var cubeEdges = [[0,1],[1,3],[3,2],[2,0],[4,5],[5,7],[7,6],[6,4],[0,4],[1,5],[2,6],[3,7]];
+    var cubeVerts = [[-0.5,-0.5,-0.5],[0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[-0.5,-0.5,0.5],[0.5,-0.5,0.5],[-0.5,0.5,0.5],[0.5,0.5,0.5]];
+
+    function create(canvas, opts) {
+      if (!canvas) return;
+      opts = opts || {};
+      var container = canvas.parentElement;
+      var ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      var w, h, dpr;
+      var camZ = opts.cameraZ || 22;
+      var cubeSize = opts.cubeSize || 0.88;
+      var fovRad = (opts.fov || 35) * Math.PI / 180;
+      var camX = opts.camX || 0;
+      var camY = opts.camY || 0;
+
+      var positions = buildPositions(opts.arm, opts.thick);
+
+      var allEdges = [];
+      for (var i = 0; i < positions.length; i++) {
+        var p = positions[i];
+        for (var e = 0; e < cubeEdges.length; e++) {
+          var a = cubeVerts[cubeEdges[e][0]];
+          var b = cubeVerts[cubeEdges[e][1]];
+          allEdges.push([
+            p[0] + a[0] * cubeSize, p[1] + a[1] * cubeSize, p[2] + a[2] * cubeSize,
+            p[0] + b[0] * cubeSize, p[1] + b[1] * cubeSize, p[2] + b[2] * cubeSize
+          ]);
+        }
+      }
+
+      var rotX = 0.4, rotY = 0.6;
+
+      function getColor() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return { color: dark ? '#7c3aed' : '#a855f7', opacity: opts.opacity || (dark ? 0.25 : 0.18) };
+      }
+
+      var style = getColor();
+
+      function resize() {
+        w = container.offsetWidth;
+        h = container.offsetHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, w < 768 ? 1.5 : 2);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+      }
+      resize();
+
+      function project(x, y, z) {
+        var f = 1 / Math.tan(fovRad / 2);
+        var px = x - camX;
+        var py = y - camY;
+        var pz = z - camZ;
+        if (pz >= -0.1) return null;
+        var sx = (f * px / -pz) * (h * dpr / 2) + (w * dpr / 2);
+        var sy = (f * -py / -pz) * (h * dpr / 2) + (h * dpr / 2);
+        return [sx, sy];
+      }
+
+      function rotatePoint(x, y, z) {
+        var cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        var y1 = y * cosX - z * sinX;
+        var z1 = y * sinX + z * cosX;
+        var cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+        var x2 = x * cosY + z1 * sinY;
+        var z2 = -x * sinY + z1 * cosY;
+        return [x2, y1, z2];
+      }
+
+      var raf;
+      function draw() {
+        raf = requestAnimationFrame(draw);
+        rotY += 0.002;
+        rotX += 0.0005;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = style.color;
+        ctx.globalAlpha = style.opacity;
+        ctx.lineWidth = dpr;
+        ctx.beginPath();
+
+        for (var i = 0; i < allEdges.length; i++) {
+          var e = allEdges[i];
+          var ra = rotatePoint(e[0], e[1], e[2]);
+          var rb = rotatePoint(e[3], e[4], e[5]);
+          var pa = project(ra[0], ra[1], ra[2]);
+          var pb = project(rb[0], rb[1], rb[2]);
+          if (!pa || !pb) continue;
+          ctx.moveTo(pa[0], pa[1]);
+          ctx.lineTo(pb[0], pb[1]);
+        }
+
+        ctx.stroke();
+      }
+      draw();
+
+      window.addEventListener('resize', function() { resize(); });
+
+      var observer = new MutationObserver(function() { style = getColor(); });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      var paused = false;
+      var io = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          if (paused) { paused = false; draw(); }
+        } else {
+          paused = true;
+          cancelAnimationFrame(raf);
+        }
+      }, { threshold: 0 });
+      io.observe(container);
+    }
+
+    return { create: create };
+  })();
+  </script>
 </head>
 <body>
   {{ nav::skip_link(lang=lang) }}
@@ -459,110 +601,6 @@
   </script>
 
   <script>
-  // Shared Swiss cross mesh helper
-  window.SwissCross = (function() {
-    function buildPositions(arm, thick) {
-      arm = arm != null ? arm : 3;
-      thick = thick != null ? thick : 1;
-      var positions = [];
-      var seen = {};
-      function add(x, y, z) {
-        var key = x + ',' + y + ',' + z;
-        if (!seen[key]) { seen[key] = true; positions.push([x, y, z]); }
-      }
-      for (var x = -arm; x <= arm; x++)
-        for (var y = -thick; y <= thick; y++)
-          for (var z = -thick; z <= thick; z++) add(x, y, z);
-      for (var x = -thick; x <= thick; x++)
-        for (var y = -arm; y <= arm; y++)
-          for (var z = -thick; z <= thick; z++) add(x, y, z);
-      for (var x = -thick; x <= thick; x++)
-        for (var y = -thick; y <= thick; y++)
-          for (var z = -arm; z <= arm; z++) add(x, y, z);
-      return positions;
-    }
-
-    function create(canvas, opts) {
-      if (typeof THREE === 'undefined' || !canvas) return;
-      opts = opts || {};
-      var container = canvas.parentElement;
-      var w = container.offsetWidth;
-      var h = container.offsetHeight;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var camZ = opts.cameraZ || 22;
-      var cubeSize = opts.cubeSize || 0.88;
-      var fov = opts.fov || 35;
-
-      var mobile = w < 768;
-      var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !mobile, powerPreference: 'low-power' });
-      renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2));
-
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(fov, w / h, 0.1, 100);
-      camera.position.set(opts.camX || 0, opts.camY || 0, camZ);
-
-      var positions = buildPositions(opts.arm, opts.thick);
-      var boxGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-      var edgesGeo = new THREE.EdgesGeometry(boxGeo);
-      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      var baseOpacity = opts.opacity || (isDark ? 0.25 : 0.18);
-      var lineMat = new THREE.LineBasicMaterial({
-        color: isDark ? 0x7c3aed : 0xa855f7,
-        transparent: true,
-        opacity: baseOpacity
-      });
-
-      var group = new THREE.Group();
-      for (var i = 0; i < positions.length; i++) {
-        var p = positions[i];
-        var line = new THREE.LineSegments(edgesGeo, lineMat);
-        line.position.set(p[0], p[1], p[2]);
-        group.add(line);
-      }
-      scene.add(group);
-      group.rotation.x = 0.4;
-      group.rotation.y = 0.6;
-
-      var raf;
-      function animate() {
-        raf = requestAnimationFrame(animate);
-        group.rotation.y += 0.002;
-        group.rotation.x += 0.0005;
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      window.addEventListener('resize', function() {
-        w = container.offsetWidth;
-        h = container.offsetHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      });
-
-      var observer = new MutationObserver(function() {
-        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        lineMat.color.setHex(dark ? 0x7c3aed : 0xa855f7);
-        lineMat.opacity = dark ? 0.25 : 0.18;
-      });
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-      var paused = false;
-      var io = new IntersectionObserver(function(entries) {
-        if (entries[0].isIntersecting) {
-          if (paused) { paused = false; animate(); }
-        } else {
-          paused = true;
-          cancelAnimationFrame(raf);
-        }
-      }, { threshold: 0 });
-      io.observe(container);
-    }
-
-    return { create: create };
-  })();
-
   // Topnav logo — show when hero scrolls away (or immediately on sub pages)
   (function() {
     var logo = document.getElementById('topnav-logo');
@@ -572,11 +610,7 @@
 
     // Element always has full dimensions (hidden via scale+margin),
     // so init the mesh right away
-    function initNav() {
-      if (typeof THREE === 'undefined' || typeof SwissCross === 'undefined') { setTimeout(initNav, 50); return; }
-      if (navCanvas && window.innerWidth >= 768) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
-    }
-    initNav();
+    if (navCanvas && window.innerWidth >= 768) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
 
     if (!hero) {
       logo.classList.add('is-visible');
@@ -596,11 +630,7 @@
     if (window.innerWidth < 768) return;
     var canvas = document.getElementById('footer-mesh');
     if (!canvas) return;
-    function init() {
-      if (typeof THREE === 'undefined' || typeof SwissCross === 'undefined') { setTimeout(init, 50); return; }
-      SwissCross.create(canvas, { cameraZ: 16, cubeSize: 0.88, fov: 35 });
-    }
-    init();
+    SwissCross.create(canvas, { cameraZ: 16, cubeSize: 0.88, fov: 35 });
   })();
   </script>
 

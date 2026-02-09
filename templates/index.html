@@ -132,18 +132,7 @@
 (function() {
   var canvas = document.getElementById('hero-mesh');
   if (!canvas) return;
-  function init() {
-    if (typeof SwissCross !== 'undefined') {
-      SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
-    } else {
-      setTimeout(init, 50);
-    }
-  }
-  if (typeof THREE !== 'undefined') { init(); }
-  else {
-    var s = document.querySelector('script[src*="three"]');
-    if (s) s.addEventListener('load', init);
-  }
+  SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
 })();
 
 // Hero subline — reveal on first scroll-down, lock scroll during animation
