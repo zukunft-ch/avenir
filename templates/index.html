@@ -187,14 +187,18 @@
   }
   function onTouchStart(e) {
     touchY = e.touches[0].clientY;
+    if (!done && heroInView()) {
+      lock();
+    }
   }
   function onTouchMove(e) {
     if (touchY === null) return;
     var dy = touchY - e.changedTouches[0].clientY;
     touchY = null;
     if (!done && dy > 10 && heroInView()) {
-      e.preventDefault();
       reveal();
+    } else if (!done) {
+      unlock();
     }
   }
   function onKeyDown(e) {
