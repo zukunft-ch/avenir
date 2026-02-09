@@ -628,9 +628,8 @@
     }
   })();
 
-  // Footer mesh (desktop only — saves GPU memory on mobile)
+  // Footer mesh
   (function() {
-    if (window.innerWidth < 768) return;
     var canvas = document.getElementById('footer-mesh');
     if (!canvas) return;
     SwissCross.create(canvas, { cameraZ: 16, cubeSize: 0.88, fov: 35 });
