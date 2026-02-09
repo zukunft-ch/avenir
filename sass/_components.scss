@@ -219,6 +219,29 @@
   margin-top: -$space-1;
 }
 
+.footer__movement {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: $space-3;
+  padding: $space-1 $space-4;
+  font-family: $font-family-headline;
+  font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-pill;
+  transition: color $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    border-color: var(--color-text-muted);
+  }
+}
+
 .footer__columns {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

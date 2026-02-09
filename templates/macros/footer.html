@@ -7,6 +7,7 @@
         {% if lang == "fr" %}le futur.{% elif lang == "it" %}il futuro.{% elif lang == "en" %}the future.{% else %}die zukunft.{% endif %}
       </p>
       <p class="footer__subline">{{ trans(key="brand_subline", lang=lang) }}</p>
+      <a class="footer__movement" href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement", lang=lang) }}</a>
     </div>
 
     <nav class="footer__columns" aria-label="Footer navigation">
@@ -42,6 +43,7 @@
         <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
         <a href="https://collective.die-zukunft.ch" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_collective", lang=lang) }}</a>
         <a href="https://opencollective.com/die-zukunft" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_donate", lang=lang) }}</a>
+        <a href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement_link", lang=lang) }}</a>
       </div>
 
       <div class="footer__col">
