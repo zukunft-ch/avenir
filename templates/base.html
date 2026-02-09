@@ -613,7 +613,7 @@
 
     // Element always has full dimensions (hidden via scale+margin),
     // so init the mesh right away
-    if (navCanvas && window.innerWidth >= 768) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
+    if (navCanvas) SwissCross.create(navCanvas, { cameraZ: 7, cubeSize: 0.9, fov: 35, arm: 1, thick: 0, opacity: 0.55, camX: -0.7 });
 
     if (!hero) {
       logo.classList.add('is-visible');
