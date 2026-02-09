@@ -6,8 +6,6 @@ $canvas-gap: $space-3;
 
 // Scroll snap + padding so snap targets land with a gap at top
 html {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: $canvas-gap;
   scroll-behavior: smooth;
 }
 
@@ -29,7 +27,6 @@ main {
   position: relative;
   padding: $space-8 $space-5;
   border-radius: $radius-lg;
-  scroll-snap-align: start;
 
   // Spacer before content keeps it below the hex anchor
   &::before {

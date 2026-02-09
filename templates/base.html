@@ -687,6 +687,52 @@
     if (dots.length) dots[0].classList.add('is-active');
   })();
 
+  // Smooth scroll-snap — JS-based for cross-browser smooth animation
+  (function() {
+    var main = document.getElementById('main');
+    if (!main) return;
+    var sections = main.querySelectorAll(':scope > section, :scope > .hero, :scope > footer');
+    if (sections.length < 2) return;
+
+    var scrollTimer = null;
+    var snapping = false;
+    var gap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75 || 12;
+
+    function getSnapTarget() {
+      var viewH = window.innerHeight;
+      var best = null;
+      var bestDist = Infinity;
+      sections.forEach(function(sec) {
+        var r = sec.getBoundingClientRect();
+        var dist = Math.abs(r.top - gap);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = sec;
+        }
+      });
+      if (bestDist < viewH * 0.4) return best;
+      return null;
+    }
+
+    function onScrollEnd() {
+      if (snapping) return;
+      var target = getSnapTarget();
+      if (!target) return;
+      var r = target.getBoundingClientRect();
+      var offset = r.top - gap;
+      if (Math.abs(offset) < 2) return;
+      snapping = true;
+      window.scrollBy({ top: offset, behavior: 'smooth' });
+      setTimeout(function() { snapping = false; }, 600);
+    }
+
+    window.addEventListener('scroll', function() {
+      if (snapping) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(onScrollEnd, 120);
+    }, { passive: true });
+  })();
+
   // Hex address anchors — each page gets a unique base (0x00, 0x10, 0x20…)
   (function() {
     var main = document.getElementById('main');
