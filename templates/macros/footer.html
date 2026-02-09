@@ -7,7 +7,6 @@
         {% if lang == "fr" %}le futur.{% elif lang == "it" %}il futuro.{% elif lang == "en" %}the future.{% else %}die zukunft.{% endif %}
       </p>
       <p class="footer__subline">{{ trans(key="brand_subline", lang=lang) }}</p>
-      <a class="footer__movement" href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement", lang=lang) }}</a>
     </div>
 
     <nav class="footer__columns" aria-label="Footer navigation">
@@ -53,6 +52,8 @@
         <a href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
       </div>
     </nav>
+
+    <a class="footer__movement" href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement", lang=lang) }}</a>
 
     <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
       {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}.
