@@ -135,7 +135,7 @@
   SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
 })();
 
-// Hero subline — reveal on first scroll-down, lock scroll during animation
+// Hero subline — page starts locked, first scroll gesture reveals subline, then unlocks
 (function() {
   var subline = document.getElementById('hero-subline');
   var hero = document.getElementById('hero');
@@ -143,15 +143,9 @@
   var done = false;
   var root = document.documentElement;
 
-  function heroInView() {
-    var r = hero.getBoundingClientRect();
-    return r.top > -r.height * 0.5 && r.top < window.innerHeight * 0.5;
-  }
-
-  function lock() {
-    root.style.overflow = 'hidden';
-    root.style.scrollSnapType = 'none';
-  }
+  // Lock scroll immediately on page load
+  root.style.overflow = 'hidden';
+  root.style.scrollSnapType = 'none';
 
   function unlock() {
     root.style.overflow = '';
@@ -161,7 +155,6 @@
   function reveal() {
     if (done) return;
     done = true;
-    lock();
     subline.classList.add('is-visible');
     setTimeout(function() {
       unlock();
@@ -171,59 +164,32 @@
 
   function cleanup() {
     window.removeEventListener('wheel', onWheel);
-    window.removeEventListener('touchstart', onTouchStart);
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend', onTouchEnd);
-    window.removeEventListener('touchcancel', onTouchEnd);
+    window.removeEventListener('touchstart', onRevealTouch);
     window.removeEventListener('keydown', onKeyDown);
   }
 
-  var touchY = null;
-
   function onWheel(e) {
-    if (done && root.style.overflow === 'hidden') return;
-    if (!done && e.deltaY > 0 && heroInView()) {
+    if (done) return;
+    if (e.deltaY > 0) {
       e.preventDefault();
       reveal();
     }
   }
-  function onTouchStart(e) {
-    touchY = e.touches[0].clientY;
-    if (!done && heroInView()) {
-      lock();
-    }
-  }
-  function onTouchMove(e) {
-    if (touchY === null || done) return;
-    var dy = touchY - e.changedTouches[0].clientY;
-    if (dy > 10 && heroInView()) {
-      touchY = null;
-      reveal();
-    } else if (dy < -10) {
-      touchY = null;
-      unlock();
-    }
-  }
-  function onTouchEnd() {
-    if (!done && touchY !== null) {
-      unlock();
-    }
-    touchY = null;
+  function onRevealTouch(e) {
+    if (done) return;
+    reveal();
   }
   function onKeyDown(e) {
     if (done) return;
     var keys = ['ArrowDown', 'PageDown', ' '];
-    if (keys.indexOf(e.key) !== -1 && heroInView()) {
+    if (keys.indexOf(e.key) !== -1) {
       e.preventDefault();
       reveal();
     }
   }
 
   window.addEventListener('wheel', onWheel, { passive: false });
-  window.addEventListener('touchstart', onTouchStart, { passive: true });
-  window.addEventListener('touchmove', onTouchMove, { passive: false });
-  window.addEventListener('touchend', onTouchEnd);
-  window.addEventListener('touchcancel', onTouchEnd);
+  window.addEventListener('touchstart', onRevealTouch, { passive: true });
   window.addEventListener('keydown', onKeyDown);
 })();
 
