@@ -173,6 +173,8 @@
     window.removeEventListener('wheel', onWheel);
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
     window.removeEventListener('keydown', onKeyDown);
   }
 
@@ -192,14 +194,21 @@
     }
   }
   function onTouchMove(e) {
-    if (touchY === null) return;
+    if (touchY === null || done) return;
     var dy = touchY - e.changedTouches[0].clientY;
-    touchY = null;
-    if (!done && dy > 10 && heroInView()) {
+    if (dy > 10 && heroInView()) {
+      touchY = null;
       reveal();
-    } else if (!done) {
+    } else if (dy < -10) {
+      touchY = null;
       unlock();
     }
+  }
+  function onTouchEnd() {
+    if (!done && touchY !== null) {
+      unlock();
+    }
+    touchY = null;
   }
   function onKeyDown(e) {
     if (done) return;
@@ -213,6 +222,8 @@
   window.addEventListener('wheel', onWheel, { passive: false });
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
+  window.addEventListener('touchend', onTouchEnd);
+  window.addEventListener('touchcancel', onTouchEnd);
   window.addEventListener('keydown', onKeyDown);
 })();
 
