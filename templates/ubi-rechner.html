@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero" aria-label="{{ page.extra.hero_title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ page.extra.hero_title }}</h1>
+    <p class="page-hero__desc">{{ page.extra.hero_desc }}</p>
+  </div>
+</section>
+
+{# ===== Simulator ===== #}
+<section class="canvas canvas--content sim" aria-label="{{ page.extra.hero_title }}">
+  <div class="container">
+
+    {# Scenario presets #}
+    <div class="sim__scenarios" role="group" aria-label="Scenarios">
+      <button class="sim__scenario-btn" type="button" data-scenario="referendum">{{ page.extra.scenario_referendum }}</button>
+      <button class="sim__scenario-btn" type="button" data-scenario="modest">{{ page.extra.scenario_modest }}</button>
+      <button class="sim__scenario-btn" type="button" data-scenario="full">{{ page.extra.scenario_full }}</button>
+    </div>
+
+    {# Two-column grid: parameters + results #}
+    <div class="sim__grid">
+
+      {# LEFT: Parameters #}
+      <div class="glass-card sim__panel">
+        <h2 class="sim__panel-title">{{ page.extra.panel_parameters }}</h2>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-adult">{{ page.extra.slider_ubi_adult }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-adult" min="500" max="5000" step="100" value="2500">
+            <output class="sim__output" for="sim-adult">2'500</output>
+          </div>
+        </div>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-child">{{ page.extra.slider_ubi_child }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-child" min="0" max="1500" step="25" value="625">
+            <output class="sim__output" for="sim-child">625</output>
+          </div>
+        </div>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-income-tax">{{ page.extra.slider_income_tax }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-income-tax" min="0" max="30" step="0.5" value="10">
+            <output class="sim__output" for="sim-income-tax">10.0</output>
+          </div>
+        </div>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-vat">{{ page.extra.slider_vat }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-vat" min="0" max="15" step="0.5" value="3">
+            <output class="sim__output" for="sim-vat">3.0</output>
+          </div>
+        </div>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-wealth">{{ page.extra.slider_wealth_tax }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-wealth" min="0" max="3" step="0.1" value="0.5">
+            <output class="sim__output" for="sim-wealth">0.5</output>
+          </div>
+        </div>
+
+        <div class="sim__slider-group">
+          <label class="sim__label" for="sim-savings">{{ page.extra.slider_savings }}</label>
+          <div class="sim__range-wrap">
+            <input class="sim__range" type="range" id="sim-savings" min="0" max="80" step="1" value="40">
+            <output class="sim__output" for="sim-savings">40</output>
+          </div>
+        </div>
+      </div>
+
+      {# RIGHT: Results #}
+      <div class="glass-card sim__panel sim__panel--results" aria-live="polite">
+        <h2 class="sim__panel-title">{{ page.extra.panel_results }}</h2>
+
+        <div class="sim__big-number">
+          <span class="sim__big-label">{{ page.extra.result_annual_cost }}</span>
+          <span class="sim__big-value" id="sim-cost">—</span>
+          <span class="sim__big-unit">CHF {{ page.extra.result_per_year }}</span>
+        </div>
+
+        <h3 class="sim__bar-heading">{{ page.extra.result_revenue }}</h3>
+        <div class="sim__bars">
+          <div class="sim__bar-row">
+            <span class="sim__bar-label">{{ page.extra.result_income_tax_revenue }}</span>
+            <div class="sim__bar-track"><div class="sim__bar-fill sim__bar-fill--purple" id="bar-income-tax"></div></div>
+            <span class="sim__bar-value" id="val-income-tax">—</span>
+          </div>
+          <div class="sim__bar-row">
+            <span class="sim__bar-label">{{ page.extra.result_vat_revenue }}</span>
+            <div class="sim__bar-track"><div class="sim__bar-fill sim__bar-fill--blue" id="bar-vat"></div></div>
+            <span class="sim__bar-value" id="val-vat">—</span>
+          </div>
+          <div class="sim__bar-row">
+            <span class="sim__bar-label">{{ page.extra.result_wealth_tax_revenue }}</span>
+            <div class="sim__bar-track"><div class="sim__bar-fill sim__bar-fill--teal" id="bar-wealth"></div></div>
+            <span class="sim__bar-value" id="val-wealth">—</span>
+          </div>
+          <div class="sim__bar-row">
+            <span class="sim__bar-label">{{ page.extra.result_savings_revenue }}</span>
+            <div class="sim__bar-track"><div class="sim__bar-fill sim__bar-fill--green" id="bar-savings"></div></div>
+            <span class="sim__bar-value" id="val-savings">—</span>
+          </div>
+        </div>
+
+        <div class="sim__net" id="sim-net">
+          <span class="sim__net-label">{{ page.extra.result_net }}</span>
+          <span class="sim__net-value" id="sim-net-value">—</span>
+        </div>
+      </div>
+
+    </div>{# /sim__grid #}
+
+    {# Impact cards #}
+    <h2 class="sim__section-title">{{ page.extra.impact_title }}</h2>
+    <div class="sim__impact-grid">
+      <div class="glass-card sim__impact-card">
+        <span class="sim__impact-income">CHF 4'000</span>
+        <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
+        <span class="sim__impact-value" id="impact-4k">—</span>
+      </div>
+      <div class="glass-card sim__impact-card">
+        <span class="sim__impact-income">CHF 8'000</span>
+        <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
+        <span class="sim__impact-value" id="impact-8k">—</span>
+      </div>
+      <div class="glass-card sim__impact-card">
+        <span class="sim__impact-income">CHF 15'000</span>
+        <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
+        <span class="sim__impact-value" id="impact-15k">—</span>
+      </div>
+    </div>
+
+    {# Comparison bars #}
+    <h2 class="sim__section-title">{{ page.extra.compare_title }}</h2>
+    <div class="sim__compare">
+      <div class="sim__compare-row">
+        <span class="sim__compare-label">{{ page.extra.compare_current }}</span>
+        <div class="sim__bar-track sim__bar-track--lg"><div class="sim__bar-fill sim__bar-fill--muted" id="bar-current"></div></div>
+        <span class="sim__compare-value">CHF 185 {{ page.extra.result_billion }}</span>
+      </div>
+      <div class="sim__compare-row">
+        <span class="sim__compare-label">{{ page.extra.compare_ubi_cost }}</span>
+        <div class="sim__bar-track sim__bar-track--lg"><div class="sim__bar-fill sim__bar-fill--purple" id="bar-ubi-cost"></div></div>
+        <span class="sim__compare-value" id="val-ubi-compare">—</span>
+      </div>
+    </div>
+
+    {# Methodology disclaimer #}
+    <div class="sim__methodology glass-card">
+      <h3>{{ page.extra.methodology_title }}</h3>
+      <p>{{ page.extra.methodology_text }}</p>
+    </div>
+
+  </div>{# /container #}
+</section>
+
+{# ===== CTA ===== #}
+{% if page.extra.show_cta %}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if page.extra.cta_text is defined %}
+    <p class="cta-section__text">{{ page.extra.cta_text }}</p>
+    {% endif %}
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      <a class="btn btn--outline" href="{{ get_url(path='@/grundeinkommen.md', lang=lang) }}">{{ page.extra.cta_grundeinkommen_text }}</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script>
+(function() {
+  /* Swiss economic constants (BFS/ESTV 2024) */
+  var POP_ADULTS = 7530000;
+  var POP_CHILDREN = 1530000;
+  var TOTAL_INCOME = 420e9;       /* CHF 420B taxable income */
+  var HOUSEHOLD_CONSUMPTION = 380e9; /* CHF 380B */
+  var TAXABLE_WEALTH = 2800e9;    /* CHF 2.8T */
+  var CURRENT_SOCIAL = 185e9;     /* CHF 185B current social spending */
+
+  /* Scenario presets: [adult, child, incomeTax, vat, wealthTax, savings] */
+  var SCENARIOS = {
+    referendum: [2500, 625, 10, 3, 0.5, 40],
+    modest:    [1200, 300, 5, 1.5, 0.2, 20],
+    full:      [3500, 875, 15, 5, 0.8, 60]
+  };
+
+  /* Slider IDs in order */
+  var IDS = ['sim-adult', 'sim-child', 'sim-income-tax', 'sim-vat', 'sim-wealth', 'sim-savings'];
+
+  /* i18n labels from frontmatter */
+  var LBL_SURPLUS = '{{ page.extra.result_surplus }}';
+  var LBL_DEFICIT = '{{ page.extra.result_deficit }}';
+  var LBL_BILLION = '{{ page.extra.result_billion }}';
+  var LBL_GAIN = '{{ page.extra.impact_net_gain }}';
+  var LBL_LOSS = '{{ page.extra.impact_net_loss }}';
+  var LBL_PER_MONTH = '{{ page.extra.result_per_month }}';
+
+  /* DOM refs */
+  var sliders = IDS.map(function(id) { return document.getElementById(id); });
+  var outputs = document.querySelectorAll('.sim__output');
+  var scenarioBtns = document.querySelectorAll('.sim__scenario-btn');
+
+  /* Format number with Swiss apostrophe separator */
+  function fmt(n) {
+    var s = Math.round(Math.abs(n)).toString();
+    var out = '';
+    for (var i = s.length - 1, c = 0; i >= 0; i--, c++) {
+      if (c > 0 && c % 3 === 0) out = "'" + out;
+      out = s[i] + out;
+    }
+    return n < 0 ? '-' + out : out;
+  }
+
+  /* Format billions */
+  function fmtB(n) {
+    var b = n / 1e9;
+    var rounded = Math.round(b * 10) / 10;
+    var s = rounded.toFixed(1).replace('.', ',');
+    return 'CHF ' + s + ' ' + LBL_BILLION;
+  }
+
+  /* Update slider track fill via CSS custom property */
+  function updateFill(slider) {
+    var min = parseFloat(slider.min);
+    var max = parseFloat(slider.max);
+    var val = parseFloat(slider.value);
+    var pct = ((val - min) / (max - min)) * 100;
+    slider.style.setProperty('--fill-pct', pct + '%');
+  }
+
+  /* Main calculation */
+  function calculate() {
+    var adult = parseFloat(sliders[0].value);
+    var child = parseFloat(sliders[1].value);
+    var incomeTaxPct = parseFloat(sliders[2].value);
+    var vatPct = parseFloat(sliders[3].value);
+    var wealthPct = parseFloat(sliders[4].value);
+    var savingsPct = parseFloat(sliders[5].value);
+
+    /* Cost */
+    var annualCost = (adult * 12 * POP_ADULTS) + (child * 12 * POP_CHILDREN);
+
+    /* Revenue streams */
+    var revIncomeTax = TOTAL_INCOME * (incomeTaxPct / 100);
+    var revVat = HOUSEHOLD_CONSUMPTION * (vatPct / 100);
+    var revWealth = TAXABLE_WEALTH * (wealthPct / 100);
+    var revSavings = CURRENT_SOCIAL * (savingsPct / 100);
+    var totalRevenue = revIncomeTax + revVat + revWealth + revSavings;
+
+    /* Net */
+    var net = totalRevenue - annualCost;
+
+    /* Update cost display */
+    document.getElementById('sim-cost').textContent = fmtB(annualCost);
+
+    /* Update bar chart (max = annualCost for proportional display) */
+    var maxBar = Math.max(annualCost, totalRevenue, 1);
+    setBar('bar-income-tax', revIncomeTax, maxBar);
+    setBar('bar-vat', revVat, maxBar);
+    setBar('bar-wealth', revWealth, maxBar);
+    setBar('bar-savings', revSavings, maxBar);
+
+    document.getElementById('val-income-tax').textContent = fmtB(revIncomeTax);
+    document.getElementById('val-vat').textContent = fmtB(revVat);
+    document.getElementById('val-wealth').textContent = fmtB(revWealth);
+    document.getElementById('val-savings').textContent = fmtB(revSavings);
+
+    /* Net result */
+    var netEl = document.getElementById('sim-net');
+    var netValEl = document.getElementById('sim-net-value');
+    netEl.classList.remove('sim__net--surplus', 'sim__net--deficit');
+    if (net >= 0) {
+      netEl.classList.add('sim__net--surplus');
+      netValEl.textContent = '+' + fmtB(net) + ' (' + LBL_SURPLUS + ')';
+    } else {
+      netEl.classList.add('sim__net--deficit');
+      netValEl.textContent = fmtB(net) + ' (' + LBL_DEFICIT + ')';
+    }
+
+    /* Per-person impact at 3 income levels */
+    updateImpact('impact-4k', 4000, adult, incomeTaxPct, vatPct);
+    updateImpact('impact-8k', 8000, adult, incomeTaxPct, vatPct);
+    updateImpact('impact-15k', 15000, adult, incomeTaxPct, vatPct);
+
+    /* Comparison bars */
+    var compMax = Math.max(annualCost, CURRENT_SOCIAL) * 1.1;
+    setBar('bar-current', CURRENT_SOCIAL, compMax);
+    setBar('bar-ubi-cost', annualCost, compMax);
+    document.getElementById('val-ubi-compare').textContent = fmtB(annualCost);
+  }
+
+  function setBar(id, value, max) {
+    var pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+    document.getElementById(id).style.setProperty('--bar-pct', pct + '%');
+  }
+
+  function updateImpact(id, monthlyIncome, ubiAdult, incomeTaxPct, vatPct) {
+    /* Net = UBI received - additional taxes paid */
+    var additionalIncomeTax = monthlyIncome * (incomeTaxPct / 100);
+    var spending = monthlyIncome * 0.8; /* assume 80% spending rate */
+    var additionalVat = spending * (vatPct / 100);
+    var netMonthly = ubiAdult - additionalIncomeTax - additionalVat;
+
+    var el = document.getElementById(id);
+    var prefix = netMonthly >= 0 ? '+' : '';
+    el.textContent = prefix + 'CHF ' + fmt(netMonthly) + ' ' + LBL_PER_MONTH;
+    el.classList.remove('sim__impact-value--gain', 'sim__impact-value--loss');
+    el.classList.add(netMonthly >= 0 ? 'sim__impact-value--gain' : 'sim__impact-value--loss');
+
+    /* Update subtitle */
+    var subtitle = el.previousElementSibling;
+    if (subtitle) {
+      var label = netMonthly >= 0 ? LBL_GAIN : LBL_LOSS;
+      subtitle.textContent = label;
+    }
+  }
+
+  /* Update output displays */
+  function updateOutputs() {
+    sliders.forEach(function(s, i) {
+      var val = parseFloat(s.value);
+      updateFill(s);
+      /* Format: integers for adult/child/savings, one decimal for percentages */
+      if (i <= 1) {
+        outputs[i].textContent = fmt(val);
+      } else if (i === 5) {
+        outputs[i].textContent = Math.round(val);
+      } else {
+        outputs[i].textContent = val.toFixed(1);
+      }
+    });
+  }
+
+  /* Scenario buttons */
+  function setScenario(name) {
+    var vals = SCENARIOS[name];
+    if (!vals) return;
+    sliders.forEach(function(s, i) { s.value = vals[i]; });
+    scenarioBtns.forEach(function(btn) {
+      btn.classList.toggle('sim__scenario-btn--active', btn.getAttribute('data-scenario') === name);
+    });
+    updateOutputs();
+    calculate();
+  }
+
+  /* Clear active scenario when user manually adjusts */
+  function clearActiveScenario() {
+    scenarioBtns.forEach(function(btn) { btn.classList.remove('sim__scenario-btn--active'); });
+  }
+
+  /* Event listeners */
+  sliders.forEach(function(s) {
+    s.addEventListener('input', function() {
+      clearActiveScenario();
+      updateOutputs();
+      calculate();
+    });
+  });
+
+  scenarioBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setScenario(btn.getAttribute('data-scenario'));
+    });
+  });
+
+  /* Initialize with referendum scenario */
+  setScenario('referendum');
+})();
+</script>
+{% endblock %}

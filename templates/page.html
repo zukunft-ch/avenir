@@ -99,7 +99,12 @@
     {% if page.extra.cta_text is defined %}
     <p class="cta-section__text">{{ page.extra.cta_text }}</p>
     {% endif %}
-    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      {% if page.extra.cta_secondary_path is defined and page.extra.cta_secondary_text is defined %}
+      <a class="btn btn--outline" href="{{ get_url(path=page.extra.cta_secondary_path, lang=lang) }}">{{ page.extra.cta_secondary_text }}</a>
+      {% endif %}
+    </div>
   </div>
 </section>
 {% endif %}
