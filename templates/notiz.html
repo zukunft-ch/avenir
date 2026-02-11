@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Notiz hero ===== #}
+<section class="page-hero" aria-label="{{ page.title }}">
+  <div class="container container--narrow">
+    <div class="lab-notiz-card__meta" style="justify-content: center; margin-bottom: 1rem;">
+      {% if page.extra.evidence_level is defined %}
+      <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
+        {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+      </span>
+      {% endif %}
+      {% if page.extra.category is defined %}
+      <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
+      {% endif %}
+    </div>
+    <h1 class="page-hero__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-hero__desc">{{ page.description }}</p>
+    {% endif %}
+    {% if page.date %}
+    <time class="lab-category" style="display: block; margin-top: 1rem;" datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Markdown body ===== #}
+<section class="canvas canvas--content">
+  <div class="container container--narrow">
+    {{ page.content | safe }}
+  </div>
+</section>
+
+{# ===== Tags ===== #}
+{% if page.taxonomies.tags is defined and page.taxonomies.tags | length > 0 %}
+<section class="canvas canvas--content" aria-label="{{ trans(key='lab_tags', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <h2>{{ trans(key="lab_tags", lang=lang) }}</h2>
+    <div class="lab-tags lab-tags--detail">
+      {% for tag in page.taxonomies.tags %}
+      <a class="lab-tag lab-tag--link" href="{{ get_taxonomy_url(kind='tags', name=tag, lang=lang) }}">{{ tag }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Back navigation ===== #}
+<section class="canvas cta-section" aria-label="{{ trans(key='lab_all_notes', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a class="btn btn--outline" href="{{ get_url(path='@/zukunftslabor/notizen/_index.md', lang=lang) }}">{{ trans(key="lab_all_notes", lang=lang) }}</a>
+      <a class="btn btn--outline" href="{{ get_url(path='@/zukunftslabor/methodik.md', lang=lang) }}">{{ trans(key="nav_methodik", lang=lang) }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=section.title, url=section.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero page-hero--brandmark" aria-label="{{ section.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ section.title }}</h1>
+    {% if section.description %}
+    <p class="page-hero__desc">{{ section.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Area cards (bento grid — 2 active, 2 coming soon) ===== #}
+{% if section.extra.areas is defined %}
+<section class="canvas canvas--content" aria-label="{{ section.title }}">
+  <div class="container">
+    <div class="bento-grid">
+      {% for area in section.extra.areas %}
+      {% if area.active %}
+      <a class="glass-card lab-area-card" href="{{ get_url(path=area.link, lang=lang) }}">
+        <span class="glass-card__icon">{{ area.icon }}</span>
+        <h2 class="glass-card__title">{{ area.title }}</h2>
+        <p class="glass-card__text">{{ area.text }}</p>
+      </a>
+      {% else %}
+      <div class="glass-card lab-area-card lab-area-card--coming-soon">
+        <span class="glass-card__icon">{{ area.icon }}</span>
+        <h2 class="glass-card__title">{{ area.title }}</h2>
+        <p class="glass-card__text">{{ area.text }}</p>
+        <span class="lab-badge lab-badge--muted">{{ trans(key="lab_coming_soon", lang=lang) }}</span>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Latest notizen ===== #}
+{% set notizen_section = get_section(path="zukunftslabor/notizen/_index.md") %}
+{% if notizen_section.pages | length > 0 %}
+<section class="canvas canvas--content" aria-label="{{ trans(key='lab_latest_notes', lang=lang) }}">
+  <div class="container">
+    <h2 style="text-align: center; margin-bottom: 1.5rem;">{{ trans(key="lab_latest_notes", lang=lang) }}</h2>
+    <div class="section-list">
+      {% for page in notizen_section.pages | slice(end=3) %}
+      <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}">
+        <div class="lab-notiz-card__meta">
+          {% if page.extra.evidence_level is defined %}
+          <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
+            {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+          </span>
+          {% endif %}
+          {% if page.extra.category is defined %}
+          <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
+          {% endif %}
+        </div>
+        <h2>{{ page.title }}</h2>
+        {% if page.date %}<time datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
+        {% if page.description %}<p>{{ page.description }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <a class="btn btn--outline" href="{{ notizen_section.permalink }}">{{ trans(key="lab_all_notes", lang=lang) }}</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== CTA ===== #}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <p class="cta-section__text">{{ section.description }}</p>
+    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endblock %}

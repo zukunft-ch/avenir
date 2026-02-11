@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+{# ===== Tag hero ===== #}
+<section class="page-hero" aria-label="{{ term.name }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ term.name }}</h1>
+    <p class="page-hero__desc">{{ term.pages | length }} {% if term.pages | length == 1 %}{{ trans(key="search_result_one", lang=lang) }}{% else %}{{ trans(key="search_result_many", lang=lang) }}{% endif %}</p>
+  </div>
+</section>
+
+{# ===== Pages with this tag ===== #}
+<section class="canvas canvas--content">
+  <div class="container">
+    {% if term.pages | length > 0 %}
+    <div class="section-list" role="list" aria-label="{{ term.name }}">
+      {% for page in term.pages %}
+      <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}" role="listitem">
+        <div class="lab-notiz-card__meta">
+          {% if page.extra.evidence_level is defined %}
+          <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
+            {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+          </span>
+          {% endif %}
+          {% if page.extra.category is defined %}
+          <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
+          {% endif %}
+        </div>
+        <h2>{{ page.title }}</h2>
+        {% if page.date %}<time datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
+        {% if page.description %}<p>{{ page.description }}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <a class="btn btn--outline" href="{{ get_url(path='@/zukunftslabor/notizen/_index.md', lang=lang) }}">{{ trans(key="lab_all_notes", lang=lang) }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1840,3 +1840,149 @@ body.hero-active {
   font-weight: $font-weight-medium;
 }
 
+// =============================================
+// Zukunftslabor components
+// =============================================
+
+// ---- Evidence badge pill ----
+.lab-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-1 $space-3;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-pill;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+
+  &--stark {
+    background: rgba($gradient-teal, 0.15);
+    color: $gradient-teal;
+
+    [data-theme="dark"] & {
+      background: rgba($gradient-teal, 0.2);
+    }
+  }
+
+  &--mittel {
+    background: rgba($gradient-blue, 0.15);
+    color: $gradient-blue;
+
+    [data-theme="dark"] & {
+      background: rgba($gradient-blue, 0.2);
+    }
+  }
+
+  &--schwach {
+    background: rgba($gradient-purple, 0.15);
+    color: $gradient-purple;
+
+    [data-theme="dark"] & {
+      background: rgba($gradient-purple, 0.2);
+    }
+  }
+
+  &--muted {
+    background: var(--glass-bg);
+    color: var(--color-text-muted);
+    border: 1px solid var(--glass-border);
+  }
+}
+
+// ---- Category label ----
+.lab-category {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+// ---- Notiz card meta row ----
+.lab-notiz-card__meta {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  margin-bottom: $space-2;
+  flex-wrap: wrap;
+}
+
+.lab-notiz-card time {
+  font-size: $font-size-xs;
+  color: var(--color-text-muted);
+}
+
+// ---- Tag pills ----
+.lab-tag {
+  display: inline-block;
+  padding: $space-1 $space-3;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-pill;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--color-text-muted);
+}
+
+.lab-tag--link {
+  cursor: pointer;
+  transition: color $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    border-color: var(--color-text-muted);
+  }
+}
+
+.lab-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  margin-top: $space-3;
+}
+
+.lab-tags--detail {
+  justify-content: center;
+  gap: $space-3;
+}
+
+// ---- Area cards (landing page) ----
+.lab-area-card {
+  display: flex;
+  flex-direction: column;
+
+  .glass-card__icon {
+    font-size: $font-size-3xl;
+  }
+}
+
+.lab-area-card--coming-soon {
+  opacity: 0.55;
+  pointer-events: none;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .lab-badge--muted {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+}
+
+// ---- Pagination ----
+.lab-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-4;
+  margin-top: $space-6;
+}
+
+.lab-pagination__current {
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  font-weight: $font-weight-medium;
+}
+

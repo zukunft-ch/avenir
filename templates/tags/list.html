@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+{# ===== Tags index hero ===== #}
+<section class="page-hero" aria-label="{{ trans(key='lab_tags', lang=lang) }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ trans(key="lab_tags", lang=lang) }}</h1>
+  </div>
+</section>
+
+{# ===== All tags ===== #}
+<section class="canvas canvas--content">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if terms is defined %}
+    <div class="lab-tags lab-tags--detail">
+      {% for term in terms %}
+      <a class="lab-tag lab-tag--link" href="{{ term.permalink }}">{{ term.name }} ({{ term.pages | length }})</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

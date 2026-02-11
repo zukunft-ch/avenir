@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=section.title, url=section.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero" aria-label="{{ section.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ section.title }}</h1>
+    {% if section.description %}
+    <p class="page-hero__desc">{{ section.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Notizen listing ===== #}
+<section class="canvas canvas--content">
+  <div class="container">
+    {% set pages = paginator.pages | default(value=section.pages) %}
+    {% if pages | length > 0 %}
+      <div class="section-list" role="list" aria-label="{{ section.title }}">
+        {% for page in pages %}
+        <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}" role="listitem">
+          <div class="lab-notiz-card__meta">
+            {% if page.extra.evidence_level is defined %}
+            <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
+              {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+            </span>
+            {% endif %}
+            {% if page.extra.category is defined %}
+            <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
+            {% endif %}
+          </div>
+          <h2>{{ page.title }}</h2>
+          {% if page.date %}<time datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
+          {% if page.description %}<p>{{ page.description }}</p>{% endif %}
+          {% if page.taxonomies.tags is defined %}
+          <div class="lab-tags">
+            {% for tag in page.taxonomies.tags %}
+            <span class="lab-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+
+      {# Pagination #}
+      {% if paginator is defined and paginator.number_pagers > 1 %}
+      <nav class="lab-pagination" aria-label="Pagination">
+        {% if paginator.previous %}
+        <a class="btn btn--sm btn--outline" href="{{ paginator.previous }}">&larr;</a>
+        {% endif %}
+        <span class="lab-pagination__current">{{ paginator.current_index }} / {{ paginator.number_pagers }}</span>
+        {% if paginator.next %}
+        <a class="btn btn--sm btn--outline" href="{{ paginator.next }}">&rarr;</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+    {% else %}
+      <p>{{ trans(key="news_empty", lang=lang) }}</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
