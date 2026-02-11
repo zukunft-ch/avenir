@@ -1783,50 +1783,19 @@ body.hero-active {
   white-space: nowrap;
 }
 
-.sim__methodology {
-  border-left: 3px solid $gradient-blue;
-  max-width: $max-width-text;
-  margin: 0 auto $space-5;
-
-  &:hover {
-    transform: none;
-  }
-
-  h3 {
-    font-family: $font-family-headline;
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
-    margin-bottom: $space-2;
-  }
-
-  p {
-    font-size: $font-size-sm;
-    color: var(--color-text-muted);
-    line-height: 1.6;
-  }
+.sim__methodology-text {
+  font-size: $font-size-base;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  text-align: center;
 }
 
-.sim__sources {
-  max-width: $max-width-text;
-  margin: 0 auto;
-
-  &:hover {
-    transform: none;
-  }
-
-  h3 {
-    font-family: $font-family-headline;
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
-    margin-bottom: $space-2;
-  }
-
-  > p {
-    font-size: $font-size-sm;
-    color: var(--color-text-muted);
-    line-height: 1.6;
-    margin-bottom: $space-4;
-  }
+.sim__sources-intro {
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: $space-5;
 }
 
 .sim__sources-table-wrap {
