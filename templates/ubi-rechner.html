@@ -115,6 +115,11 @@
           </div>
         </div>
 
+        <div class="sim__total-revenue">
+          <span class="sim__total-revenue-label">{{ page.extra.result_total_revenue }}</span>
+          <span class="sim__total-revenue-value" id="val-total-revenue">—</span>
+        </div>
+
         <div class="sim__net" id="sim-net">
           <span class="sim__net-label">{{ page.extra.result_net }}</span>
           <span class="sim__net-value" id="sim-net-value">—</span>
@@ -129,17 +134,56 @@
       <div class="glass-card sim__impact-card">
         <span class="sim__impact-income">CHF 4'000</span>
         <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
-        <span class="sim__impact-value" id="impact-4k">—</span>
+        <div class="sim__impact-breakdown">
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_ubi_received }}</span>
+            <span id="impact-4k-ubi">—</span>
+          </div>
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_additional_taxes }}</span>
+            <span id="impact-4k-tax">—</span>
+          </div>
+        </div>
+        <div class="sim__impact-net">
+          <span class="sim__impact-net-label" id="impact-4k-label">—</span>
+          <span class="sim__impact-value" id="impact-4k">—</span>
+        </div>
       </div>
       <div class="glass-card sim__impact-card">
         <span class="sim__impact-income">CHF 8'000</span>
         <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
-        <span class="sim__impact-value" id="impact-8k">—</span>
+        <div class="sim__impact-breakdown">
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_ubi_received }}</span>
+            <span id="impact-8k-ubi">—</span>
+          </div>
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_additional_taxes }}</span>
+            <span id="impact-8k-tax">—</span>
+          </div>
+        </div>
+        <div class="sim__impact-net">
+          <span class="sim__impact-net-label" id="impact-8k-label">—</span>
+          <span class="sim__impact-value" id="impact-8k">—</span>
+        </div>
       </div>
       <div class="glass-card sim__impact-card">
         <span class="sim__impact-income">CHF 15'000</span>
         <span class="sim__impact-subtitle">{{ page.extra.impact_subtitle }}</span>
-        <span class="sim__impact-value" id="impact-15k">—</span>
+        <div class="sim__impact-breakdown">
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_ubi_received }}</span>
+            <span id="impact-15k-ubi">—</span>
+          </div>
+          <div class="sim__impact-line">
+            <span>{{ page.extra.impact_additional_taxes }}</span>
+            <span id="impact-15k-tax">—</span>
+          </div>
+        </div>
+        <div class="sim__impact-net">
+          <span class="sim__impact-net-label" id="impact-15k-label">—</span>
+          <span class="sim__impact-value" id="impact-15k">—</span>
+        </div>
       </div>
     </div>
 
@@ -209,6 +253,8 @@
   var LBL_GAIN = '{{ page.extra.impact_net_gain }}';
   var LBL_LOSS = '{{ page.extra.impact_net_loss }}';
   var LBL_PER_MONTH = '{{ page.extra.result_per_month }}';
+  var LBL_UBI_RECEIVED = '{{ page.extra.impact_ubi_received }}';
+  var LBL_ADDITIONAL_TAXES = '{{ page.extra.impact_additional_taxes }}';
 
   /* DOM refs */
   var sliders = IDS.map(function(id) { return document.getElementById(id); });
@@ -280,6 +326,9 @@
     document.getElementById('val-wealth').textContent = fmtB(revWealth);
     document.getElementById('val-savings').textContent = fmtB(revSavings);
 
+    /* Total revenue */
+    document.getElementById('val-total-revenue').textContent = fmtB(totalRevenue);
+
     /* Net result */
     var netEl = document.getElementById('sim-net');
     var netValEl = document.getElementById('sim-net-value');
@@ -309,25 +358,30 @@
     document.getElementById(id).style.setProperty('--bar-pct', pct + '%');
   }
 
-  function updateImpact(id, monthlyIncome, ubiAdult, incomeTaxPct, vatPct) {
+  function updateImpact(prefix, monthlyIncome, ubiAdult, incomeTaxPct, vatPct) {
     /* Net = UBI received - additional taxes paid */
     var additionalIncomeTax = monthlyIncome * (incomeTaxPct / 100);
     var spending = monthlyIncome * 0.8; /* assume 80% spending rate */
     var additionalVat = spending * (vatPct / 100);
-    var netMonthly = ubiAdult - additionalIncomeTax - additionalVat;
+    var totalTax = additionalIncomeTax + additionalVat;
+    var netMonthly = ubiAdult - totalTax;
 
-    var el = document.getElementById(id);
-    var prefix = netMonthly >= 0 ? '+' : '';
-    el.textContent = prefix + 'CHF ' + fmt(netMonthly) + ' ' + LBL_PER_MONTH;
+    /* Breakdown lines */
+    document.getElementById(prefix + '-ubi').textContent = '+CHF ' + fmt(ubiAdult);
+    document.getElementById(prefix + '-tax').textContent = '-CHF ' + fmt(totalTax);
+
+    /* Net label */
+    var labelEl = document.getElementById(prefix + '-label');
+    if (labelEl) {
+      labelEl.textContent = netMonthly >= 0 ? LBL_GAIN : LBL_LOSS;
+    }
+
+    /* Net value */
+    var el = document.getElementById(prefix);
+    var sign = netMonthly >= 0 ? '+' : '';
+    el.textContent = sign + 'CHF ' + fmt(netMonthly) + ' ' + LBL_PER_MONTH;
     el.classList.remove('sim__impact-value--gain', 'sim__impact-value--loss');
     el.classList.add(netMonthly >= 0 ? 'sim__impact-value--gain' : 'sim__impact-value--loss');
-
-    /* Update subtitle */
-    var subtitle = el.previousElementSibling;
-    if (subtitle) {
-      var label = netMonthly >= 0 ? LBL_GAIN : LBL_LOSS;
-      subtitle.textContent = label;
-    }
   }
 
   /* Update output displays */

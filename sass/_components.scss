@@ -1426,6 +1426,14 @@ body.hero-active {
   &:hover {
     transform: none;
   }
+
+  &--results {
+    @media (min-width: $bp-md) {
+      position: sticky;
+      top: $space-5;
+      align-self: start;
+    }
+  }
 }
 
 .sim__panel-title {
@@ -1604,6 +1612,26 @@ body.hero-active {
   }
 }
 
+.sim__total-revenue {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: $space-3 0;
+  margin-bottom: $space-4;
+  border-top: 1px solid var(--glass-border);
+  font-family: $font-family-headline;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base;
+}
+
+.sim__total-revenue-label {
+  color: var(--color-text-muted);
+}
+
+.sim__total-revenue-value {
+  @include gradient-text();
+}
+
 .sim__net {
   text-align: center;
   padding: $space-4;
@@ -1684,6 +1712,37 @@ body.hero-active {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: $space-2;
+}
+
+.sim__impact-breakdown {
+  width: 100%;
+  margin-bottom: $space-2;
+  padding-top: $space-2;
+  border-top: 1px solid var(--glass-border);
+}
+
+.sim__impact-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-xs;
+  color: var(--color-text-muted);
+  padding: $space-1 0;
+}
+
+.sim__impact-net {
+  width: 100%;
+  padding-top: $space-2;
+  border-top: 1px solid var(--glass-border);
+  text-align: center;
+}
+
+.sim__impact-net-label {
+  display: block;
+  font-size: $font-size-xs;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: $space-1;
 }
 
 .sim__impact-value {
