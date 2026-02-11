@@ -10,9 +10,9 @@
 <section class="page-hero" aria-label="{{ page.title }}">
   <div class="container container--narrow">
     <div class="lab-notiz-card__meta" style="justify-content: center; margin-bottom: 1rem;">
-      {% if page.extra.evidence_level is defined %}
-      <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
-        {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+      {% if page.extra.evidence is defined %}
+      <span class="lab-badge lab-badge--{{ page.extra.evidence }}">
+        {{ trans(key="lab_evidence_" ~ page.extra.evidence, lang=lang) }}
       </span>
       {% endif %}
       {% if page.extra.category is defined %}
