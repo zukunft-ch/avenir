@@ -208,6 +208,34 @@
       <p>{{ page.extra.methodology_text }}</p>
     </div>
 
+    {# Data sources #}
+    {% if page.extra.sources is defined %}
+    <div class="sim__sources glass-card">
+      <h3>{{ page.extra.sources_title }}</h3>
+      <p>{{ page.extra.sources_intro }}</p>
+      <div class="sim__sources-table-wrap">
+        <table class="sim__sources-table">
+          <thead>
+            <tr>
+              <th>{{ page.extra.sources_col_param }}</th>
+              <th>{{ page.extra.sources_col_value }}</th>
+              <th>{{ page.extra.sources_col_source }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for src in page.extra.sources %}
+            <tr>
+              <td>{{ src.param }}</td>
+              <td class="sim__sources-value">{{ src.value }}</td>
+              <td>{% if src.url is defined %}<a href="{{ src.url }}" target="_blank" rel="noopener noreferrer">{{ src.source }}</a>{% else %}{{ src.source }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
   </div>{# /container #}
 </section>
 
