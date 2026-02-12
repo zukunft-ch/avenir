@@ -88,6 +88,7 @@ body.plasma-active .canvas {
   opacity: 0.4;
   text-decoration: none;
   z-index: 1;
+  cursor: pointer;
   transition: opacity $transition-fast;
 
   &:hover {
