@@ -1,0 +1,11 @@
+<figure class="chart-interactive" role="img" aria-label="{{ alt | default(value='Chart') }}">
+  <div class="chart-interactive__render" data-chart-src="/zukunftslabor/charts/{{ spec }}.json">
+    <div class="chart-interactive__loading" aria-hidden="true"></div>
+  </div>
+  {% if body %}
+  <figcaption class="chart-interactive__caption">{{ body }}</figcaption>
+  {% endif %}
+  <noscript>
+    <img src="/zukunftslabor/charts/{{ spec }}.svg" alt="{{ alt | default(value='Chart') }}" loading="lazy" width="720">
+  </noscript>
+</figure>

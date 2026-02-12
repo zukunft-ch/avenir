@@ -29,12 +29,17 @@
   </div>
 </section>
 
-{# ===== Markdown body ===== #}
+{# ===== Markdown body (split at <hr /> into separate sections) ===== #}
+{% set parts = page.content | split(pat="<hr />") %}
+{% for part in parts %}
+{% if part | striptags | trim | length > 0 %}
 <section class="canvas canvas--content">
   <div class="container container--narrow">
-    {{ page.content | safe }}
+    {{ part | safe }}
   </div>
 </section>
+{% endif %}
+{% endfor %}
 
 {# ===== Tags ===== #}
 {% if page.taxonomies.tags is defined and page.taxonomies.tags | length > 0 %}
@@ -59,4 +64,170 @@
     </div>
   </div>
 </section>
-{% endblock %}
+{% endblock content %}
+
+{% block body_end %}
+<script defer src="/js/vega/vega.min.js"></script>
+<script defer src="/js/vega/vega-lite.min.js"></script>
+<script defer src="/js/vega/vega-embed.min.js"></script>
+<script>
+(function() {
+  var specCache = {};
+  var viewCache = {};
+
+  function getThemeConfig() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+      background: 'transparent',
+      font: 'Switzer, system-ui, sans-serif',
+      axis: {
+        labelColor: isDark ? '#999999' : '#666666',
+        titleColor: isDark ? '#eeeeee' : '#111111',
+        gridColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+        domainColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.08)'
+      },
+      legend: {
+        labelColor: isDark ? '#999999' : '#666666',
+        titleColor: isDark ? '#eeeeee' : '#111111'
+      },
+      title: {
+        color: isDark ? '#eeeeee' : '#111111'
+      },
+      view: { stroke: 'transparent' },
+      range: {
+        category: ['#a855f7', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444']
+      }
+    };
+  }
+
+  function addInteractivity(spec) {
+    if (!spec || !spec.mark) return spec;
+    var markType = typeof spec.mark === 'string' ? spec.mark : spec.mark.type;
+    if (markType === 'bar' && spec.encoding) {
+      spec.params = spec.params || [];
+      spec.params.push({
+        name: 'highlight',
+        select: { type: 'point', encodings: ['x'] }
+      });
+      spec.mark = typeof spec.mark === 'string'
+        ? { type: spec.mark, cursor: 'pointer' }
+        : Object.assign({}, spec.mark, { cursor: 'pointer' });
+      spec.encoding.opacity = spec.encoding.opacity || {
+        condition: { param: 'highlight', value: 1 },
+        value: 0.7
+      };
+    }
+    return spec;
+  }
+
+  function renderChart(el) {
+    var src = el.getAttribute('data-chart-src');
+    if (!src) return;
+
+    var loading = el.querySelector('.chart-interactive__loading');
+
+    function doRender(spec) {
+      spec.width = 'container';
+      spec.autosize = { type: 'fit', contains: 'padding' };
+      if (spec.encoding && spec.encoding.tooltip === undefined) {
+        spec.encoding.tooltip = { content: 'data' };
+      }
+      spec = addInteractivity(spec);
+
+      if (typeof vegaEmbed === 'undefined') {
+        fallbackSvg(el, src);
+        return;
+      }
+
+      vegaEmbed(el, spec, {
+        actions: false,
+        renderer: 'svg',
+        config: getThemeConfig(),
+        tooltip: { theme: 'custom' }
+      }).then(function(result) {
+        if (loading) loading.remove();
+        viewCache[src] = result;
+      }).catch(function() {
+        fallbackSvg(el, src);
+      });
+    }
+
+    if (specCache[src]) {
+      doRender(JSON.parse(JSON.stringify(specCache[src])));
+      return;
+    }
+
+    fetch(src).then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(spec) {
+      specCache[src] = spec;
+      doRender(JSON.parse(JSON.stringify(spec)));
+    }).catch(function() {
+      fallbackSvg(el, src);
+    });
+  }
+
+  function fallbackSvg(el, jsonSrc) {
+    var svgSrc = jsonSrc.replace(/\.json$/, '.svg');
+    var loading = el.querySelector('.chart-interactive__loading');
+    if (loading) loading.remove();
+    var img = document.createElement('img');
+    img.src = svgSrc;
+    img.alt = el.closest('.chart-interactive')
+      ? el.closest('.chart-interactive').getAttribute('aria-label') || 'Chart'
+      : 'Chart';
+    img.loading = 'lazy';
+    img.width = 720;
+    el.appendChild(img);
+  }
+
+  function reRenderAll() {
+    Object.keys(viewCache).forEach(function(src) {
+      var cached = specCache[src];
+      if (!cached) return;
+      var result = viewCache[src];
+      if (!result || !result.view) return;
+      var el = document.querySelector('[data-chart-src="' + src + '"]');
+      if (!el) return;
+      el.innerHTML = '';
+      var spec = JSON.parse(JSON.stringify(cached));
+      spec.width = 'container';
+      spec.autosize = { type: 'fit', contains: 'padding' };
+      if (spec.encoding && spec.encoding.tooltip === undefined) {
+        spec.encoding.tooltip = { content: 'data' };
+      }
+      spec = addInteractivity(spec);
+      vegaEmbed(el, spec, {
+        actions: false,
+        renderer: 'svg',
+        config: getThemeConfig(),
+        tooltip: { theme: 'custom' }
+      }).then(function(r) { viewCache[src] = r; });
+    });
+  }
+
+  function init() {
+    if (typeof vegaEmbed === 'undefined') {
+      setTimeout(init, 100);
+      return;
+    }
+    var containers = document.querySelectorAll('[data-chart-src]');
+    containers.forEach(function(el) { renderChart(el); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
+  } else {
+    setTimeout(init, 50);
+  }
+
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.attributeName === 'data-theme') reRenderAll();
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+{% endblock body_end %}

@@ -1986,3 +1986,79 @@ body.hero-active {
   font-weight: $font-weight-medium;
 }
 
+// ---- Interactive charts (Vega-Lite) ----
+.chart-interactive {
+  margin: $space-5 0;
+  width: 100%;
+}
+
+.chart-interactive__render {
+  width: 100%;
+  min-height: 200px;
+  border-radius: $radius-md;
+
+  // vegaEmbed injects a .vega-embed div — make it responsive
+  .vega-embed {
+    width: 100%;
+  }
+}
+
+.chart-interactive__caption {
+  margin-top: $space-4;
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.chart-interactive__loading {
+  height: 200px;
+  border-radius: $radius-md;
+  background: linear-gradient(
+    90deg,
+    var(--glass-bg) 25%,
+    var(--glass-border) 50%,
+    var(--glass-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: chart-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes chart-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Vega tooltip — glassmorphic style matching site
+#vg-tooltip-element {
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  padding: $space-2 $space-3;
+  background: var(--glass-bg);
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-sm;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  color: var(--color-text);
+  max-width: 280px;
+
+  &.visible {
+    visibility: visible !important;
+  }
+
+  h2 {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $space-1;
+    color: var(--color-text);
+  }
+
+  table tr td {
+    padding: 1px $space-2;
+
+    &.key {
+      color: var(--color-text-muted);
+    }
+  }
+}
+
