@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{# ===== Page hero ===== #}
+<section class="page-hero" aria-label="{{ page.title }}">
+  <div class="container container--narrow">
+    <h1 class="page-hero__title">{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="page-hero__desc">{{ page.description }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ===== Section 0: thesis with 5 axes ===== #}
+{% if page.extra.sections is defined and page.extra.sections | length > 0 %}
+{% set sec = page.extra.sections[0] %}
+<section class="canvas canvas--content" aria-label="{{ sec.title }}">
+  <div class="container container--narrow">
+    <h2>{{ sec.title }}</h2>
+    {% if sec.text is defined and sec.text %}
+    <p>{{ sec.text | safe }}</p>
+    {% endif %}
+    {% if sec.points is defined %}
+    <ul>
+      {% for point in sec.points %}
+      <li>{{ point | safe }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{# ===== Political Radar ===== #}
+{% if page.extra.radar_axes is defined %}
+<section class="canvas canvas--content" aria-label="{{ page.extra.radar_title }}">
+  <div class="container container--narrow">
+    <h2>{{ page.extra.radar_title }}</h2>
+    <p>{{ page.extra.radar_intro }}</p>
+
+    <div class="radar">
+      <div class="radar__chart-wrap">
+        <canvas id="radar-canvas" width="500" height="500"></canvas>
+      </div>
+      <div class="radar__legend" role="group" aria-label="Profiles">
+        <button class="radar__legend-item" type="button" data-profile="left" aria-pressed="false">
+          <span class="radar__legend-swatch" style="background:{{ page.extra.profile_left_color }}"></span>
+          {{ page.extra.profile_left_label }}
+        </button>
+        <button class="radar__legend-item" type="button" data-profile="right" aria-pressed="false">
+          <span class="radar__legend-swatch" style="background:{{ page.extra.profile_right_color }}"></span>
+          {{ page.extra.profile_right_label }}
+        </button>
+        <button class="radar__legend-item radar__legend-item--active" type="button" data-profile="zukunft" aria-pressed="true">
+          <span class="radar__legend-swatch" style="background:{{ page.extra.profile_zukunft_color }}"></span>
+          {{ page.extra.profile_zukunft_label }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Axis comparison cards ===== #}
+{% if page.extra.radar_axes is defined %}
+<section class="canvas canvas--content" aria-label="{{ page.extra.axes_title }}">
+  <div class="container container--narrow">
+    <h2>{{ page.extra.axes_title }}</h2>
+
+    <div class="axis-cards">
+      {% for ax in page.extra.radar_axes %}
+      <div class="axis-card glass-card">
+        <h3 class="axis-card__title">{{ ax.label }}</h3>
+        <p class="axis-card__desc">{{ ax.description }}</p>
+
+        <div class="axis-card__viz">
+          <div class="axis-card__endpoints">
+            <span>{{ ax.low_label }}</span>
+            <span>{{ ax.high_label }}</span>
+          </div>
+          <div class="axis-card__track">
+            <div class="axis-card__marker" style="left:{{ ax.v_left * 10 }}%">
+              <span class="axis-card__marker-dot" style="background:{{ page.extra.profile_left_color }}"></span>
+              <span class="axis-card__marker-label">{{ page.extra.profile_left_short }}</span>
+            </div>
+            <div class="axis-card__marker" style="left:{{ ax.v_right * 10 }}%">
+              <span class="axis-card__marker-dot" style="background:{{ page.extra.profile_right_color }}"></span>
+              <span class="axis-card__marker-label">{{ page.extra.profile_right_short }}</span>
+            </div>
+            <div class="axis-card__marker" style="left:{{ ax.v_zukunft * 10 }}%">
+              <span class="axis-card__marker-dot" style="background:{{ page.extra.profile_zukunft_color }}"></span>
+              <span class="axis-card__marker-label">{{ page.extra.profile_zukunft_short }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="axis-card__example"><strong>{{ page.extra.axes_example_label }}:</strong> {{ ax.example }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Remaining content sections (1–6) ===== #}
+{% if page.extra.sections is defined %}
+  {% for sec in page.extra.sections %}
+  {% if loop.index0 > 0 %}
+  <section class="canvas canvas--content" aria-label="{{ sec.title }}">
+    <div class="container container--narrow">
+      <h2>{{ sec.title }}</h2>
+      {% if sec.text is defined and sec.text %}
+      <p>{{ sec.text | safe }}</p>
+      {% endif %}
+
+      {% if sec.subsections is defined %}
+        {% for sub in sec.subsections %}
+        <h3>{{ sub.title }}</h3>
+        {% if sub.text is defined and sub.text %}
+        <p>{{ sub.text | safe }}</p>
+        {% endif %}
+        {% if sub.points is defined %}
+        <ul>
+          {% for point in sub.points %}
+          <li>{{ point | safe }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% if sec.points is defined %}
+      <ul>
+        {% for point in sec.points %}
+        <li>{{ point | safe }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if sec.items is defined %}
+      <ul>
+        {% for item in sec.items %}
+        <li><strong>{{ item.label }}</strong>: {{ item.text | safe }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+  {% endfor %}
+{% endif %}
+
+{# ===== CTA ===== #}
+{% if page.extra.show_cta %}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if page.extra.cta_text is defined %}
+    <p class="cta-section__text">{{ page.extra.cta_text }}</p>
+    {% endif %}
+    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endif %}
+
+{# ===== Radar chart JS ===== #}
+{% if page.extra.radar_axes is defined %}
+<script>
+(function() {
+  var canvas = document.getElementById('radar-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  /* axis data from frontmatter */
+  var axes = [
+    {% for ax in page.extra.radar_axes %}
+    { label: '{{ ax.label }}', left: {{ ax.v_left }}, right: {{ ax.v_right }}, zukunft: {{ ax.v_zukunft }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  var profiles = {
+    left:    { color: '{{ page.extra.profile_left_color }}',    values: axes.map(function(a) { return a.left; }) },
+    right:   { color: '{{ page.extra.profile_right_color }}',   values: axes.map(function(a) { return a.right; }) },
+    zukunft: { color: '{{ page.extra.profile_zukunft_color }}', values: axes.map(function(a) { return a.zukunft; }) }
+  };
+
+  var highlighted = 'zukunft';
+  var N = axes.length;
+  var MAX_VAL = 10;
+  var RINGS = 5;
+
+  function getThemeColors() {
+    var s = getComputedStyle(document.documentElement);
+    return {
+      text: s.getPropertyValue('--color-text').trim() || '#1a1a2e',
+      muted: s.getPropertyValue('--color-text-muted').trim() || '#6b7280',
+      border: s.getPropertyValue('--glass-border').trim() || 'rgba(0,0,0,0.08)'
+    };
+  }
+
+  function draw() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var size = Math.round(rect.width);
+    if (size < 100) return;
+
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var cx = size / 2;
+    var cy = size / 2;
+    var radius = size * 0.36;
+    var labelOffset = size * 0.44;
+
+    var theme = getThemeColors();
+
+    ctx.clearRect(0, 0, size, size);
+
+    /* grid rings */
+    var r;
+    for (r = 1; r <= RINGS; r++) {
+      var ringR = (r / RINGS) * radius;
+      ctx.beginPath();
+      for (var i = 0; i < N; i++) {
+        var angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+        var px = cx + ringR * Math.cos(angle);
+        var py = cy + ringR * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* spokes */
+    for (var i = 0; i < N; i++) {
+      var angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle));
+      ctx.strokeStyle = theme.border;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* axis labels */
+    ctx.font = '600 ' + Math.max(11, size * 0.026) + 'px Switzer, sans-serif';
+    ctx.fillStyle = theme.muted;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var i = 0; i < N; i++) {
+      var angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+      var lx = cx + labelOffset * Math.cos(angle);
+      var ly = cy + labelOffset * Math.sin(angle);
+      ctx.fillText(axes[i].label, lx, ly);
+    }
+
+    /* draw profiles */
+    var order = ['left', 'right', 'zukunft'];
+    /* draw highlighted last so it's on top */
+    order.sort(function(a, b) {
+      if (a === highlighted) return 1;
+      if (b === highlighted) return -1;
+      return 0;
+    });
+
+    for (var pi = 0; pi < order.length; pi++) {
+      var key = order[pi];
+      var p = profiles[key];
+      var isHighlighted = key === highlighted;
+      var alpha = isHighlighted ? 0.25 : 0.06;
+      var strokeAlpha = isHighlighted ? 0.9 : 0.25;
+      var lineW = isHighlighted ? 2.5 : 1.5;
+
+      ctx.beginPath();
+      for (var i = 0; i < N; i++) {
+        var angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+        var val = p.values[i] / MAX_VAL;
+        var px = cx + radius * val * Math.cos(angle);
+        var py = cy + radius * val * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      /* fill */
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.fill();
+
+      /* stroke */
+      ctx.globalAlpha = strokeAlpha;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = lineW;
+      ctx.stroke();
+
+      /* dots */
+      ctx.globalAlpha = isHighlighted ? 1 : 0.4;
+      for (var i = 0; i < N; i++) {
+        var angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+        var val = p.values[i] / MAX_VAL;
+        var px = cx + radius * val * Math.cos(angle);
+        var py = cy + radius * val * Math.sin(angle);
+        ctx.beginPath();
+        ctx.arc(px, py, isHighlighted ? 4 : 3, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  /* legend toggle */
+  var legendBtns = document.querySelectorAll('.radar__legend-item');
+  legendBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      highlighted = btn.getAttribute('data-profile');
+      legendBtns.forEach(function(b) {
+        var isActive = b.getAttribute('data-profile') === highlighted;
+        b.classList.toggle('radar__legend-item--active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+      draw();
+    });
+  });
+
+  /* resize observer */
+  var resizeTimer;
+  var ro = new ResizeObserver(function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(draw, 100);
+  });
+  ro.observe(canvas.parentElement);
+
+  /* theme change */
+  var mo = new MutationObserver(function() { draw(); });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* initial draw */
+  draw();
+})();
+</script>
+{% endif %}
+{% endblock %}
