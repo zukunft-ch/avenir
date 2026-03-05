@@ -34,12 +34,51 @@
       <p>{{ sec.text }}</p>
       {% if sec.shortcode is defined and sec.shortcode == "newsletter_form" %}
       <div class="glass-card">
-        <div class="newsletter-form">
+        <form class="newsletter-form" id="newsletter-form" novalidate>
           <label for="newsletter-email" class="sr-only">{{ trans(key='label_email', lang=lang) }}</label>
-          <input class="form__input" id="newsletter-email" type="email" placeholder="{{ trans(key='label_email', lang=lang) }}" disabled>
-          <button type="button" class="btn btn--disabled" disabled>Coming Soon</button>
-        </div>
+          <input class="form__input" id="newsletter-email" type="email" name="email" placeholder="{{ trans(key='label_email', lang=lang) }}" required>
+          <div aria-hidden="true" style="position:absolute;left:-9999px">
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn--glow" id="newsletter-submit">{{ trans(key="btn_subscribe", lang=lang) }}</button>
+        </form>
+        <p class="form-status" id="newsletter-status" role="status" aria-live="polite"></p>
       </div>
+
+      <script>
+      (function() {
+        var form = document.getElementById('newsletter-form');
+        var status = document.getElementById('newsletter-status');
+        var btn = document.getElementById('newsletter-submit');
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (!form.checkValidity()) { form.reportValidity(); return; }
+          btn.disabled = true;
+          btn.textContent = '...';
+          status.textContent = '';
+          fetch('https://api.die-zukunft.ch/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: form.elements.email.value,
+              website: form.elements.website.value,
+              lang: '{{ lang }}'
+            })
+          }).then(function(r) {
+            if (!r.ok) throw new Error(r.status);
+            form.reset();
+            status.textContent = '{{ trans(key="sub_success", lang=lang) }}';
+            status.className = 'form-status form-status--ok';
+          }).catch(function() {
+            status.textContent = '{{ trans(key="form_error", lang=lang) }}';
+            status.className = 'form-status form-status--err';
+          }).finally(function() {
+            btn.disabled = false;
+            btn.textContent = '{{ trans(key="btn_subscribe", lang=lang) }}';
+          });
+        });
+      })();
+      </script>
       {% endif %}
       {% if sec.link_text is defined %}
       <a class="btn btn--outline" href="{{ sec.link }}">{{ sec.link_text }}</a>

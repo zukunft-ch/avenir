@@ -22,24 +22,74 @@
   <div class="container container--narrow">
     {{ page.content | safe }}
 
-    <form class="contact-form">
+    <form class="contact-form" id="contact-form" novalidate>
       <div>
-        <label for="name">{{ trans(key="label_name", lang=lang) }}</label>
-        <input type="text" id="name" name="name" disabled>
+        <label for="contact-name">{{ trans(key="label_name", lang=lang) }}</label>
+        <input type="text" id="contact-name" name="name" required>
       </div>
 
       <div>
-        <label for="email">{{ trans(key="label_email", lang=lang) }}</label>
-        <input type="email" id="email" name="email" disabled>
+        <label for="contact-email">{{ trans(key="label_email", lang=lang) }}</label>
+        <input type="email" id="contact-email" name="email" required>
       </div>
 
       <div>
-        <label for="message">{{ trans(key="label_message", lang=lang) }}</label>
-        <textarea id="message" name="message" disabled></textarea>
+        <label for="contact-message">{{ trans(key="label_message", lang=lang) }}</label>
+        <textarea id="contact-message" name="message" required></textarea>
       </div>
 
-      <button type="button" class="btn btn--disabled" disabled>Coming Soon</button>
+      {# Honeypot — hidden from real users, bots fill it #}
+      <div aria-hidden="true" style="position:absolute;left:-9999px">
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div>
+        <label class="consent-label">
+          <input type="checkbox" id="contact-consent" required>
+          <span>{{ trans(key="label_consent", lang=lang) }}</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn--glow" id="contact-submit">{{ trans(key="btn_send", lang=lang) }}</button>
+      <p class="form-status" id="contact-status" role="status" aria-live="polite"></p>
     </form>
+
+    <script>
+    (function() {
+      var form = document.getElementById('contact-form');
+      var status = document.getElementById('contact-status');
+      var btn = document.getElementById('contact-submit');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        btn.disabled = true;
+        btn.textContent = '...';
+        status.textContent = '';
+        fetch('https://api.die-zukunft.ch/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: form.elements.name.value,
+            email: form.elements.email.value,
+            message: form.elements.message.value,
+            website: form.elements.website.value,
+            lang: '{{ lang }}'
+          })
+        }).then(function(r) {
+          if (!r.ok) throw new Error(r.status);
+          form.reset();
+          status.textContent = '{{ trans(key="form_success", lang=lang) }}';
+          status.className = 'form-status form-status--ok';
+        }).catch(function() {
+          status.textContent = '{{ trans(key="form_error", lang=lang) }}';
+          status.className = 'form-status form-status--err';
+        }).finally(function() {
+          btn.disabled = false;
+          btn.textContent = '{{ trans(key="btn_send", lang=lang) }}';
+        });
+      });
+    })();
+    </script>
   </div>
 </section>
 {% endblock %}

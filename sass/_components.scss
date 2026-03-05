@@ -1335,6 +1335,29 @@
   }
 }
 
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-2;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    margin-top: 0.2em;
+    accent-color: var(--color-accent);
+  }
+}
+
+.form-status {
+  font-size: $font-size-sm;
+  margin-top: $space-2;
+
+  &--ok { color: #22c55e; }
+  &--err { color: #ef4444; }
+}
+
 // ---- Section listing (articles) ----
 .section-list {
   display: flex;
