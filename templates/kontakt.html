@@ -46,7 +46,7 @@
       <div>
         <label class="consent-label">
           <input type="checkbox" id="contact-consent" required>
-          <span>{{ trans(key="label_consent", lang=lang) }}</span>
+          <span>{{ trans(key="label_consent_pre", lang=lang) }}<a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="label_consent_link", lang=lang) }}</a>{{ trans(key="label_consent_post", lang=lang) }}</span>
         </label>
       </div>
 
