@@ -64,12 +64,17 @@
   </section>
   {% endfor %}
 {% else %}
-  {# ===== Markdown content (fallback) ===== #}
+  {# ===== Markdown content (fallback) — split at <hr /> into separate sections ===== #}
+  {% set parts = page.content | split(pat="<hr />") %}
+  {% for part in parts %}
+  {% if part | striptags | trim | length > 0 %}
   <section class="canvas canvas--content">
     <div class="container container--narrow">
-      {{ page.content | safe }}
+      {{ part | safe }}
     </div>
   </section>
+  {% endif %}
+  {% endfor %}
 {% endif %}
 
 {# ===== FAQ ===== #}
