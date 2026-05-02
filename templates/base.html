@@ -44,7 +44,8 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="{% block og_title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %}">
   <meta property="og:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
-  <meta property="og:image" content="{{ get_url(path='og-' ~ lang ~ '.png') }}">
+  {% set og_image_path = page.extra.og_image | default(value='og-' ~ lang ~ '.png') %}
+  <meta property="og:image" content="{{ get_url(path=og_image_path) }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="{{ page.title | default(value=section.title | default(value=config.title)) }} — {% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
@@ -61,7 +62,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ page.title | default(value=section.title | default(value=config.title)) }}">
   <meta name="twitter:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
-  <meta name="twitter:image" content="{{ get_url(path='og-' ~ lang ~ '.png') }}">
+  <meta name="twitter:image" content="{{ get_url(path=og_image_path) }}">
 
   {# Fonts — loaded via link tags for reliable cross-browser loading #}
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
@@ -278,6 +279,12 @@
   <button class="to-top" id="to-top" type="button" aria-label="{{ trans(key='aria_scroll_top', lang=lang) }}">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
   </button>
+
+  <div class="key-hints" id="key-hints" aria-hidden="true">
+    <button class="key-hint" data-key="ArrowDown" type="button" aria-label="{{ trans(key='aria_scroll_down', lang=lang) }}"><span class="key-hint__cap">↓</span></button>
+    <button class="key-hint" data-key="ArrowUp" type="button" aria-label="{{ trans(key='aria_scroll_up', lang=lang) }}"><span class="key-hint__cap">↑</span></button>
+    <button class="key-hint key-hint--wide" data-key="Home" type="button" aria-label="{{ trans(key='aria_scroll_top', lang=lang) }}"><span class="key-hint__cap">Home</span></button>
+  </div>
 
   <main id="main" data-hex-page="{% if page %}{{ page.relative_path | split(pat='.') | first }}{% elif section %}{{ section.relative_path | split(pat='.') | first }}{% endif %}">
     {% block content %}{% endblock %}
@@ -780,15 +787,22 @@
       'talent-integration': 0x2A, 'sprache-verstaendigung': 0x2B,
       'zukunftslabor/_index': 0x30, 'zukunftslabor/notizen/_index': 0x31, 'zukunftslabor/methodik': 0x32,
       'menschen': 0x40, 'kontakt': 0x41,
+      'aktuelles/platz-1-ist-kein-plan': 0x50,
       'impressum': 0xF0, 'datenschutz': 0xF1,
-      'info': 0xF2, 'aktuelles/_index': 0xF3,
-      'aktuelles/platz-1-ist-kein-plan': 0xF4
+      'info': 0xF2, 'aktuelles/_index': 0xF3
     };
     var page = hexMap[pageKey] != null ? hexMap[pageKey] : 0x00;
     var sections = main.querySelectorAll(':scope > section, :scope > .hero');
-    sections.forEach(function(sec, i) {
-      var addr = (page << 8) | i;
-      var hex = '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+    var counter = 0;
+    sections.forEach(function(sec) {
+      var hex;
+      if (sec.dataset.hex) {
+        hex = sec.dataset.hex;
+      } else {
+        var addr = (page << 8) | counter;
+        hex = '0x' + addr.toString(16).toUpperCase().padStart(4, '0');
+        counter++;
+      }
       sec.id = sec.id || hex;
       var a = document.createElement('a');
       a.className = 'hex-anchor';
@@ -913,23 +927,97 @@
     });
   })();
 
-  // Scroll-to-top button
+  // Scroll-to-top button (mobile) + key hints cluster (desktop)
   (function() {
     var btn = document.getElementById('to-top');
+    var hints = document.getElementById('key-hints');
     var main = document.getElementById('main');
-    if (!btn || !main) return;
+    if (!main) return;
 
     var first = main.querySelector(':scope > section, :scope > .hero');
     if (!first) return;
 
+    var sections = main.querySelectorAll(':scope > section, :scope > .hero');
+
     var io = new IntersectionObserver(function(entries) {
-      btn.classList.toggle('is-visible', !entries[0].isIntersecting);
+      var pastHero = !entries[0].isIntersecting;
+      if (btn) btn.classList.toggle('is-visible', pastHero);
     }, { threshold: 0 });
     io.observe(first);
 
-    btn.addEventListener('click', function() {
-      first.scrollIntoView({ behavior: 'smooth' });
-    });
+    if (btn) {
+      btn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
+    }
+
+    function go(delta) {
+      var EPS = 24;
+      var target = -1;
+      if (delta > 0) {
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top > EPS) { target = i; break; }
+        }
+      } else {
+        for (var j = sections.length - 1; j >= 0; j--) {
+          if (sections[j].getBoundingClientRect().top < -EPS) { target = j; break; }
+        }
+      }
+      if (target < 0) return;
+      var rect = sections[target].getBoundingClientRect();
+      var gap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75 || 12;
+      var y = window.pageYOffset + rect.top - gap;
+      window.scrollTo({ top: y, behavior: 'instant' });
+    }
+
+    function handleKey(name) {
+      if (name === 'ArrowUp') go(-1);
+      else if (name === 'ArrowDown') go(1);
+      else if (name === 'Home') window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    if (hints) {
+      var capButtons = hints.querySelectorAll('.key-hint');
+      capButtons.forEach(function(b) {
+        b.addEventListener('click', function() { handleKey(b.dataset.key); });
+      });
+
+      var upBtn = hints.querySelector('.key-hint[data-key="ArrowUp"]');
+      var downBtn = hints.querySelector('.key-hint[data-key="ArrowDown"]');
+      var homeBtn = hints.querySelector('.key-hint[data-key="Home"]');
+      function updateAvailability() {
+        var EPS = 24;
+        var hasUp = false, hasDown = false;
+        for (var i = 0; i < sections.length; i++) {
+          var t = sections[i].getBoundingClientRect().top;
+          if (t < -EPS) hasUp = true;
+          if (t > EPS) hasDown = true;
+        }
+        if (upBtn) upBtn.classList.toggle('is-hidden', !hasUp);
+        if (homeBtn) homeBtn.classList.toggle('is-hidden', !hasUp);
+        if (downBtn) downBtn.classList.toggle('is-hidden', !hasDown);
+        hints.classList.toggle('is-visible', hasUp);
+      }
+      window.addEventListener('scroll', updateAvailability, { passive: true });
+      window.addEventListener('resize', updateAvailability);
+      updateAvailability();
+
+      // Visual feedback when actual keyboard key is pressed
+      function flash(name) {
+        var b = hints.querySelector('.key-hint[data-key="' + name + '"]');
+        if (!b) return;
+        b.classList.add('is-pressed');
+        setTimeout(function() { b.classList.remove('is-pressed'); }, 140);
+      }
+      window.addEventListener('keydown', function(e) {
+        if (e.target && (e.target.matches('input, textarea, [contenteditable]'))) return;
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Home') {
+          e.preventDefault();
+          flash(e.key);
+          handleKey(e.key);
+        }
+      });
+    }
   })();
   </script>
   <script>

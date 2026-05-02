@@ -14,9 +14,10 @@
 {# ===== Article listing ===== #}
 <section class="canvas canvas--content">
   <div class="container container--narrow">
-    {% if section.pages | length > 0 %}
+    {% set pages = paginator.pages | default(value=section.pages) %}
+    {% if pages | length > 0 %}
       <div class="section-list" role="list" aria-label="{{ section.title }}">
-        {% for page in section.pages %}
+        {% for page in pages %}
         <a class="section-list__item" href="{{ page.permalink }}" role="listitem">
           <h2>{{ page.title }}</h2>
           {% if page.date %}<p>{{ page.date | date(format="%d.%m.%Y") }}</p>{% endif %}

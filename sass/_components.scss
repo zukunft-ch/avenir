@@ -1474,7 +1474,7 @@
   }
 }
 
-// ---- Scroll-to-top button (fixed bottom-right, glassmorphic) ----
+// ---- Scroll-to-top button (fixed bottom-right, glassmorphic) — mobile only ----
 .to-top {
   position: fixed;
   bottom: calc($space-3 + $space-4);
@@ -1498,7 +1498,12 @@
   transform: translateY(0.5rem);
   transition: opacity $transition-normal, transform $transition-normal, background $transition-fast, border-color $transition-fast;
 
-  // On mobile, sit above the bottom nav bar with clear gap
+  // Desktop: replaced by key-hints cluster
+  @media (min-width: ($bp-md + 1px)) {
+    display: none;
+  }
+
+  // Mobile: sit above the bottom nav bar with clear gap
   @media (max-width: $bp-md) {
     bottom: calc($space-3 + $space-4 + 2.75rem + $space-5);
   }
@@ -1513,6 +1518,88 @@
     background: var(--hover-bg);
     border-color: var(--color-text-muted);
   }
+}
+
+// ---- Key hints cluster (desktop only, replaces to-top) ----
+.key-hints {
+  position: fixed;
+  bottom: calc($space-3 + $space-4);
+  right: calc($space-3 + $space-4);
+  z-index: $z-sticky;
+  display: flex;
+  gap: $space-2;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.5rem);
+  transition: opacity $transition-normal, transform $transition-normal;
+
+  @media (max-width: $bp-md) {
+    display: none;
+  }
+
+  &.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+.key-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.5rem 3px;
+  background: var(--glass-bg);
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-sm;
+  color: var(--color-text-muted);
+  font-family: $font-family;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  // Stack: outer drop shadow (spatial), bottom edge (cap thickness), inner top highlight, inner bottom shade
+  box-shadow:
+    0 2px 0 0 var(--glass-border),
+    0 3px 4px -1px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.06);
+  transition: background $transition-fast, border-color $transition-fast, transform 0.08s ease, box-shadow 0.08s ease, color $transition-fast;
+
+  &:hover {
+    background: var(--hover-bg);
+    border-color: var(--color-text-muted);
+    color: var(--color-text);
+  }
+
+  &:active,
+  &.is-pressed {
+    transform: translateY(2px);
+    background: var(--hover-bg);
+    color: var(--color-text);
+    box-shadow:
+      0 0 0 0 var(--glass-border),
+      0 1px 2px -1px var(--shadow-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+  }
+}
+
+.key-hint--wide {
+  min-width: 3.25rem;
+}
+
+.key-hint.is-hidden {
+  display: none;
+}
+
+.key-hint__cap {
+  line-height: 1;
 }
 
 // ---- Reveal animation ----
@@ -1539,6 +1626,7 @@ body.hero-active {
   .progress-tracker,
   .sparkle-btn,
   .to-top,
+  .key-hints,
   .hex-anchor {
     opacity: 0 !important;
     pointer-events: none !important;

@@ -118,6 +118,28 @@
 </section>
 {% endif %}
 
+{# ===== Latest Aktuelles teaser ===== #}
+{% set news = get_section(path="aktuelles/_index.md", lang=lang) %}
+{% if news.pages | length > 0 %}
+{% set latest = news.pages | first %}
+<section class="canvas canvas--hex" aria-label="{{ trans(key='nav_aktuelles', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    <p class="subtitle-descriptor">{{ trans(key="nav_aktuelles", lang=lang) }}</p>
+    <h2 style="margin-top: 0.75rem;">
+      <a href="{{ latest.permalink }}" style="color: inherit; text-decoration: none;">{{ latest.title }}</a>
+    </h2>
+    {% if latest.date %}<time datetime="{{ latest.date }}" style="display: block; margin-top: 0.5rem; opacity: 0.7; font-size: 0.95rem;">{{ latest.date | date(format="%d.%m.%Y") }}</time>{% endif %}
+    {% if latest.description %}<p style="margin-top: 1.25rem; opacity: 0.85;">{{ latest.description }}</p>{% endif %}
+    <div style="margin-top: 2rem;">
+      <a class="btn btn--outline" href="{{ latest.permalink }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>
+    </div>
+    <p style="margin-top: 1.25rem;">
+      <a href="{{ news.permalink }}" style="opacity: 0.7; font-size: 0.95rem;">{{ trans(key="news_all", lang=lang) }} →</a>
+    </p>
+  </div>
+</section>
+{% endif %}
+
 {# ===== CTA — get involved ===== #}
 {% if section.extra.cta_title %}
 <section class="canvas cta-section" aria-label="{{ section.extra.cta_title }}">
