@@ -16,6 +16,18 @@
     {% if page.description %}
     <p class="page-hero__desc">{{ page.description }}</p>
     {% endif %}
+    {% if page.date %}
+    {% set author = page.extra.author | default(value=trans(key="author_default", lang=lang)) %}
+    {% if lang == "en" %}{% set date_fmt = "%B %-d, %Y" %}{% set date_locale = "en_GB" %}
+    {% elif lang == "fr" %}{% set date_fmt = "%-d %B %Y" %}{% set date_locale = "fr_CH" %}
+    {% elif lang == "it" %}{% set date_fmt = "%-d %B %Y" %}{% set date_locale = "it_CH" %}
+    {% else %}{% set date_fmt = "%-d. %B %Y" %}{% set date_locale = "de_CH" %}{% endif %}
+    <p class="page-hero__byline">
+      <time datetime="{{ page.date }}">{{ page.date | date(format=date_fmt, locale=date_locale) }}</time>
+      <span aria-hidden="true"> · </span>
+      <span>{{ author }}</span>
+    </p>
+    {% endif %}
   </div>
 </section>
 

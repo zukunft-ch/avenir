@@ -864,6 +864,14 @@
   line-height: 1.5;
 }
 
+.page-hero__byline {
+  margin-top: $space-4;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+}
+
 .page-hero--brandmark .page-hero__title {
   font-family: $font-family-brandmark;
   font-weight: 700;
