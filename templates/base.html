@@ -725,11 +725,15 @@
   })();
 
   // Smooth scroll-snap — JS-based for cross-browser smooth animation
+  // Disabled on small viewports (phones): the magnetic snap fights the natural
+  // scroll flow there. The virtual slide-deck feel is kept for tablets/desktop.
   (function() {
     var main = document.getElementById('main');
     if (!main) return;
     var sections = main.querySelectorAll(':scope > section, :scope > .hero, :scope > footer');
     if (sections.length < 2) return;
+
+    var snapEnabled = window.matchMedia('(min-width: 768px)');
 
     var scrollTimer = null;
     var snapping = false;
@@ -752,7 +756,7 @@
     }
 
     function onScrollEnd() {
-      if (snapping) return;
+      if (snapping || !snapEnabled.matches) return;
       var target = getSnapTarget();
       if (!target) return;
       var r = target.getBoundingClientRect();
