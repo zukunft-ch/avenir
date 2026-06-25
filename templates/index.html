@@ -171,6 +171,13 @@
   var done = false;
   var root = document.documentElement;
 
+  // Reduced-motion: don't lock scroll or stage the reveal — just show the
+  // subline and let the page scroll freely from the start.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    subline.classList.add('is-visible');
+    return;
+  }
+
   // Lock scroll immediately on page load
   root.style.overflow = 'hidden';
 
@@ -248,7 +255,10 @@
   totalWidth += gap * half;
 
   var pos = 0;
-  var speed = 0.5;
+  // Respect reduced-motion: the global CSS rule can't stop a JS RAF transform,
+  // so disable the continuous auto-scroll here (drag/swipe still works).
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var speed = reduceMotion ? 0 : 0.5;
   var raf;
   var dragging = false;
   var hoverPaused = false;

@@ -1414,6 +1414,11 @@
   align-items: center;
   gap: $space-3;
 
+  // Hidden on phones — the slide-deck dot nav is a desktop affordance and
+  // only crowds the left edge on small screens.
+  @media (max-width: $bp-md) {
+    display: none;
+  }
 }
 
 .progress-tracker__dot {

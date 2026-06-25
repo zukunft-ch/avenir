@@ -768,7 +768,7 @@
     }
 
     window.addEventListener('scroll', function() {
-      if (snapping) return;
+      if (snapping || !snapEnabled.matches) return;
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(onScrollEnd, 120);
     }, { passive: true });
