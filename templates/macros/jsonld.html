@@ -4,11 +4,11 @@
 {
   "@context": "https://schema.org",
   "@type": "PoliticalParty",
-  "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization",
+  "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization",
   "name": "Die Zukunft",
   "alternateName": ["Le Futur", "Il Futuro", "The Future"],
-  "url": "{{ config.base_url | trim_end_matches(pat='/') }}",
-  "logo": "{{ config.base_url | trim_end_matches(pat='/') }}/favicon.svg",
+  "url": "{{ config.base_url | trim_end_matches(pat='/') | safe }}",
+  "logo": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/favicon.svg",
   "email": "hey@die-zukunft.ch",
   "address": {
     "@type": "PostalAddress",
@@ -30,14 +30,14 @@
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#website",
+  "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#website",
   "name": "{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}",
-  "url": "{{ config.base_url | trim_end_matches(pat='/') }}",
+  "url": "{{ config.base_url | trim_end_matches(pat='/') | safe }}",
   "inLanguage": "{{ lang }}",
-  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization" },
+  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "{{ config.base_url | trim_end_matches(pat='/') }}{% if lang != 'de' %}/{{ lang }}{% endif %}/#search={search_term_string}",
+    "target": "{{ config.base_url | trim_end_matches(pat='/') | safe }}{% if lang != 'de' %}/{{ lang }}{% endif %}/#search={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 }
@@ -54,8 +54,8 @@
   "description": {{ description | json_encode() | safe }},
   "url": {{ url | json_encode() | safe }},
   "inLanguage": "{{ lang }}",
-  "isPartOf": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#website" },
-  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization" },
+  "isPartOf": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#website" },
+  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
   "mainEntityOfPage": {{ url | json_encode() | safe }},
   "speakable": {
     "@type": "SpeakableSpecification",
@@ -76,7 +76,7 @@
       "@type": "ListItem",
       "position": 1,
       "name": "{% if lang == 'fr' %}Accueil{% elif lang == 'it' %}Home{% elif lang == 'en' %}Home{% else %}Start{% endif %}",
-      "item": "{{ config.base_url | trim_end_matches(pat='/') }}{% if lang != 'de' %}/{{ lang }}/{% else %}/{% endif %}"
+      "item": "{{ config.base_url | trim_end_matches(pat='/') | safe }}{% if lang != 'de' %}/{{ lang }}/{% else %}/{% endif %}"
     },
     {
       "@type": "ListItem",
@@ -122,7 +122,7 @@
   "url": {{ url | json_encode() | safe }},
   "mainEntity": {
     "@type": "Organization",
-    "@id": "{{ config.base_url | trim_end_matches(pat='/') }}/#organization"
+    "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization"
   }
 }
 </script>

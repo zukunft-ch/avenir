@@ -67,11 +67,32 @@
 {% endblock content %}
 
 {% block body_end %}
-<script defer src="/js/vega/vega.min.js"></script>
-<script defer src="/js/vega/vega-lite.min.js"></script>
-<script defer src="/js/vega/vega-embed.min.js"></script>
 <script>
 (function() {
+  // Vega (~278 KB gzip) is NOT on the critical path. Each chart shows its
+  // pre-rendered static SVG immediately; the interactive Vega build is loaded
+  // on demand only when a chart nears the viewport.
+  var VEGA = ['/js/vega/vega.min.js', '/js/vega/vega-lite.min.js', '/js/vega/vega-embed.min.js'];
+  var vegaState = 0; // 0 idle, 1 loading, 2 ready, 3 failed
+  var waiters = [];
+  function flush(ok) { var w = waiters; waiters = []; w.forEach(function(cb) { cb(ok); }); }
+  function whenVega(cb) {
+    if (vegaState === 2) return cb(true);
+    if (vegaState === 3) return cb(false);
+    waiters.push(cb);
+    if (vegaState !== 0) return;
+    vegaState = 1;
+    var i = 0;
+    (function next() {
+      if (i >= VEGA.length) { vegaState = 2; flush(true); return; }
+      var s = document.createElement('script');
+      s.src = VEGA[i++];
+      s.onload = next;
+      s.onerror = function() { vegaState = 3; flush(false); };
+      document.head.appendChild(s);
+    })();
+  }
+
   var specCache = {};
   var viewCache = {};
 
@@ -120,106 +141,91 @@
     return spec;
   }
 
-  function renderChart(el) {
-    var src = el.getAttribute('data-chart-src');
-    if (!src) return;
-
-    var loading = el.querySelector('.chart-interactive__loading');
-
-    function doRender(spec) {
-      spec.width = 'container';
-      spec.autosize = { type: 'fit', contains: 'padding' };
-      if (spec.encoding && spec.encoding.tooltip === undefined) {
-        spec.encoding.tooltip = { content: 'data' };
-      }
-      spec = addInteractivity(spec);
-
-      if (typeof vegaEmbed === 'undefined') {
-        fallbackSvg(el, src);
-        return;
-      }
-
-      vegaEmbed(el, spec, {
-        actions: false,
-        renderer: 'svg',
-        config: getThemeConfig(),
-        tooltip: { theme: 'custom' }
-      }).then(function(result) {
-        if (loading) loading.remove();
-        viewCache[src] = result;
-      }).catch(function() {
-        fallbackSvg(el, src);
-      });
-    }
-
-    if (specCache[src]) {
-      doRender(JSON.parse(JSON.stringify(specCache[src])));
-      return;
-    }
-
-    fetch(src).then(function(r) {
-      if (!r.ok) throw new Error(r.status);
-      return r.json();
-    }).then(function(spec) {
-      specCache[src] = spec;
-      doRender(JSON.parse(JSON.stringify(spec)));
-    }).catch(function() {
-      fallbackSvg(el, src);
-    });
-  }
-
   function fallbackSvg(el, jsonSrc) {
-    var svgSrc = jsonSrc.replace(/\.json$/, '.svg');
     var loading = el.querySelector('.chart-interactive__loading');
     if (loading) loading.remove();
+    if (el.querySelector('img')) return; // static SVG already present
     var img = document.createElement('img');
-    img.src = svgSrc;
+    img.src = jsonSrc.replace(/\.json$/, '.svg');
     img.alt = el.closest('.chart-interactive')
       ? el.closest('.chart-interactive').getAttribute('aria-label') || 'Chart'
       : 'Chart';
     img.loading = 'lazy';
     img.width = 720;
+    img.className = 'chart-fallback-svg';
+    img.onerror = function() { img.remove(); }; // missing SVG: wait for interactive upgrade
     el.appendChild(img);
+  }
+
+  function embed(el, spec) {
+    var src = el.getAttribute('data-chart-src');
+    spec.width = 'container';
+    spec.autosize = { type: 'fit', contains: 'padding' };
+    if (spec.encoding && spec.encoding.tooltip === undefined) {
+      spec.encoding.tooltip = { content: 'data' };
+    }
+    spec = addInteractivity(spec);
+    el.innerHTML = '';
+    vegaEmbed(el, spec, {
+      actions: false,
+      renderer: 'svg',
+      config: getThemeConfig(),
+      tooltip: { theme: 'custom' }
+    }).then(function(result) {
+      viewCache[src] = result;
+    }).catch(function() {
+      fallbackSvg(el, src);
+    });
+  }
+
+  function renderInteractive(el) {
+    var src = el.getAttribute('data-chart-src');
+    if (!src) return;
+    if (specCache[src]) { embed(el, JSON.parse(JSON.stringify(specCache[src]))); return; }
+    fetch(src).then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(spec) {
+      specCache[src] = spec;
+      embed(el, JSON.parse(JSON.stringify(spec)));
+    }).catch(function() {
+      fallbackSvg(el, src);
+    });
+  }
+
+  function upgrade(el) {
+    whenVega(function(ok) {
+      if (ok && typeof vegaEmbed !== 'undefined') renderInteractive(el);
+    });
   }
 
   function reRenderAll() {
     Object.keys(viewCache).forEach(function(src) {
-      var cached = specCache[src];
-      if (!cached) return;
-      var result = viewCache[src];
-      if (!result || !result.view) return;
+      if (!specCache[src]) return;
       var el = document.querySelector('[data-chart-src="' + src + '"]');
-      if (!el) return;
-      el.innerHTML = '';
-      var spec = JSON.parse(JSON.stringify(cached));
-      spec.width = 'container';
-      spec.autosize = { type: 'fit', contains: 'padding' };
-      if (spec.encoding && spec.encoding.tooltip === undefined) {
-        spec.encoding.tooltip = { content: 'data' };
-      }
-      spec = addInteractivity(spec);
-      vegaEmbed(el, spec, {
-        actions: false,
-        renderer: 'svg',
-        config: getThemeConfig(),
-        tooltip: { theme: 'custom' }
-      }).then(function(r) { viewCache[src] = r; });
+      if (el) embed(el, JSON.parse(JSON.stringify(specCache[src])));
     });
   }
 
   function init() {
-    if (typeof vegaEmbed === 'undefined') {
-      setTimeout(init, 100);
-      return;
-    }
     var containers = document.querySelectorAll('[data-chart-src]');
-    containers.forEach(function(el) { renderChart(el); });
+    if (!containers.length) return;
+    // 1. Static SVG immediately — content visible with zero JS library cost.
+    containers.forEach(function(el) { fallbackSvg(el, el.getAttribute('data-chart-src')); });
+    // 2. Upgrade to interactive Vega only when a chart approaches the viewport.
+    if (!('IntersectionObserver' in window)) { containers.forEach(upgrade); return; }
+    var io = new IntersectionObserver(function(entries, obs) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { obs.unobserve(e.target); upgrade(e.target); }
+      });
+    }, { rootMargin: '300px' });
+    containers.forEach(function(el) { io.observe(el); });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    setTimeout(init, 50);
+    init();
   }
 
   var observer = new MutationObserver(function(mutations) {

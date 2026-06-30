@@ -25,14 +25,12 @@
 
   {# Hreflang alternates #}
   {% if page %}
-    <link rel="alternate" hreflang="de" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     {% for t in page.translations %}
       <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
     {% endfor %}
     <link rel="alternate" hreflang="x-default" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     <link rel="canonical" href="{{ page.permalink }}">
   {% elif section %}
-    <link rel="alternate" hreflang="de" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
     {% for t in section.translations %}
       <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
     {% endfor %}
@@ -64,10 +62,12 @@
   <meta name="twitter:description" content="{{ page.description | default(value=section.description | default(value=config.description)) }}">
   <meta name="twitter:image" content="{{ get_url(path=og_image_path) }}">
 
-  {# Fonts — loaded via link tags for reliable cross-browser loading #}
+  {# Fonts — self-hosted body font preloaded; Fontshare CDN loaded non-render-blocking #}
+  <link rel="preload" href="/fonts/MozillaHeadline-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@1&f[]=clash-display@600,700&display=swap">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@1&f[]=clash-display@600,700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@1&f[]=clash-display@600,700&display=swap"></noscript>
 
   {# Favicon #}
   <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml">
@@ -139,6 +139,7 @@
       var fovRad = (opts.fov || 35) * Math.PI / 180;
       var camX = opts.camX || 0;
       var camY = opts.camY || 0;
+      var reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
 
       var positions = buildPositions(opts.arm, opts.thick);
 
@@ -198,9 +199,11 @@
 
       var raf;
       function draw() {
-        raf = requestAnimationFrame(draw);
-        rotY += 0.002;
-        rotX += 0.0005;
+        if (!reduceMotion) {
+          raf = requestAnimationFrame(draw);
+          rotY += 0.002;
+          rotX += 0.0005;
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = style.color;
@@ -485,6 +488,7 @@
   (function() {
     var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (motionQuery.matches) return;
+    if (window.innerWidth < 768) return;
 
     var sections = document.querySelectorAll('main > .canvas');
     if (!sections.length) return;
