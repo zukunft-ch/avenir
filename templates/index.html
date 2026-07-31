@@ -7,6 +7,45 @@
 
 {% block content %}
 
+{# ===== 1. August banner — meta-slot 0x00F0, date-gated + dismissable (see script below) ===== #}
+{% if section.extra.banner_title %}
+<section class="natday-banner" id="natday-banner" data-hex="0x00F0" aria-label="{{ section.extra.banner_eyebrow }}">
+  <div class="natday-banner__inner">
+    <span class="natday-banner__flag" aria-hidden="true">🇨🇭</span>
+    <div class="natday-banner__body">
+      <p class="natday-banner__eyebrow">{{ section.extra.banner_eyebrow }}</p>
+      <p class="natday-banner__title">{{ section.extra.banner_title }}</p>
+      {% if section.extra.banner_text %}<p class="natday-banner__text">{{ section.extra.banner_text }}</p>{% endif %}
+    </div>
+    <a class="btn btn--outline natday-banner__cta" href="{{ get_url(path='@/aktuelles/1-august-2026.md', lang=lang) }}">{{ section.extra.banner_cta }}</a>
+    <button class="natday-banner__close" id="natday-close" type="button" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</section>
+<script>
+(function(){
+  var el = document.getElementById('natday-banner');
+  if (!el) return;
+  var KEY = 'natday-2026-dismissed';
+  var now = new Date();
+  var start = new Date(2026, 6, 31, 0, 0, 0);
+  var end = new Date(2026, 7, 2, 23, 59, 59);
+  var inWindow = now >= start && now <= end;
+  var dismissed = false;
+  try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  if (inWindow && !dismissed) { el.classList.add('is-visible'); }
+  var btn = document.getElementById('natday-close');
+  if (btn) {
+    btn.addEventListener('click', function(){
+      el.classList.remove('is-visible');
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    });
+  }
+})();
+</script>
+{% endif %}
+
 {# ===== Hero — brandmark ===== #}
 <section class="hero" id="hero" aria-label="Hero">
   <canvas class="hero__mesh" id="hero-mesh" aria-hidden="true"></canvas>

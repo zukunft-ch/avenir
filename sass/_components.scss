@@ -2491,3 +2491,126 @@ body.hero-active {
   }
 }
 
+// ---- 1. August (Swiss National Day) banner — homepage meta-slot 0x00F0 ----
+// Hidden by default; the date-gated dismiss script in index.html adds .is-visible.
+.natday-banner {
+  display: none;
+  position: relative;
+  width: 100%;
+  max-width: $max-width;
+  margin: $space-3 auto 0;
+  padding: 0 $space-5;
+  scroll-snap-align: none;
+
+  &.is-visible {
+    display: block;
+  }
+
+  .hex-anchor {
+    top: $space-3;
+  }
+}
+
+.natday-banner__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: $space-5;
+  background: var(--glass-bg);
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-lg;
+  padding: $space-4 $space-5;
+  box-shadow: 0 8px 32px var(--shadow-color);
+}
+
+.natday-banner__flag {
+  flex-shrink: 0;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.natday-banner__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.natday-banner__eyebrow {
+  margin: 0;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.natday-banner__title {
+  @include gradient-text();
+  margin: $space-1 0 0;
+  font-family: $font-family-headline;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-lg;
+  line-height: 1.15;
+}
+
+.natday-banner__text {
+  margin: $space-2 0 0;
+  font-size: $font-size-sm;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.natday-banner__cta {
+  flex-shrink: 0;
+}
+
+.natday-banner__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--hover-bg);
+  }
+}
+
+@media (max-width: $bp-md) {
+  .natday-banner {
+    padding: 0 $space-3;
+  }
+
+  .natday-banner__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-3;
+    padding: $space-5 $space-4 $space-4;
+  }
+
+  .natday-banner__flag {
+    display: none;
+  }
+
+  .natday-banner__cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .natday-banner__close {
+    position: absolute;
+    top: $space-2;
+    right: $space-2;
+  }
+}
+
