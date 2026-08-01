@@ -10,6 +10,32 @@
   src: url("/fonts/MozillaHeadline-Variable.woff2") format("woff2");
 }
 
+// Switzer (headings) + Clash Display (brandmark) — self-hosted, no third-party CDN.
+// Files under static/fonts/. Fontshare fonts, ITF Free Font License (self-hosting permitted).
+@font-face {
+  font-family: "Switzer";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/switzer-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Clash Display";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/clash-display-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Clash Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/clash-display-700.woff2") format("woff2");
+}
+
 body {
   font-family: $font-family;
   font-weight: $font-weight-normal;
