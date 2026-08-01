@@ -17,9 +17,9 @@
       {% for page in term.pages %}
       <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}" role="listitem">
         <div class="lab-notiz-card__meta">
-          {% if page.extra.evidence_level is defined %}
-          <span class="lab-badge lab-badge--{{ page.extra.evidence_level }}">
-            {{ trans(key="lab_evidence_" ~ page.extra.evidence_level, lang=lang) }}
+          {% if page.extra.evidence is defined %}
+          <span class="lab-badge lab-badge--{{ page.extra.evidence }}">
+            {{ trans(key="lab_evidence_" ~ page.extra.evidence, lang=lang) }}
           </span>
           {% endif %}
           {% if page.extra.category is defined %}
