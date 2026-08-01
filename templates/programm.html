@@ -38,7 +38,7 @@
         <h2 class="program-chapter__title">{{ ch.title }}</h2>
         <p class="program-chapter__text">{{ ch.text }}</p>
         {% if ch.link %}
-        <a class="btn btn--outline" href="{{ ch.link }}">{{ trans(key="cta_learn_more", lang=lang) }} →</a>
+        <a class="btn btn--outline" href="{{ get_url(path=ch.link, lang=lang) }}">{{ trans(key="cta_learn_more", lang=lang) }} →</a>
         {% endif %}
       </div>
     </div>

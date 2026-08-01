@@ -104,7 +104,7 @@
       "position": {{ loop.index }},
       "name": {{ ch.title | json_encode() | safe }},
       "description": {{ ch.text | json_encode() | safe }}{% if ch.link %},
-      "url": {{ ch.link | json_encode() | safe }}{% endif %}
+      "url": {{ get_url(path=ch.link, lang=lang) | json_encode() | safe }}{% endif %}
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
