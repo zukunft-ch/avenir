@@ -23,19 +23,25 @@
   })();
   </script>
 
-  {# Hreflang alternates #}
+  {# Hreflang alternates. FR/IT resolve to their dedicated domains (le-futur.ch / il-futuro.ch);
+     DE and EN live on die-zukunft.ch. This keeps hreflang + canonical reciprocal with the
+     language-domain worker and avoids advertising die-zukunft.ch/fr|it/ URLs that 301
+     (see static/_redirects). #}
+  {% if page %}{% set self_perma = page.permalink %}{% elif section %}{% set self_perma = section.permalink %}{% else %}{% set self_perma = config.base_url ~ "/" %}{% endif %}
+  {% set self_canonical = self_perma | replace(from="https://die-zukunft.ch/fr/", to="https://le-futur.ch/") | replace(from="https://die-zukunft.ch/it/", to="https://il-futuro.ch/") %}
+  {% set x_default = self_perma | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") %}
   {% if page %}
     {% for t in page.translations %}
-      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
+      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink | replace(from='https://die-zukunft.ch/fr/', to='https://le-futur.ch/') | replace(from='https://die-zukunft.ch/it/', to='https://il-futuro.ch/') }}">
     {% endfor %}
-    <link rel="alternate" hreflang="x-default" href="{{ page.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
-    <link rel="canonical" href="{{ page.permalink }}">
+    <link rel="alternate" hreflang="x-default" href="{{ x_default }}">
+    <link rel="canonical" href="{{ self_canonical }}">
   {% elif section %}
     {% for t in section.translations %}
-      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink }}">
+      <link rel="alternate" hreflang="{{ t.lang }}" href="{{ t.permalink | replace(from='https://die-zukunft.ch/fr/', to='https://le-futur.ch/') | replace(from='https://die-zukunft.ch/it/', to='https://il-futuro.ch/') }}">
     {% endfor %}
-    <link rel="alternate" hreflang="x-default" href="{{ section.permalink | replace(from="/fr/", to="/") | replace(from="/it/", to="/") | replace(from="/en/", to="/") }}">
-    <link rel="canonical" href="{{ section.permalink }}">
+    <link rel="alternate" hreflang="x-default" href="{{ x_default }}">
+    <link rel="canonical" href="{{ self_canonical }}">
   {% endif %}
 
   {# Open Graph #}
@@ -53,7 +59,7 @@
   {% for loc in all_locales %}{% if loc != current_locale %}
   <meta property="og:locale:alternate" content="{{ loc }}">
   {% endif %}{% endfor %}
-  <meta property="og:url" content="{% if page %}{{ page.permalink }}{% elif section %}{{ section.permalink }}{% else %}{{ config.base_url }}{% endif %}">
+  <meta property="og:url" content="{{ self_canonical }}">
   <meta property="og:site_name" content="{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
 
   {# Twitter Card #}
