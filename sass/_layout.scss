@@ -91,8 +91,15 @@ body.plasma-active .canvas {
   cursor: pointer;
   transition: opacity $transition-fast;
 
-  &:hover {
-    opacity: 0.7;
+  // Invisible padding gives a >=44px tap target; negative margin keeps the label in place
+  padding: $space-3;
+  margin: -$space-3;
+  min-height: 44px;
+  border-radius: $radius-sm;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 0.8;
   }
 
   @media (max-width: $bp-md) {

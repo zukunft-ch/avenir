@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/icons.html" as icons %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -34,7 +35,7 @@
   <section class="canvas canvas--content" aria-label="{{ ch.title }}">
     <div class="container container--narrow">
       <div class="program-chapter glass-card">
-        {% if ch.icon %}<p class="glass-card__icon">{{ ch.icon }}</p>{% endif %}
+        {% if ch.icon %}<p class="glass-card__icon">{{ icons::icon(name=ch.icon) }}</p>{% endif %}
         <h2 class="program-chapter__title">{{ ch.title }}</h2>
         <p class="program-chapter__text">{{ ch.text }}</p>
         {% if ch.link %}

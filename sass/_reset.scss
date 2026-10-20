@@ -54,8 +54,18 @@ h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
 }
 
-p {
+p, li {
   overflow-wrap: break-word;
+}
+
+// Long German compounds ("Gesellschaftsvertrag") otherwise wrap mid-word without
+// a hyphen on narrow screens. Relies on <html lang>.
+@media (max-width: 768px) {
+  h1, h2, h3, h4, p, li {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphenate-limit-chars: 7 3 3;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

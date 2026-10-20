@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/icons.html" as icons %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=section.title, url=section.permalink, lang=lang) }}
@@ -24,13 +25,13 @@
       {% for area in section.extra.areas %}
       {% if area.active %}
       <a class="glass-card lab-area-card" href="{{ get_url(path=area.link, lang=lang) }}">
-        <span class="glass-card__icon">{{ area.icon }}</span>
+        <span class="glass-card__icon">{{ icons::icon(name=area.icon) }}</span>
         <h2 class="glass-card__title">{{ area.title }}</h2>
         <p class="glass-card__text">{{ area.text }}</p>
       </a>
       {% else %}
       <div class="glass-card lab-area-card lab-area-card--coming-soon">
-        <span class="glass-card__icon">{{ area.icon }}</span>
+        <span class="glass-card__icon">{{ icons::icon(name=area.icon) }}</span>
         <h2 class="glass-card__title">{{ area.title }}</h2>
         <p class="glass-card__text">{{ area.text }}</p>
         <span class="lab-badge lab-badge--muted">{{ trans(key="lab_coming_soon", lang=lang) }}</span>

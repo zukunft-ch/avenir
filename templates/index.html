@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/pillar_cards.html" as cards %}
+{% import "macros/icons.html" as icons %}
 
 {% block title %}{{ section.title | default(value=section.extra.hero_title | default(value=config.title)) }}{% endblock %}
 
@@ -75,7 +76,7 @@
 
 {# ===== What's changing — title ===== #}
 {% if section.extra.changes %}
-<section class="canvas canvas--hex" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
+<section class="canvas canvas--hex canvas--compact" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
   <div class="container container--narrow" style="text-align: center;">
     <h2>{{ section.extra.changes_title | default(value="") }}</h2>
     {% if section.extra.changes_intro %}
@@ -90,7 +91,7 @@
     <div class="bento-grid">
       {% for item in section.extra.changes %}
       <div class="glass-card reveal-up reveal-delay-{{ loop.index }}">
-        {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
+        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
         <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
       </div>
@@ -105,19 +106,19 @@
 
 {# ===== What we propose — title + carousel ===== #}
 {% if section.extra.pillars %}
-<section class="canvas canvas--hex" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}">
+<section class="canvas canvas--hex canvas--compact" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}">
   <div class="container container--narrow" style="text-align: center;">
     <h2>{{ section.extra.pillars_title | default(value="") }}</h2>
   </div>
 </section>
 
-<section class="canvas canvas--carousel" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}" aria-roledescription="carousel">
+<section class="canvas canvas--carousel canvas--compact" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}" aria-roledescription="carousel">
   <div class="carousel" id="pillar-carousel">
     <div class="carousel__track" aria-live="off" id="carousel-track">
       {# Duplicate cards for seamless loop #}
       {% for item in section.extra.pillars %}
       <div class="glass-card carousel__card" role="group" aria-roledescription="slide" aria-label="{{ item.title }}">
-        {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
+        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
         <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
         {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
@@ -125,7 +126,7 @@
       {% endfor %}
       {% for item in section.extra.pillars %}
       <div class="glass-card carousel__card" aria-hidden="true">
-        {% if item.icon %}<p class="glass-card__icon">{{ item.icon }}</p>{% endif %}
+        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
         <h3 class="glass-card__title">{{ item.title }}</h3>
         <p class="glass-card__text">{{ item.text }}</p>
         {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}" tabindex="-1">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
@@ -173,7 +174,7 @@
       <a class="btn btn--outline" href="{{ latest.permalink }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>
     </div>
     <p style="margin-top: 1.25rem;">
-      <a href="{{ news.permalink }}" style="opacity: 0.7; font-size: 0.95rem;">{{ trans(key="news_all", lang=lang) }} →</a>
+      <a href="{{ news.permalink }}" style="font-size: 0.95rem;">{{ trans(key="news_all", lang=lang) }} →</a>
     </p>
   </div>
 </section>

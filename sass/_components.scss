@@ -119,6 +119,12 @@
   @include gradient-text();
   white-space: nowrap;
   animation: hero-in 0.8s $ease-out-expo both;
+
+  // The 4rem floor is wider than a phone: scale with the viewport instead
+  // (the brandmark is ~6.2em wide incl. letter-spacing; keep a 1.25rem gutter each side)
+  @media (max-width: $bp-sm) {
+    font-size: calc((100vw - 2.5rem) / 6.4);
+  }
 }
 
 .hero__subline {
@@ -898,6 +904,13 @@
 }
 
 // ---- Content canvas (scrollable content inside a canvas section) ----
+.canvas--content,
+.canvas--compact {
+  // Short sections no longer claim a full screen: two of them share one, while
+  // long sections still grow. Snap targets (section tops) are unchanged.
+  min-height: clamp(22rem, 60dvh, calc(100dvh - #{$canvas-gap * 2}));
+}
+
 .canvas--content {
   padding: $space-8 $space-5;
   align-items: center;
@@ -1004,6 +1017,25 @@
   font-size: $font-size-3xl;
   margin-bottom: $space-3;
   line-height: 1;
+
+  // Line icons (macros/icons.html) scale with the emoji size they replace
+  svg {
+    width: 0.6em;
+    height: 0.6em;
+    fill: none;
+    stroke: url(#icon-gradient);
+  }
+}
+
+.glass-card__icon:has(svg) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  border-radius: $radius-md;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-card__title {
@@ -1073,14 +1105,15 @@
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
   color: #fff;
-  background: var(--color-accent);
+  // Brandmark gradient, using deeper stops so white text passes WCAG AA
+  background: linear-gradient(135deg, #9333ea 0%, #2563eb 100%);
   border: none;
   border-radius: $radius-pill;
   cursor: pointer;
-  transition: background $transition-fast, transform $transition-fast, box-shadow $transition-fast;
+  transition: filter $transition-fast, transform $transition-fast, box-shadow $transition-fast;
 
   &:hover {
-    background: var(--color-accent-hover);
+    filter: brightness(0.92);
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 4px 16px var(--shadow-color);
@@ -1107,6 +1140,7 @@
   box-shadow: none;
 
   &:hover {
+    filter: none;
     transform: none;
     box-shadow: none;
   }
@@ -1123,6 +1157,7 @@
   border: 1px solid var(--glass-border);
 
   &:hover {
+    filter: none;
     background: var(--hover-bg);
     color: var(--color-text);
   }
