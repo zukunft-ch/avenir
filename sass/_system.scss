@@ -53,8 +53,7 @@ html { scroll-behavior: smooth; scroll-padding-top: $nav-h + 1rem; }
 body {
   background: var(--color-bg);
   background-image: var(--ground-glow);
-  background-attachment: fixed;
-  min-height: 100dvh;
+  min-height: 100svh;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -384,7 +383,7 @@ main {
 // ---- Page hero (all sub pages) --------------------------------------------
 .page-hero {
   height: auto;
-  min-height: clamp(26rem, 68dvh, 46rem);
+  min-height: clamp(26rem, 68svh, 46rem); // svh: no jump when iOS toolbars collapse
   border-radius: 0;
   text-align: left;
   align-items: flex-end;
@@ -638,7 +637,7 @@ main {
   right: $gutter;
   z-index: $z-overlay + 3;
   width: min(26rem, calc(100vw - 2rem));
-  max-height: calc(100dvh - #{$nav-h} - 2rem);
+  max-height: calc(100svh - #{$nav-h} - 2rem);
   display: flex;
   flex-direction: column;
   background: var(--overlay-bg);
@@ -844,3 +843,71 @@ main {
   &.is-open { clip-path: circle(150% at 50% 0%); }
 }
 .command-overlay__inner { @media (max-width: $bp-md) { padding-top: $space-5; } }
+
+// ---- Touch & iOS ------------------------------------------------------------
+// Fixes for things that only show on phones, mostly iPhone Safari.
+html { -webkit-tap-highlight-color: transparent; }
+
+// Fixed backgrounds repaint on every scroll frame on iOS; only fine pointers get them.
+@media (hover: hover) and (pointer: fine) {
+  body { background-attachment: fixed; }
+}
+
+// iOS zooms the page when a focused field is below 16px. Never let that happen.
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  font-size: max(16px, 1em);
+}
+
+// The lattice layer uses the large viewport, so toolbar show/hide never resizes it.
+.ground { bottom: auto; height: 100lvh; }
+
+// Notch / Dynamic Island / home indicator (viewport-fit=cover is set in <head>).
+.topnav {
+  padding-left: max(#{$gutter}, env(safe-area-inset-left));
+  padding-right: max(#{$gutter}, env(safe-area-inset-right));
+}
+.canvas,
+.hero.lede,
+.page-hero {
+  padding-left: max(#{$gutter}, env(safe-area-inset-left));
+  padding-right: max(#{$gutter}, env(safe-area-inset-right));
+}
+.footer { padding-bottom: calc(#{$space-5} + env(safe-area-inset-bottom)); }
+.to-top { bottom: calc(1.75rem + env(safe-area-inset-bottom)); right: max(1.75rem, env(safe-area-inset-right)); }
+.pins-toast { bottom: calc(#{$space-6} + env(safe-area-inset-bottom)); }
+
+// Scrolling inside overlays must not scroll the page behind them.
+.command-overlay__nav,
+.pins-tray__list,
+.command-overlay { overscroll-behavior: contain; }
+
+// Touch: 44px targets, and no hover states that "stick" after a tap.
+@media (pointer: coarse) {
+  .pin-btn { min-width: 44px; height: 44px; }
+  .hex-anchor { min-height: 44px; }
+  .menu-btn, .topnav__pins { min-height: 44px; }
+  .menu-btn { width: 44px; height: 44px; }
+  .pins-tray__remove { width: 44px; height: 44px; }
+  .pin-btn:active, .menu-btn:active, .topnav__pins:active { background: var(--active-bg); }
+}
+@media (hover: none) {
+  .btn:hover { transform: none; filter: none; }
+  .evidence-tile:hover { transform: none; border-color: var(--hairline); }
+  .thesis-row:hover { background: none; }
+  .thesis-row__link:hover .thesis-row__arrow { transform: none; }
+  .pillar-cell:not(:first-child):hover { background: var(--color-surface); }
+  .btn:active { filter: brightness(0.92); }
+  .evidence-tile:active, .pillar-cell:active, .thesis-row:active { background: var(--hover-bg); }
+}
+
+// Phones: the menu is one scrolling panel (full page list visible), not a
+// squeezed nested scroller between search, pins and settings.
+@media (max-width: $bp-md) {
+  .command-overlay__inner { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .command-overlay__nav-wrap { flex: none; }
+  .command-overlay__nav { flex: none; overflow: visible; }
+  .command-overlay__scroll { display: none !important; }
+  .command-overlay__link { padding-top: 0.7rem; padding-bottom: 0.7rem; }
+}

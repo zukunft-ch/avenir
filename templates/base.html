@@ -184,10 +184,16 @@
 
       var style = getColor();
 
-      function resize() {
-        w = container.offsetWidth;
-        h = container.offsetHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, w < 768 ? 1.5 : 2);
+      var coarse = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
+      function resize(e) {
+        var nw = container.offsetWidth, nh = container.offsetHeight;
+        // iOS/Android: the browser toolbar collapsing while scrolling changes only the
+        // height by ~50-120px. Re-allocating the canvas then causes a visible flash,
+        // so ignore height-only changes below 160px (the lattice is framed by width).
+        if (e && nw === w && Math.abs(nh - h) < 160) return;
+        w = nw;
+        h = nh;
+        dpr = Math.min(window.devicePixelRatio || 1, w < 768 ? 1.25 : 2);
         canvas.width = w * dpr;
         canvas.height = h * dpr;
         canvas.style.width = w + 'px';
@@ -220,9 +226,14 @@
 
       var raf;
       var lastScroll = window.pageYOffset || 0;
+      var frame = 0;
       function draw() {
         if (!reduceMotion) {
           raf = requestAnimationFrame(draw);
+          // Touch devices: draw every second frame (~30 fps) to save battery and keep
+          // scrolling smooth; the rotation speed is doubled to compensate.
+          if (coarse && (frame++ & 1)) return;
+          if (coarse) { rotY += 0.002; rotX += 0.0005; }
           rotY += 0.002;
           rotX += 0.0005;
           if (opts.scrollSpin) {
@@ -255,7 +266,11 @@
       }
       draw();
 
-      window.addEventListener('resize', function() { resize(); if (reduceMotion) draw(); });
+      window.addEventListener('resize', function(e) { resize(e); if (reduceMotion) draw(); });
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) { cancelAnimationFrame(raf); paused = true; }
+        else if (paused) { paused = false; draw(); }
+      });
 
       var observer = new MutationObserver(function() { style = getColor(); buildGradient(); if (reduceMotion) draw(); });
       document.addEventListener('dz:brand', function() { buildGradient(); if (reduceMotion) draw(); });
