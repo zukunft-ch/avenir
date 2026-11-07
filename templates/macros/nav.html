@@ -1,46 +1,54 @@
+{% import "macros/brand.html" as brandmark %}
 {# ---- Skip link ---- #}
 {% macro skip_link(lang) %}
 <a class="skip-link" href="#main">{{ trans(key="skip_to_content", lang=lang) }}</a>
 {% endmacro %}
 
-{# ---- Top nav bar (glassmorphic, centered) ---- #}
+{# ---- Top bar: brand · primary links · pins · join · menu ---- #}
 {% macro topnav(lang) %}
-<nav class="topnav" aria-label="Main navigation">
-  <a class="topnav__logo" id="topnav-logo" href="{% if lang == 'de' %}/{% else %}/{{ lang }}/{% endif %}" aria-label="Home">
-    <canvas class="topnav__logo-canvas" id="topnav-mesh" aria-hidden="true"></canvas>
+{% set links = ["@/vision.md|nav_vision", "@/manifest.md|nav_manifest", "@/programm.md|nav_programm", "@/zukunftslabor/_index.md|nav_zukunftslabor", "@/aktuelles/_index.md|nav_aktuelles"] %}
+<nav class="topnav" id="topnav" aria-label="Main navigation">
+  <a class="topnav__brand" href="{{ get_url(path='@/_index.md', lang=lang) }}" aria-label="{{ trans(key='nav_home', lang=lang) }}">
+    <span class="topnav__logo" id="topnav-logo"><canvas class="topnav__logo-canvas" id="topnav-mesh" aria-hidden="true"></canvas></span>
+    <span class="topnav__wordmark wm">{{ brandmark::wordmark(lang=lang) }}</span>
   </a>
-  {% set current_path = current_path | default(value="") %}
-  {% set programm_url = get_url(path='@/programm.md', lang=lang) %}
-  {% set vision_url = get_url(path='@/vision.md', lang=lang) %}
-  {% set mitmachen_url = get_url(path='@/mitmachen.md', lang=lang) %}
-  <a class="topnav__link{% if current_url is defined and current_url == vision_url %} is-active{% endif %}" href="{{ vision_url }}" data-nav{% if current_url is defined and current_url == vision_url %} aria-current="page"{% endif %}>{{ trans(key="nav_vision", lang=lang) }}</a>
-  <a class="topnav__link{% if current_url is defined and current_url == programm_url %} is-active{% endif %}" href="{{ programm_url }}" data-nav{% if current_url is defined and current_url == programm_url %} aria-current="page"{% endif %}>{{ trans(key="nav_programm", lang=lang) }}</a>
-  <a class="topnav__link{% if current_url is defined and current_url == mitmachen_url %} is-active{% endif %}" href="{{ mitmachen_url }}" data-nav{% if current_url is defined and current_url == mitmachen_url %} aria-current="page"{% endif %}>{{ trans(key="nav_mitmachen", lang=lang) }}</a>
-  <button class="sparkle-btn sparkle-btn--mobile" type="button" aria-label="{{ trans(key='aria_menu', lang=lang) }}" aria-expanded="false">
-    <span class="sparkle-btn__flipper">
-      <span class="sparkle-btn__face sparkle-btn__face--front">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
-      </span>
-      <span class="sparkle-btn__face sparkle-btn__face--back">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </span>
-    </span>
-  </button>
+  <div class="topnav__links">
+    {% for item in links %}
+    {% set l = item | split(pat="|") %}
+    {% set u = get_url(path=l[0], lang=lang) %}
+    {% set active = current_url is defined and current_url is starting_with(u) %}
+    <a class="topnav__link{% if active %} is-active{% endif %}" href="{{ u }}"{% if active %} aria-current="page"{% endif %}>{{ trans(key=l[1], lang=lang) }}</a>
+    {% endfor %}
+  </div>
+  <div class="topnav__actions">
+    <button class="topnav__pins" id="pins-toggle" type="button" aria-expanded="false" aria-controls="pins-tray" aria-label="{{ trans(key='pins_title', lang=lang) }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>
+      <span class="topnav__pins-label">{{ trans(key="pins_label", lang=lang) }}</span>
+      <span class="topnav__pins-count" id="pins-count">0</span>
+    </button>
+    <a class="btn btn--sm topnav__join" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+    <button class="menu-btn" type="button" data-menu-toggle aria-label="{{ trans(key='aria_menu', lang=lang) }}" aria-expanded="false" aria-controls="command-overlay">
+      <svg class="menu-btn__open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16"/><path d="M4 16h16"/></svg>
+      <svg class="menu-btn__close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
 </nav>
-{% endmacro %}
 
-{# ---- Sparkle button (standalone, fixed top-right on desktop) ---- #}
-{% macro sparkle_button(lang) %}
-<button class="sparkle-btn sparkle-btn--desktop" id="sparkle-btn" type="button" aria-label="{{ trans(key='aria_menu', lang=lang) }}" aria-expanded="false">
-  <span class="sparkle-btn__flipper">
-    <span class="sparkle-btn__face sparkle-btn__face--front">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
-    </span>
-    <span class="sparkle-btn__face sparkle-btn__face--back">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    </span>
-  </span>
-</button>
+{# ---- Pins tray (rendered by DZPins in base.html) ---- #}
+<aside class="pins-tray" id="pins-tray" aria-label="{{ trans(key='pins_title', lang=lang) }}" aria-hidden="true">
+  <div class="pins-tray__head">
+    <h2>{{ trans(key="pins_title", lang=lang) }}</h2>
+    <span>{{ trans(key="pins_local", lang=lang) }}</span>
+  </div>
+  <div id="pins-import"></div>
+  <ul class="pins-tray__list" id="pins-list"></ul>
+  <p class="pins-tray__empty" id="pins-empty">{{ trans(key="pins_empty", lang=lang) | safe }}</p>
+  <div class="pins-tray__foot" id="pins-foot">
+    <button type="button" id="pins-share">{{ trans(key="pins_share", lang=lang) }}</button>
+    <button type="button" id="pins-clear" data-confirm="{{ trans(key='pins_clear_confirm', lang=lang) }}">{{ trans(key="pins_clear", lang=lang) }}</button>
+  </div>
+</aside>
+<div class="pins-toast" id="pins-toast" role="status" aria-live="polite"></div>
 {% endmacro %}
 
 {# ---- Command overlay (glassmorphic panel) ---- #}
@@ -56,6 +64,9 @@
     </div>
     <div id="search-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
+    {# Reader's pins, filled by DZPins #}
+    <div class="command-overlay__pins" id="command-pins"></div>
+
     {# Navigation links (scrollable) #}
     <div class="command-overlay__nav-wrap">
       <button class="command-overlay__scroll command-overlay__scroll--up" id="nav-scroll-up" type="button" aria-label="{{ trans(key='aria_scroll_up', lang=lang) }}">
@@ -67,6 +78,7 @@
         <a class="command-overlay__link" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
+        <a class="command-overlay__link" href="{{ get_url(path='@/souveraene-ki.md', lang=lang) }}">{{ trans(key="nav_souveraene_ki", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/robotik.md', lang=lang) }}">{{ trans(key="nav_robotik", lang=lang) }}</a>
         <a class="command-overlay__link" href="{{ get_url(path='@/uebergaenge.md', lang=lang) }}">{{ trans(key="nav_uebergaenge", lang=lang) }}</a>

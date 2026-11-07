@@ -3,9 +3,11 @@
 // =============================================
 
 // Gradient anchors (brandmark — same in both themes)
-$gradient-purple:   #a855f7;
-$gradient-blue:     #3b82f6;
-$gradient-teal:     #06b6d4;
+// Alpenglühen anchors (Nov 2026). Names kept for compatibility with older components:
+// "purple" = rose start, "blue" = violet middle, "teal" = indigo end.
+$gradient-purple:   #f43f5e;
+$gradient-blue:     #6d28d9;
+$gradient-teal:     #4338ca;
 
 // Glass blur (constant)
 $glass-blur:        20px;

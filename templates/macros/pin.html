@@ -1,0 +1,9 @@
+{#
+  Pin button. Anything with a stable hex address can be pinned: the reader's pins
+  live in localStorage on their device only (see the DZPins module in base.html).
+  `url` may be absolute or relative; the JS normalises it to a pathname so the
+  same section pinned from the homepage and from its own page is one pin.
+#}
+{% macro icon() %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>{% endmacro icon %}
+
+{% macro button(url, hex, title, page, lang, labelled=false) %}<button class="pin-btn{% if labelled %} pin-btn--labelled{% endif %}" type="button" data-pin data-pin-url="{{ url }}" data-pin-hex="{{ hex }}" data-pin-title="{{ title }}" data-pin-page="{{ page }}" aria-pressed="false" aria-label="{{ trans(key='pin_add', lang=lang) }}: {{ title }}" title="{{ trans(key='pin_add', lang=lang) }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg><span class="pin-btn__label">{{ trans(key='pin_add', lang=lang) }}</span></button>{% endmacro button %}

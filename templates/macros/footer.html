@@ -1,27 +1,36 @@
+{% import "macros/brand.html" as brandmark %}
 {% macro footer(lang) %}
+{% if lang == "fr" %}{% set brand = "Le Futur" %}{% elif lang == "it" %}{% set brand = "Il Futuro" %}{% elif lang == "en" %}{% set brand = "The Future" %}{% else %}{% set brand = "Die Zukunft" %}{% endif %}
 <footer class="canvas footer">
-  <div class="container">
-    <div class="footer__brandmark">
-      <canvas class="footer__mesh" id="footer-mesh" aria-hidden="true"></canvas>
-      <p class="footer__wordmark">
-        {% if lang == "fr" %}le futur.{% elif lang == "it" %}il futuro.{% elif lang == "en" %}the future.{% else %}die zukunft.{% endif %}
-      </p>
+  <div class="footer__main">
+    {# ---- Left: brandtype + description ---- #}
+    <div class="footer__about">
+      <a class="footer__wordmark wm" href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ brandmark::wordmark(lang=lang) }}</a>
       <p class="footer__subline">{{ trans(key="brand_subline", lang=lang) }}</p>
+      <p class="footer__desc">{{ trans(key="footer_about", lang=lang) }}</p>
+      <p class="footer__contact">
+        <a href="mailto:{{ config.extra.contact_email }}">{{ config.extra.contact_email }}</a>
+        <span>{{ trans(key="footer_city", lang=lang) }}</span>
+      </p>
+      <a class="footer__world" href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement", lang=lang) | replace(from="the-future", to="the‑future") }}</a>
     </div>
 
-    <nav class="footer__columns" aria-label="Footer navigation">
+    {# ---- Right: link columns ---- #}
+    <nav class="footer__columns" aria-label="{{ trans(key='footer_nav', lang=lang) }}">
       <div class="footer__col">
         <p class="footer__heading">{{ trans(key="footer_nav", lang=lang) }}</p>
-        <a href="{{ get_url(path='@/_index.md', lang=lang) }}">{{ trans(key="nav_home", lang=lang) }}</a>
         <a href="{{ get_url(path='@/vision.md', lang=lang) }}">{{ trans(key="nav_vision", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
         <a href="{{ get_url(path='@/manifest.md', lang=lang) }}">{{ trans(key="nav_manifest", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="nav_programm", lang=lang) }}</a>
         <a href="{{ get_url(path='@/kein-links-rechts.md', lang=lang) }}">{{ trans(key="nav_kein_links_rechts", lang=lang) }}</a>
         <a href="{{ get_url(path='@/zukunftslabor/_index.md', lang=lang) }}">{{ trans(key="nav_zukunftslabor", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/aktuelles/_index.md', lang=lang) }}">{{ trans(key="nav_aktuelles", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/abstimmungen.md', lang=lang) }}">{{ trans(key="nav_abstimmungen", lang=lang) }}</a>
       </div>
 
-      <div class="footer__col">
+      <div class="footer__col footer__col--wide">
         <p class="footer__heading">{{ trans(key="nav_programm", lang=lang) }}</p>
+        <a href="{{ get_url(path='@/souveraene-ki.md', lang=lang) }}">{{ trans(key="nav_souveraene_ki", lang=lang) }}</a>
         <a href="{{ get_url(path='@/digitale-souveraenitaet.md', lang=lang) }}">{{ trans(key="nav_digitale_souveraenitaet", lang=lang) }}</a>
         <a href="{{ get_url(path='@/robotik.md', lang=lang) }}">{{ trans(key="nav_robotik", lang=lang) }}</a>
         <a href="{{ get_url(path='@/uebergaenge.md', lang=lang) }}">{{ trans(key="nav_uebergaenge", lang=lang) }}</a>
@@ -37,28 +46,30 @@
       </div>
 
       <div class="footer__col">
-        <p class="footer__heading">{{ trans(key="footer_contact", lang=lang) }}</p>
-        <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <p class="footer__heading">{{ trans(key="nav_mitmachen", lang=lang) }}</p>
         <a href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="nav_mitmachen", lang=lang) }}</a>
         <a href="https://collective.die-zukunft.ch" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_collective", lang=lang) }}</a>
         <a href="https://opencollective.com/die-zukunft" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_donate", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/menschen.md', lang=lang) }}">{{ trans(key="nav_menschen", lang=lang) }}</a>
+        <a href="{{ get_url(path='@/kontakt.md', lang=lang) }}">{{ trans(key="nav_kontakt", lang=lang) }}</a>
         <a href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement_link", lang=lang) }}</a>
       </div>
-
-      <div class="footer__col">
-        <p class="footer__heading">{{ trans(key="footer_legal", lang=lang) }}</p>
-        <a href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
-        <a href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
-      </div>
     </nav>
+  </div>
 
-    <a class="footer__movement" href="https://the-future.world" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_movement", lang=lang) }}</a>
-
-    <p class="footer__copy">&copy; {{ now() | date(format="%Y") }}
-      {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}.
-      {{ trans(key="footer_copyright", lang=lang) }}
+  {# ---- Bottom: one quiet line — legal on the left, colophon on the right ---- #}
+  <div class="footer__bottom">
+    <p class="footer__legal">
+      <span>&copy; {{ now() | date(format="%Y") }} {{ brand }}</span>
+      <a href="{{ get_url(path='@/impressum.md', lang=lang) }}">{{ trans(key="footer_impressum", lang=lang) }}</a>
+      <a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}">{{ trans(key="footer_datenschutz", lang=lang) }}</a>
+      <a href="{{ get_url(path='@/info.md', lang=lang) }}">{{ trans(key="nav_info", lang=lang) }}</a>
+    </p>
+    {# Colophon — the site describes its own infrastructure, measured live #}
+    <p class="colophon" title="{{ trans(key='colophon_static', lang=lang) }} · {{ trans(key='colophon_fonts', lang=lang) }}">
+      <span>{{ trans(key="colophon_trackers", lang=lang) }}</span>
+      <span>{{ trans(key="colophon_weight", lang=lang) }} <span id="page-weight">–</span></span>
+      <span><a href="https://github.com/zukunft-ch/die-zukunft.ch" target="_blank" rel="noopener noreferrer">{{ trans(key="colophon_source", lang=lang) }}</a></span>
     </p>
   </div>
 </footer>

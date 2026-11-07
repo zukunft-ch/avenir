@@ -1,0 +1,913 @@
+// =============================================
+// System — the Nov 2026 revamp layer
+// =============================================
+// Loaded after _components so it can retire the pastel "slide deck" without
+// rewriting every page template. Principles:
+//   1. One continuous ground. The wireframe Swiss cross lives behind every page
+//      (.ground), sections are open bands separated by hairlines, not cards.
+//   2. Ink for words, light for signal. Headlines are charcoal; the brand
+//      gradient is reserved for the brandmark, the lattice and primary actions.
+//   3. Ambient annotation. Addresses, counts and states are small mono labels
+//      attached to the thing they describe (hex tags, pins, colophon).
+
+$font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+$nav-h: 4rem;
+$gutter: clamp(1.25rem, 4vw, 3rem);
+
+@mixin mono-label {
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+// Brandtype: Clash Display, lowercase, gradient fitted to the glyphs (inline-block,
+// so purple→cyan spans the word, not the container), optical tracking (tight when
+// large, neutral when small so counters don't collide), and the full stop in Swiss red.
+@mixin brandtype($tracking: -0.022em) {
+  font-family: $font-family-brandmark;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: $tracking;
+  word-spacing: -0.02em;
+  display: inline-block;
+  width: fit-content;
+  white-space: nowrap;
+  padding-bottom: 0.07em; // descender room under background-clip
+  @include gradient-text();
+  font-kerning: normal;
+  font-feature-settings: "kern" 1;
+}
+
+.brand-dot { margin-left: 0.01em; }
+
+@mixin signal-gradient($angle: 90deg) {
+  background: var(--brand-grad);
+}
+
+// ---- Ground ---------------------------------------------------------------
+html { scroll-behavior: smooth; scroll-padding-top: $nav-h + 1rem; }
+
+body {
+  background: var(--color-bg);
+  background-image: var(--ground-glow);
+  min-height: 100svh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ground {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  // --ground-p (0 → 1) is set by JS as the hero scrolls away. The lattice
+  // drifts right and recedes so long text sits on a quiet surface.
+  --ground-p: 1;
+  opacity: calc(1 - var(--ground-p) * 0.62);
+  transform: translate3d(calc(var(--ground-p) * 26vw), calc(var(--ground-p) * 4vh), 0) scale(calc(1 - var(--ground-p) * 0.18));
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+
+  canvas { width: 100%; height: 100%; display: block; }
+
+  @media (max-width: $bp-md) {
+    transform: translate3d(calc(var(--ground-p) * 30vw), 0, 0) scale(calc(1 - var(--ground-p) * 0.1));
+    opacity: calc(0.62 - var(--ground-p) * 0.4);
+  }
+}
+
+// Plasma is retired; make sure nothing paints over the ground.
+.plasma-layer { display: none !important; }
+
+// ---- Main + sections ------------------------------------------------------
+main {
+  gap: 0;
+  padding: 0;
+}
+
+.canvas {
+  min-height: auto;
+  border-radius: 0;
+  background: transparent !important;
+  padding: clamp(4.5rem, 10vw, 8rem) $gutter;
+  border-top: 1px solid var(--hairline);
+  align-items: stretch;
+  overflow: visible;
+
+  &::before, &::after { display: none; }
+
+  > .container { padding-left: 0; padding-right: 0; }
+}
+
+.canvas--content,
+.canvas--compact {
+  min-height: auto;
+  overflow: visible;
+}
+
+.canvas--content .container--narrow {
+  h2 {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--color-text);
+    font-size: $font-size-4xl;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: $space-5;
+  }
+  h3 { letter-spacing: -0.015em; }
+  p, li { font-size: $font-size-lg; line-height: 1.65; }
+}
+
+.container { max-width: 84rem; }
+.container--narrow { max-width: $max-width-text; }
+// Reading columns align to the left edge of the 84rem grid, under the headings
+.canvas > .container--narrow { margin-left: max(0px, calc((100% - 84rem) / 2)); }
+
+// ---- Section tag: hex address + pin ---------------------------------------
+.sec-tag {
+  position: absolute;
+  top: $space-5;
+  left: $gutter;
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  z-index: 2;
+
+  .hero > &, .page-hero > & { top: calc(#{$nav-h} + 0.25rem); }
+  @media (max-width: $bp-md) { .hero > &, .page-hero > & { top: 3.75rem; } }
+}
+
+.hex-anchor {
+  position: static;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  opacity: 1;
+  color: var(--color-text-faint);
+  padding: $space-2 $space-2;
+  margin: 0;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-sm;
+
+  &:hover, &:focus-visible { color: var(--color-text); background: var(--hover-bg); opacity: 1; }
+
+  @media (max-width: $bp-md) { font-size: 0.72rem; }
+}
+
+.pin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 $space-2;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color $transition-fast, background $transition-fast, border-color $transition-fast;
+
+  svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .pin-btn__label { display: none; }
+
+  &:hover, &:focus-visible { color: var(--color-text); background: var(--hover-bg); }
+
+  &[aria-pressed="true"] {
+    color: var(--color-signal);
+    svg path { fill: currentColor; }
+  }
+
+  &--labelled .pin-btn__label { display: inline; }
+}
+
+@keyframes pin-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35) rotate(-12deg); }
+  100% { transform: scale(1); }
+}
+.pin-btn.is-popping svg { animation: pin-pop 360ms $ease-out-expo; }
+
+// ---- Eyebrow / labels -----------------------------------------------------
+.eyebrow {
+  @include mono-label;
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  margin-bottom: $space-5;
+
+  &::before {
+    content: "";
+    width: 1.75rem;
+    height: 2px;
+    border-radius: 2px;
+    @include signal-gradient;
+  }
+}
+
+.subtitle-descriptor { @include mono-label; }
+
+// ---- Top bar --------------------------------------------------------------
+.topnav {
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: none;
+  height: $nav-h;
+  padding: 0 $gutter;
+  gap: $space-2;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background $transition-normal, border-color $transition-normal;
+
+  &.is-scrolled {
+    background: var(--glass-bg);
+    backdrop-filter: blur($glass-blur) saturate(1.2);
+    -webkit-backdrop-filter: blur($glass-blur) saturate(1.2);
+    border-bottom-color: var(--hairline);
+  }
+
+  @media (max-width: $bp-md) {
+    top: 0;
+    bottom: auto;
+    height: 3.5rem;
+  }
+}
+
+.topnav__brand {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  text-decoration: none;
+  color: var(--color-text);
+  margin-right: auto;
+  flex-shrink: 0;
+
+  &:hover { color: var(--color-text); }
+}
+
+.topnav__logo {
+  transform: none;
+  margin: 0;
+  pointer-events: auto;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.topnav__wordmark {
+  @include brandtype(0.012em);
+  font-size: 1.15rem;
+  padding-bottom: 0;
+
+  @media (max-width: 360px) { display: none; }
+}
+
+.topnav__links {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  margin-right: auto;
+
+  @media (max-width: $bp-lg) { display: none; }
+}
+
+.topnav__link {
+  border-radius: $radius-sm;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+
+  &.is-active {
+    background: transparent;
+    color: var(--color-text);
+    box-shadow: inset 0 -2px 0 var(--color-text);
+    border-radius: 0;
+  }
+}
+
+.topnav__actions {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.topnav__pins {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  height: 2.25rem;
+  padding: 0 $space-3;
+  border-radius: $radius-pill;
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  svg { width: 14px; height: 14px; }
+
+  &:hover { background: var(--hover-bg); }
+
+  .topnav__pins-count {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: $radius-pill;
+    display: inline-grid;
+    place-items: center;
+    background: var(--active-bg);
+    font-size: 0.7rem;
+    padding: 0 0.3rem;
+  }
+
+  &.has-pins .topnav__pins-count {
+    background: var(--color-signal);
+    color: #fff;
+  }
+
+  @media (max-width: $bp-sm) {
+    .topnav__pins-label { display: none; }
+    padding: 0 $space-2;
+  }
+}
+
+.topnav__join {
+  padding: $space-2 $space-4;
+  font-size: 0.875rem;
+
+  @media (max-width: 420px) { display: none; }
+}
+
+// Menu button replaces the old sparkle buttons (desktop + mobile)
+.menu-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+
+  &:hover { background: var(--hover-bg); }
+
+  .menu-btn__close { display: none; }
+  &.is-open .menu-btn__open { display: none; }
+  &.is-open .menu-btn__close { display: block; }
+}
+
+.sparkle-btn--desktop { display: none !important; }
+
+// Overlays sit below the bar so the menu button can close them
+.command-overlay { top: $nav-h + 0.5rem; }
+.overlay-backdrop { z-index: $z-overlay; }
+
+// ---- Page hero (all sub pages) --------------------------------------------
+.page-hero {
+  height: auto;
+  min-height: clamp(26rem, 68svh, 46rem); // svh: no jump when iOS toolbars collapse
+  border-radius: 0;
+  text-align: left;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: calc(#{$nav-h} + 4rem) $gutter clamp(3rem, 7vw, 5.5rem);
+
+  .container,
+  .container--narrow {
+    max-width: 84rem;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.page-hero__title {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--color-text);
+  font-size: clamp(2.75rem, 1.6rem + 5.2vw, 7.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  font-weight: 650;
+  max-width: 16ch;
+  margin-bottom: $space-5;
+  text-wrap: balance;
+}
+
+.page-hero__desc {
+  margin: 0;
+  max-width: 44rem;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.5rem);
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+
+.page-hero__byline { @include mono-label; opacity: 1; }
+
+.page-hero--brandmark {
+  .page-hero__title {
+    @include brandtype(-0.022em);
+    max-width: none;
+    line-height: 0.9;
+  }
+  .page-hero__desc { @include mono-label; font-size: 0.9rem; }
+}
+
+// ---- Cards ----------------------------------------------------------------
+.glass-card {
+  background: var(--color-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--hairline);
+  border-radius: $radius-md;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 1px 2px var(--shadow-color);
+
+  &:hover { transform: none; }
+}
+
+[data-theme="dark"] .glass-card { box-shadow: none; }
+
+.glass-card__icon svg { stroke: url(#icon-gradient); }
+
+// ---- Buttons --------------------------------------------------------------
+.btn--glow { box-shadow: 0 6px 24px -8px var(--brand-glow); }
+.btn--outline {
+  border-color: var(--hairline-strong);
+  &:hover { border-color: var(--color-text); }
+}
+.btn--ink {
+  background: var(--color-text);
+  color: var(--color-bg);
+  &:hover { color: var(--color-bg); }
+}
+.btn--lg { padding: $space-4 $space-7; font-size: $font-size-lg; }
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-weight: $font-weight-semibold;
+  text-decoration: none;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--hairline-strong);
+  padding-bottom: 2px;
+
+  &::after { content: "→"; transition: transform $transition-fast; }
+  &:hover { color: var(--color-text); border-bottom-color: var(--color-text); }
+  &:hover::after { transform: translateX(3px); }
+}
+
+// ---- Reading progress (replaces the side dot tracker) ---------------------
+// Editorial, not instrumental: one hairline of ink under the top bar.
+.read-progress {
+  position: fixed;
+  top: $nav-h;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: $z-overlay + 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity $transition-normal;
+
+  &.is-visible { opacity: 1; }
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--color-text);
+    opacity: 0.55;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  @media (max-width: $bp-md) { top: 3.5rem; }
+}
+
+.key-hints { display: none !important; }
+
+// ---- Footer: about left, link columns right, one quiet bottom line --------
+.footer {
+  border-top: 1px solid var(--hairline);
+  padding-top: clamp(4rem, 8vw, 6rem);
+  padding-bottom: $space-5;
+  font-size: 0.95rem;
+}
+
+.footer__main {
+  width: 100%;
+  max-width: 84rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr);
+  gap: $space-8;
+  padding-bottom: clamp(3rem, 6vw, 4.5rem);
+
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; gap: $space-7; }
+}
+
+.footer__about {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 26rem;
+}
+
+.footer__wordmark {
+  @include brandtype(-0.012em);
+  font-size: clamp(2.4rem, 1.8rem + 2vw, 3.4rem);
+  line-height: 0.95;
+  text-decoration: none;
+}
+
+.footer__subline {
+  @include mono-label;
+  margin: $space-2 0 $space-5;
+}
+
+.footer__desc {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: $space-5;
+  text-wrap: pretty;
+}
+
+.footer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: $space-5;
+  color: var(--color-text-muted);
+
+  a { color: var(--color-text); font-weight: $font-weight-semibold; text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
+
+.footer__world {
+  @include mono-label;
+  text-decoration: none;
+  border-bottom: 1px solid var(--hairline-strong);
+  padding-bottom: 2px;
+  &:hover { color: var(--color-text); border-bottom-color: var(--color-text); }
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.footer__columns {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: $space-6;
+  margin: 0;
+
+  @media (max-width: $bp-md) { grid-template-columns: 1fr 1fr; .footer__col--wide { grid-column: 1 / -1; grid-row: 2; } }
+}
+
+.footer__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-2;
+
+  a { color: var(--color-text-muted); text-decoration: none; line-height: 1.35; }
+  a:hover { color: var(--color-text); }
+}
+
+.footer__heading {
+  @include mono-label;
+  margin-bottom: $space-2;
+}
+
+.footer__bottom {
+  width: 100%;
+  max-width: 84rem;
+  margin: 0 auto;
+  padding-top: $space-4;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: $space-3 $space-6;
+  font-size: 0.8rem;
+  color: var(--color-text-faint);
+
+  @media (max-width: $bp-md) { flex-direction: column; gap: $space-3; .footer__legal, .colophon { gap: $space-2 $space-4; } }
+
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: var(--color-text); }
+}
+
+.footer__legal,
+.colophon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2 $space-5;
+}
+
+.colophon {
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+
+  span { white-space: nowrap; }
+}
+
+// ---- Pins tray ------------------------------------------------------------
+.pins-tray {
+  position: fixed;
+  top: $nav-h + 0.5rem;
+  right: $gutter;
+  z-index: $z-overlay + 3;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: calc(100svh - #{$nav-h} - 2rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--overlay-bg);
+  backdrop-filter: blur($glass-blur) saturate(1.2);
+  -webkit-backdrop-filter: blur($glass-blur) saturate(1.2);
+  border: 1px solid var(--hairline-strong);
+  border-radius: $radius-md;
+  box-shadow: 0 24px 60px -20px var(--shadow-color), 0 2px 8px var(--shadow-color);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity $transition-fast, transform $transition-normal, visibility 0s linear 150ms;
+
+  &.is-open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    visibility: visible;
+    transition: opacity $transition-fast, transform $transition-normal;
+  }
+
+  @media (max-width: $bp-md) {
+    top: 3.75rem;
+    right: 1rem;
+  }
+}
+
+.pins-tray__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-4 $space-4 $space-3;
+  border-bottom: 1px solid var(--hairline);
+
+  h2 { font-size: 1.05rem; letter-spacing: -0.01em; }
+  span { @include mono-label; }
+}
+
+.pins-tray__list {
+  list-style: none;
+  margin: 0;
+  padding: $space-2;
+  overflow-y: auto;
+}
+
+.pins-tray__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-2;
+  border-radius: $radius-sm;
+
+  &:hover { background: var(--hover-bg); }
+
+  a { color: var(--color-text); text-decoration: none; min-width: 0; }
+  a:hover { color: var(--color-text); }
+}
+
+.pins-tray__hex {
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  color: var(--color-signal);
+  letter-spacing: 0.06em;
+}
+
+.pins-tray__title {
+  display: block;
+  font-weight: $font-weight-semibold;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pins-tray__page {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pins-tray__remove {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: none;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  border-radius: $radius-sm;
+  &:hover { color: var(--color-text); background: var(--active-bg); }
+}
+
+.pins-tray__empty {
+  padding: $space-5 $space-4;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+
+  svg { width: 16px; height: 16px; vertical-align: -3px; color: var(--color-signal); }
+}
+
+.pins-tray__import {
+  margin: $space-2;
+  padding: $space-3 $space-4;
+  border-radius: $radius-sm;
+  background: var(--color-surface-2);
+  font-size: 0.9rem;
+
+  p { margin-bottom: $space-3; }
+  div { display: flex; gap: $space-2; }
+}
+
+.pins-tray__foot {
+  display: flex;
+  gap: $space-2;
+  justify-content: space-between;
+  padding: $space-3 $space-4;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.85rem;
+
+  button {
+    background: none;
+    border: none;
+    padding: $space-1 0;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font: inherit;
+    &:hover { color: var(--color-text); }
+  }
+}
+
+.pins-toast {
+  position: fixed;
+  left: 50%;
+  bottom: $space-6;
+  transform: translate(-50%, 12px);
+  z-index: $z-modal;
+  padding: $space-2 $space-4;
+  border-radius: $radius-pill;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity $transition-fast, transform $transition-normal;
+
+  &.is-visible { opacity: 1; transform: translate(-50%, 0); }
+}
+
+// Command overlay: pinned group
+.command-overlay__pins {
+  padding: 0 $space-2 $space-2;
+  border-bottom: 1px solid var(--hairline);
+  margin-bottom: $space-2;
+
+  &:empty { display: none; }
+
+  p { @include mono-label; padding: $space-2 $space-3; }
+  .command-overlay__link span { font-family: $font-mono; font-size: 0.72rem; color: var(--color-signal); margin-right: $space-2; }
+}
+
+// ---- Share overlay: pin action --------------------------------------------
+.share-overlay__pin { margin-top: $space-3; }
+
+// ---- Reveal: calmer -------------------------------------------------------
+.reveal-up { transform: translateY(14px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ground { transition: none; will-change: auto; }
+}
+
+// ---- Late overrides for legacy rules --------------------------------------
+.footer, .footer:nth-child(odd), .footer:nth-child(even) {
+  background: transparent;
+  min-height: auto;
+  text-align: left;
+}
+
+.command-overlay {
+  top: $nav-h + 0.5rem;
+  left: $gutter;
+  right: $gutter;
+  bottom: $space-4;
+  border-radius: $radius-md;
+  border-color: var(--hairline-strong);
+  clip-path: circle(1.25rem at calc(100% - 1.25rem) -2rem);
+
+  @media (max-width: $bp-md) {
+    top: 4rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    clip-path: circle(1.25rem at calc(100% - 1.25rem) -2rem);
+  }
+
+  &.is-open { clip-path: circle(150% at 50% 0%); }
+}
+.command-overlay__inner { @media (max-width: $bp-md) { padding-top: $space-5; } }
+
+// ---- Touch & iOS ------------------------------------------------------------
+// Fixes for things that only show on phones, mostly iPhone Safari.
+html { -webkit-tap-highlight-color: transparent; }
+
+// Fixed backgrounds repaint on every scroll frame on iOS; only fine pointers get them.
+@media (hover: hover) and (pointer: fine) {
+  body { background-attachment: fixed; }
+}
+
+// iOS zooms the page when a focused field is below 16px. Never let that happen.
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  font-size: max(16px, 1em);
+}
+
+// The lattice layer uses the large viewport, so toolbar show/hide never resizes it.
+.ground { bottom: auto; height: 100lvh; }
+
+// Notch / Dynamic Island / home indicator (viewport-fit=cover is set in <head>).
+.topnav {
+  padding-left: max(#{$gutter}, env(safe-area-inset-left));
+  padding-right: max(#{$gutter}, env(safe-area-inset-right));
+}
+.canvas,
+.hero.lede,
+.page-hero {
+  padding-left: max(#{$gutter}, env(safe-area-inset-left));
+  padding-right: max(#{$gutter}, env(safe-area-inset-right));
+}
+.footer { padding-bottom: calc(#{$space-5} + env(safe-area-inset-bottom)); }
+.to-top { bottom: calc(1.75rem + env(safe-area-inset-bottom)); right: max(1.75rem, env(safe-area-inset-right)); }
+.pins-toast { bottom: calc(#{$space-6} + env(safe-area-inset-bottom)); }
+
+// Scrolling inside overlays must not scroll the page behind them.
+.command-overlay__nav,
+.pins-tray__list,
+.command-overlay { overscroll-behavior: contain; }
+
+// Touch: 44px targets, and no hover states that "stick" after a tap.
+@media (pointer: coarse) {
+  .pin-btn { min-width: 44px; height: 44px; }
+  .hex-anchor { min-height: 44px; }
+  .menu-btn, .topnav__pins { min-height: 44px; }
+  .menu-btn { width: 44px; height: 44px; }
+  .pins-tray__remove { width: 44px; height: 44px; }
+  .pin-btn:active, .menu-btn:active, .topnav__pins:active { background: var(--active-bg); }
+}
+@media (hover: none) {
+  .btn:hover { transform: none; filter: none; }
+  .evidence-tile:hover { transform: none; border-color: var(--hairline); }
+  .thesis-row:hover { background: none; }
+  .thesis-row__link:hover .thesis-row__arrow { transform: none; }
+  .pillar-cell:not(:first-child):hover { background: var(--color-surface); }
+  .btn:active { filter: brightness(0.92); }
+  .evidence-tile:active, .pillar-cell:active, .thesis-row:active { background: var(--hover-bg); }
+}
+
+// Phones: the menu is one scrolling panel (full page list visible), not a
+// squeezed nested scroller between search, pins and settings.
+@media (max-width: $bp-md) {
+  .command-overlay__inner { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .command-overlay__nav-wrap { flex: none; }
+  .command-overlay__nav { flex: none; overflow: visible; }
+  .command-overlay__scroll { display: none !important; }
+  .command-overlay__link { padding-top: 0.7rem; padding-bottom: 0.7rem; }
+}

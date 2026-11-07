@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+{% import "macros/pin.html" as pin %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{#
+  The manifesto as an addressable document. Every part has a fixed hex address
+  (0x10SS) stored in content, so a thesis can be linked, cited and pinned and
+  keeps its address across revisions. New parts take the next free slot.
+#}
+{% set x = page.extra %}
+{% if lang == "en" %}{% set date_fmt = "%-d %B %Y" %}{% set date_locale = "en_GB" %}
+{% elif lang == "fr" %}{% set date_fmt = "%-d %B %Y" %}{% set date_locale = "fr_CH" %}
+{% elif lang == "it" %}{% set date_fmt = "%-d %B %Y" %}{% set date_locale = "it_CH" %}
+{% else %}{% set date_fmt = "%-d. %B %Y" %}{% set date_locale = "de_CH" %}{% endif %}
+
+<section class="page-hero manifest-hero" data-hex="0x1000" aria-labelledby="manifest-title">
+  <div class="container">
+    <p class="eyebrow">{{ trans(key="manifest_version", lang=lang) }} {{ x.version }} · <time datetime="{{ x.version_date }}">{{ x.version_date | date(format=date_fmt, locale=date_locale) }}</time></p>
+    <h1 class="page-hero__title" id="manifest-title">{{ page.title }}</h1>
+    <p class="page-hero__desc">{{ page.description }}</p>
+    <ol class="manifest-toc" aria-label="{{ trans(key='manifest_contents', lang=lang) }}">
+      <li><a href="#{{ x.preamble_hex }}"><span>{{ x.preamble_hex }}</span>{{ x.preamble_title }}</a></li>
+      {% for t in x.theses %}
+      <li><a href="#{{ t.hex }}"><span>{{ t.hex }}</span>{{ t.title }}</a></li>
+      {% endfor %}
+      <li><a href="#{{ x.commitments_hex }}"><span>{{ x.commitments_hex }}</span>{{ x.commitments_title }}</a></li>
+      <li><a href="#{{ x.not_hex }}"><span>{{ x.not_hex }}</span>{{ x.not_title }}</a></li>
+    </ol>
+  </div>
+</section>
+
+<nav class="manifest-rail" aria-label="{{ trans(key='manifest_contents', lang=lang) }}">
+  <a href="#{{ x.preamble_hex }}" data-rail="{{ x.preamble_hex }}" title="{{ x.preamble_title }}">{{ x.preamble_hex }}</a>
+  {% for t in x.theses %}<a href="#{{ t.hex }}" data-rail="{{ t.hex }}" title="{{ t.title }}">{{ t.hex }}</a>{% endfor %}
+  <a href="#{{ x.commitments_hex }}" data-rail="{{ x.commitments_hex }}" title="{{ x.commitments_title }}">{{ x.commitments_hex }}</a>
+  <a href="#{{ x.not_hex }}" data-rail="{{ x.not_hex }}" title="{{ x.not_title }}">{{ x.not_hex }}</a>
+</nav>
+
+{# ---- Preamble ---- #}
+<section class="canvas manifest-sec manifest-sec--preamble" data-hex="{{ x.preamble_hex }}" aria-labelledby="m-pre">
+  <div class="manifest-sec__grid">
+    <p class="manifest-sec__num" aria-hidden="true">00</p>
+    <div class="manifest-sec__body">
+      <h2 class="manifest-sec__title" id="m-pre">{{ x.preamble_title }}</h2>
+      <p class="manifest-sec__lead">{{ x.preamble }}</p>
+    </div>
+  </div>
+</section>
+
+{# ---- Theses ---- #}
+{% for t in x.theses %}
+<section class="canvas manifest-sec manifest-sec--thesis" data-hex="{{ t.hex }}" aria-labelledby="m-t{{ loop.index }}">
+  <div class="manifest-sec__grid">
+    <p class="manifest-sec__num" aria-hidden="true">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</p>
+    <div class="manifest-sec__body">
+      <h2 class="manifest-sec__title" id="m-t{{ loop.index }}">{{ t.title }}</h2>
+      <p class="manifest-sec__text">{{ t.text | safe }}</p>
+      {% if t.link %}<p class="manifest-sec__link"><a class="link-arrow" href="{{ get_url(path=t.link, lang=lang) }}">{{ t.link_text }}</a></p>{% endif %}
+      <div class="manifest-sec__actions">
+        {{ pin::button(url=page.permalink, hex=t.hex, title=t.title, page=page.title, lang=lang, labelled=true) }}
+        <button class="pin-btn pin-btn--labelled" type="button" data-copy-link="#{{ t.hex }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="pin-btn__label">{{ trans(key="copy_link", lang=lang) }}</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+{# ---- Commitments ---- #}
+<section class="canvas manifest-sec manifest-sec--commit" data-hex="{{ x.commitments_hex }}" aria-labelledby="m-commit">
+  <div class="manifest-sec__grid">
+    <p class="manifest-sec__num" aria-hidden="true">§</p>
+    <div class="manifest-sec__body manifest-sec__body--wide">
+      <h2 class="manifest-sec__title" id="m-commit">{{ x.commitments_title }}</h2>
+      {% if x.commitments_intro %}<p class="manifest-sec__text">{{ x.commitments_intro }}</p>{% endif %}
+      <ol class="commit-grid">
+        {% for c in x.commitments %}
+        <li class="commit">
+          <span class="commit__n">{{ loop.index }}</span>
+          <h3 class="commit__title">{{ c.title }}</h3>
+          <p class="commit__text">{{ c.text }}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+
+{# ---- What we are not ---- #}
+<section class="canvas manifest-sec manifest-sec--not" data-hex="{{ x.not_hex }}" aria-labelledby="m-not">
+  <div class="manifest-sec__grid">
+    <p class="manifest-sec__num" aria-hidden="true">≠</p>
+    <div class="manifest-sec__body">
+      <h2 class="manifest-sec__title" id="m-not">{{ x.not_title }}</h2>
+      <ul class="not-list">
+        {% for n in x.not_points %}
+        <li><strong>{{ n.title }}</strong> {{ n.text }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+{# ---- Signature + changelog ---- #}
+<section class="canvas manifest-sec manifest-sec--sign" data-hex="{{ x.sign_hex }}" aria-label="{{ trans(key='manifest_changelog', lang=lang) }}">
+  <div class="manifest-sec__grid">
+    <p class="manifest-sec__num" aria-hidden="true">∎</p>
+    <div class="manifest-sec__body">
+      <p class="manifest-sign">{{ x.signature }}</p>
+      <h2 class="manifest-log__title">{{ trans(key="manifest_changelog", lang=lang) }}</h2>
+      <ol class="manifest-log" reversed>
+        {% for c in x.changelog %}
+        <li><span class="manifest-log__v">v{{ c.version }}</span><time datetime="{{ c.date }}">{{ c.date | date(format="%Y-%m-%d") }}</time><span>{{ c.note }}</span></li>
+        {% endfor %}
+      </ol>
+      {% if page.extra.cta_text %}
+      <div class="manifest-cta">
+        <p>{{ page.extra.cta_text }}</p>
+        <a class="btn btn--glow btn--lg" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+// Rail: highlight the part currently in view
+(function() {
+  var rail = document.querySelector('.manifest-rail');
+  if (!rail || !('IntersectionObserver' in window)) return;
+  var links = {};
+  rail.querySelectorAll('[data-rail]').forEach(function(a) { links[a.getAttribute('data-rail')] = a; });
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      var hex = e.target.getAttribute('data-hex');
+      if (e.isIntersecting && links[hex]) {
+        Object.keys(links).forEach(function(k) { links[k].classList.toggle('is-active', k === hex); });
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('.manifest-sec[data-hex]').forEach(function(s) { io.observe(s); });
+  var hero = document.querySelector('.manifest-hero');
+  if (hero) new IntersectionObserver(function(e) { rail.classList.toggle('is-visible', !e[0].isIntersecting); }).observe(hero);
+})();
+</script>
+{% endblock %}

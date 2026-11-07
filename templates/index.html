@@ -1,427 +1,239 @@
 {% extends "base.html" %}
-{% import "macros/pillar_cards.html" as cards %}
 {% import "macros/icons.html" as icons %}
+{% import "macros/pin.html" as pin %}
+{% import "macros/brand.html" as brandmark %}
 
 {% block title %}{{ section.title | default(value=section.extra.hero_title | default(value=config.title)) }}{% endblock %}
 
-{% block head_extra %}{% endblock %}
-
 {% block content %}
-
-{# ===== 1. August banner — meta-slot 0x00F0, date-gated + dismissable (see script below) ===== #}
-{% if section.extra.banner_title %}
-<section class="natday-banner" id="natday-banner" data-hex="0x00F0" aria-label="{{ section.extra.banner_eyebrow }}">
-  <div class="natday-banner__inner">
-    <span class="natday-banner__flag" aria-hidden="true">🇨🇭</span>
-    <div class="natday-banner__body">
-      <p class="natday-banner__eyebrow">{{ section.extra.banner_eyebrow }}</p>
-      <p class="natday-banner__title">{{ section.extra.banner_title }}</p>
-      {% if section.extra.banner_text %}<p class="natday-banner__text">{{ section.extra.banner_text }}</p>{% endif %}
-    </div>
-    <a class="btn btn--outline natday-banner__cta" href="{{ get_url(path='@/aktuelles/1-august-2026.md', lang=lang) }}">{{ section.extra.banner_cta }}</a>
-    <button class="natday-banner__close" id="natday-close" type="button" aria-label="Close">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </button>
-  </div>
-</section>
-<script>
-(function(){
-  var el = document.getElementById('natday-banner');
-  if (!el) return;
-  var KEY = 'natday-2026-dismissed';
-  var now = new Date();
-  var start = new Date(2026, 6, 31, 0, 0, 0);
-  var end = new Date(2026, 7, 2, 23, 59, 59);
-  var inWindow = now >= start && now <= end;
-  var dismissed = false;
-  try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
-  if (inWindow && !dismissed) { el.classList.add('is-visible'); }
-  var btn = document.getElementById('natday-close');
-  if (btn) {
-    btn.addEventListener('click', function(){
-      el.classList.remove('is-visible');
-      try { localStorage.setItem(KEY, '1'); } catch (e) {}
-    });
-  }
-})();
-</script>
-{% endif %}
-
-{# ===== Hero — brandmark ===== #}
-<section class="hero" id="hero" aria-label="Hero">
-  <canvas class="hero__mesh" id="hero-mesh" aria-hidden="true"></canvas>
-  <div class="hero__display">
-    <h1 class="hero__big">
-      {% if lang == "fr" %}Le Futur.{% elif lang == "it" %}Il Futuro.{% elif lang == "en" %}The Future.{% else %}Die Zukunft.{% endif %}
-    </h1>
-    {% if section.extra.hero_subline %}
-    <p class="hero__subline" id="hero-subline">{{ section.extra.hero_subline }}</p>
-    {% endif %}
-  </div>
-</section>
-
-{# ===== Subtitle / positioning + CTA ===== #}
-<section class="canvas canvas--hex" aria-label="Subtitle">
-  <div class="container container--narrow" style="text-align: center;">
-    {% if section.extra.hero_descriptor %}
-    <p class="subtitle-descriptor">{{ section.extra.hero_descriptor }}</p>
-    {% endif %}
-    <h2>{{ section.extra.hero_subtitle | default(value="") }}</h2>
-    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
-      <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
-      <a class="btn btn--outline" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="cta_program", lang=lang) }}</a>
-    </div>
-  </div>
-</section>
-
-{# ===== What's changing — title ===== #}
-{% if section.extra.changes %}
-<section class="canvas canvas--hex canvas--compact" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
-  <div class="container container--narrow" style="text-align: center;">
-    <h2>{{ section.extra.changes_title | default(value="") }}</h2>
-    {% if section.extra.changes_intro %}
-    <p style="margin-top: 1rem; opacity: 0.85;">{{ section.extra.changes_intro }}</p>
-    {% endif %}
-  </div>
-</section>
-
-{# ===== What's changing — cards ===== #}
-<section class="canvas canvas--hex" aria-label="{{ section.extra.changes_title | default(value='What is changing') }}">
-  <div class="container">
-    <div class="bento-grid">
-      {% for item in section.extra.changes %}
-      <div class="glass-card reveal-up reveal-delay-{{ loop.index }}">
-        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
-        <h3 class="glass-card__title">{{ item.title }}</h3>
-        <p class="glass-card__text">{{ item.text }}</p>
-      </div>
-      {% endfor %}
-    </div>
-    {% if section.extra.changes_cta %}
-    <p style="text-align: center; margin-top: 2rem; font-weight: 600;">{{ section.extra.changes_cta }}</p>
-    {% endif %}
-  </div>
-</section>
-{% endif %}
-
-{# ===== What we propose — title + carousel ===== #}
-{% if section.extra.pillars %}
-<section class="canvas canvas--hex canvas--compact" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}">
-  <div class="container container--narrow" style="text-align: center;">
-    <h2>{{ section.extra.pillars_title | default(value="") }}</h2>
-  </div>
-</section>
-
-<section class="canvas canvas--carousel canvas--compact" aria-label="{{ section.extra.pillars_title | default(value='Pillars') }}" aria-roledescription="carousel">
-  <div class="carousel" id="pillar-carousel">
-    <div class="carousel__track" aria-live="off" id="carousel-track">
-      {# Duplicate cards for seamless loop #}
-      {% for item in section.extra.pillars %}
-      <div class="glass-card carousel__card" role="group" aria-roledescription="slide" aria-label="{{ item.title }}">
-        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
-        <h3 class="glass-card__title">{{ item.title }}</h3>
-        <p class="glass-card__text">{{ item.text }}</p>
-        {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
-      </div>
-      {% endfor %}
-      {% for item in section.extra.pillars %}
-      <div class="glass-card carousel__card" aria-hidden="true">
-        {% if item.icon %}<p class="glass-card__icon">{{ icons::icon(name=item.icon) }}</p>{% endif %}
-        <h3 class="glass-card__title">{{ item.title }}</h3>
-        <p class="glass-card__text">{{ item.text }}</p>
-        {% if item.link %}<a class="btn btn--sm" href="{{ get_url(path=item.link, lang=lang) }}" tabindex="-1">{{ trans(key="cta_learn_more", lang=lang) }}</a>{% endif %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{# ===== How we start (timeline) ===== #}
-{% if section.extra.timeline %}
-<section class="canvas canvas--hex" aria-label="{{ section.extra.timeline_title | default(value='Timeline') }}">
-  <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-    <h2 style="text-align: center; margin-bottom: 2rem;">{{ section.extra.timeline_title | default(value="") }}</h2>
-    <div class="timeline">
-      {% for step in section.extra.timeline %}
-      <div class="timeline__item reveal-up reveal-delay-{{ loop.index }}">
-        <div class="timeline__marker">{{ loop.index }}</div>
-        <div class="timeline__content">
-          <p class="timeline__phase">{{ step.phase }}</p>
-          <p class="timeline__title">{{ step.title }}</p>
-          <p class="timeline__text">{{ step.text }}</p>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{# ===== Latest Aktuelles teaser ===== #}
+{#
+  Homepage = a descent in layers ("Ebenen"). Each layer is complete on its own
+  and links one level deeper:
+    0  Haltung   — brandmark, claim, the trio            (hero, 0x0000)
+    1  Thesen    — the manifesto in ten sentences        (0x0001)
+    1  Alltag    — what changes in everyday life          (0x0002)
+    2  Programm  — twelve pillars, all visible at once    (0x0003)
+    –  Horizont  — Basel → Schweiz → Europa → Welt        (0x0004)
+    3  Belege    — lab, news, votes                       (0x0005)
+    –  Mitmachen                                          (0x0006)
+  Addresses are explicit (data-hex) so they stay stable if a layer is added.
+#}
+{% if lang == "fr" %}{% set brand = "Le Futur." %}{% elif lang == "it" %}{% set brand = "Il Futuro." %}{% elif lang == "en" %}{% set brand = "The Future." %}{% else %}{% set brand = "Die Zukunft." %}{% endif %}
+{% if lang == "de" %}{% set mpath = "manifest.md" %}{% else %}{% set mpath = "manifest." ~ lang ~ ".md" %}{% endif %}
+{% set manifest = get_page(path=mpath) %}
+{% set theses = manifest.extra.theses | default(value=[]) %}
 {% set news = get_section(path="aktuelles/_index.md", lang=lang) %}
-{% if news.pages | length > 0 %}
-{% set latest = news.pages | first %}
-<section class="canvas canvas--hex" aria-label="{{ trans(key='nav_aktuelles', lang=lang) }}">
-  <div class="container container--narrow" style="text-align: center;">
-    <p class="subtitle-descriptor">{{ trans(key="nav_aktuelles", lang=lang) }}</p>
-    <h2 style="margin-top: 0.75rem;">
-      <a href="{{ latest.permalink }}" style="color: inherit; text-decoration: none;">{{ latest.title }}</a>
-    </h2>
-    {% if latest.date %}<time datetime="{{ latest.date }}" style="display: block; margin-top: 0.5rem; opacity: 0.7; font-size: 0.95rem;">{{ latest.date | date(format="%d.%m.%Y") }}</time>{% endif %}
-    {% if latest.description %}<p style="margin-top: 1.25rem; opacity: 0.85;">{{ latest.description }}</p>{% endif %}
-    <div style="margin-top: 2rem;">
-      <a class="btn btn--outline" href="{{ latest.permalink }}">{{ trans(key="cta_learn_more", lang=lang) }}</a>
+{% set notes = get_section(path="zukunftslabor/notizen/_index.md", lang=lang) %}
+{% set home_url = get_url(path='@/_index.md', lang=lang) %}
+{% set x = section.extra %}
+
+{# ===== 0x0000 · Ebene 0 — Haltung ===== #}
+<section class="hero lede" id="hero" data-hex="0x0000" aria-labelledby="lede-title">
+  <div class="lede__inner">
+    <p class="eyebrow lede__kicker">{{ x.hero_descriptor }}</p>
+    <h1 class="lede__title" id="lede-title">
+      <span class="lede__brand wm">{{ brandmark::wordmark(lang=lang) }}</span>
+      <span class="lede__claim">{{ x.hero_claim }}</span>
+    </h1>
+    <p class="lede__lead">{{ x.hero_lead }}</p>
+
+    <ol class="lede__trio" aria-label="{{ x.trio_label }}">
+      {% for t in x.hero_trio %}
+      <li><span class="lede__trio-n" aria-hidden="true">0{{ loop.index }}</span><span>{{ t }}</span></li>
+      {% endfor %}
+    </ol>
+
+    <div class="lede__actions">
+      <a class="btn btn--glow btn--lg" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      <a class="link-arrow" href="{{ manifest.permalink }}">{{ x.hero_manifest_cta }}</a>
     </div>
-    <p style="margin-top: 1.25rem;">
-      <a href="{{ news.permalink }}" style="font-size: 0.95rem;">{{ trans(key="news_all", lang=lang) }} →</a>
-    </p>
+  </div>
+
+  {# Ambient annotations: true facts attached to the lattice, desktop only #}
+  <p class="lede__annot lede__annot--a" aria-hidden="true"><span>47.5596° N · 7.5886° E</span><span>Basel</span></p>
+  <p class="lede__annot lede__annot--b" aria-hidden="true"><span>{{ trans(key="manifest_version", lang=lang) }} {{ manifest.extra.version }}</span><span>DE · FR · IT · EN</span></p>
+
+  <div class="lede__foot">
+    {% if news.pages | length > 0 %}{% set latest = news.pages | first %}
+    <a class="lede__pinned" href="{{ latest.permalink }}">
+      <span class="lede__pinned-label">{{ pin::icon() }} {{ trans(key="pinned_by_us", lang=lang) }}</span>
+      <span class="lede__pinned-title">{{ latest.title }}</span>
+    </a>
+    {% endif %}
+    <a class="lede__depth" href="#0x0001">
+      <span class="lede__depth-arrow" aria-hidden="true">↓</span>
+      <span>{{ trans(key="depth_deeper", lang=lang) }}</span>
+      <span class="lede__depth-counts">{{ theses | length }} {{ trans(key="depth_theses", lang=lang) }} · {{ x.pillars | length }} {{ trans(key="depth_pillars", lang=lang) }}{% if notes.pages | length > 0 %} · {{ notes.pages | length }} {{ trans(key="depth_notes", lang=lang) }}{% endif %}</span>
+    </a>
+  </div>
+</section>
+
+{# ===== 0x0001 · Ebene 1 — Thesen ===== #}
+{% if theses | length > 0 %}
+<section class="canvas layer theses" data-hex="0x0001" aria-labelledby="theses-title">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.theses_eyebrow }}</p>
+      <h2 class="layer__title" id="theses-title">{{ x.theses_title }}</h2>
+      <p class="layer__intro">{{ x.theses_intro }}</p>
+    </header>
+    <ol class="theses__list">
+      {% for t in theses %}
+      <li class="thesis-row reveal-up">
+        <a class="thesis-row__link" href="{{ manifest.permalink }}#{{ t.hex }}">
+          <span class="thesis-row__hex">{{ t.hex }}</span>
+          <span class="thesis-row__title">{{ t.title }}</span>
+          <span class="thesis-row__arrow" aria-hidden="true">→</span>
+        </a>
+        {{ pin::button(url=manifest.permalink, hex=t.hex, title=t.title, page=manifest.title, lang=lang) }}
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="layer__more"><a class="link-arrow" href="{{ manifest.permalink }}">{{ x.theses_cta }}</a></p>
   </div>
 </section>
 {% endif %}
 
-{# ===== CTA — get involved ===== #}
-{% if section.extra.cta_title %}
-<section class="canvas cta-section" aria-label="{{ section.extra.cta_title }}">
-  <div class="container container--narrow" style="text-align: center;">
-    <h2>{{ section.extra.cta_title }}</h2>
-    {% if section.extra.cta_text %}
-    <p class="cta-section__text">{{ section.extra.cta_text }}</p>
-    {% endif %}
-    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-      <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
-      <a class="btn btn--outline" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ trans(key="cta_program", lang=lang) }}</a>
+{# ===== 0x0002 · Ebene 1 — Alltag ===== #}
+{% if x.changes %}
+<section class="canvas layer changes" data-hex="0x0002" aria-labelledby="changes-title">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.changes_eyebrow }}</p>
+      <h2 class="layer__title" id="changes-title">{{ x.changes_title }}</h2>
+      {% if x.changes_intro %}<p class="layer__intro">{{ x.changes_intro }}</p>{% endif %}
+    </header>
+    <div class="changes__grid">
+      {% for item in x.changes %}
+      <article class="change-tile reveal-up reveal-delay-{{ loop.index }}">
+        <span class="change-tile__icon">{{ icons::icon(name=item.icon) }}</span>
+        <h3 class="change-tile__title">{{ item.title }}</h3>
+        <p class="change-tile__text">{{ item.text }}</p>
+      </article>
+      {% endfor %}
+    </div>
+    {% if x.changes_cta %}<p class="changes__cta">{{ x.changes_cta }}</p>{% endif %}
+  </div>
+</section>
+{% endif %}
+
+{# ===== 0x0003 · Ebene 2 — Programm ===== #}
+{% if x.pillars %}
+<section class="canvas layer pillars" data-hex="0x0003" aria-labelledby="pillars-title">
+  <div class="container">
+    <header class="layer__head layer__head--split">
+      <div>
+        <p class="eyebrow">{{ x.pillars_eyebrow }}</p>
+        <h2 class="layer__title" id="pillars-title">{{ x.pillars_title }}</h2>
+      </div>
+      <p class="layer__intro">{{ x.pillars_intro }}</p>
+    </header>
+    <ul class="pillar-grid">
+      {% for item in x.pillars %}
+      {% set purl = get_url(path=item.link, lang=lang) %}
+      <li class="pillar-cell reveal-up">
+        <a class="pillar-cell__link" href="{{ purl }}">
+          <span class="pillar-cell__hex">{{ item.hex }}</span>
+          <span class="pillar-cell__icon">{{ icons::icon(name=item.icon) }}</span>
+          <span class="pillar-cell__title">{{ item.title }}</span>
+          <span class="pillar-cell__text">{{ item.text }}</span>
+        </a>
+        {{ pin::button(url=purl, hex=item.hex ~ "00", title=item.title, page=trans(key="nav_programm", lang=lang), lang=lang) }}
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="layer__more"><a class="link-arrow" href="{{ get_url(path='@/programm.md', lang=lang) }}">{{ x.pillars_cta }}</a></p>
+  </div>
+</section>
+{% endif %}
+
+{# ===== 0x0004 · Horizont ===== #}
+{% if x.timeline %}
+<section class="canvas layer horizon" data-hex="0x0004" aria-labelledby="horizon-title">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.horizon_eyebrow }}</p>
+      <h2 class="layer__title" id="horizon-title">{{ x.timeline_title }}</h2>
+      {% if x.horizon_intro %}<p class="layer__intro">{{ x.horizon_intro }}</p>{% endif %}
+    </header>
+    <ol class="horizon__track">
+      {% for step in x.timeline %}
+      <li class="horizon__step{% if loop.first %} is-now{% endif %} reveal-up reveal-delay-{{ loop.index }}" style="--i: {{ loop.index }}">
+        <span class="horizon__ring" aria-hidden="true"></span>
+        <p class="horizon__phase">{{ step.phase }}{% if loop.first %} <span class="horizon__now">{{ trans(key="horizon_now", lang=lang) }}</span>{% endif %}</p>
+        <h3 class="horizon__title">{{ step.title }}</h3>
+        <p class="horizon__text">{{ step.text }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endif %}
+
+{# ===== 0x0005 · Ebene 3 — Belege ===== #}
+<section class="canvas layer evidence" data-hex="0x0005" aria-labelledby="evidence-title">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.evidence_eyebrow }}</p>
+      <h2 class="layer__title" id="evidence-title">{{ x.evidence_title }}</h2>
+      <p class="layer__intro">{{ x.evidence_intro }}</p>
+    </header>
+    <div class="evidence__grid">
+      {% if news.pages | length > 0 %}{% set latest = news.pages | first %}
+      <a class="evidence-tile evidence-tile--wide" href="{{ latest.permalink }}">
+        <span class="evidence-tile__label">{{ trans(key="nav_aktuelles", lang=lang) }}{% if latest.date %} · <time datetime="{{ latest.date }}">{{ latest.date | date(format="%d.%m.%Y") }}</time>{% endif %}</span>
+        <span class="evidence-tile__title">{{ latest.title }}</span>
+        {% if latest.description %}<span class="evidence-tile__text">{{ latest.description }}</span>{% endif %}
+        <span class="evidence-tile__go">{{ trans(key="cta_learn_more", lang=lang) }} →</span>
+      </a>
+      {% endif %}
+      <a class="evidence-tile" href="{{ get_url(path='@/zukunftslabor/_index.md', lang=lang) }}">
+        <span class="evidence-tile__label">{{ trans(key="nav_zukunftslabor", lang=lang) }}{% if notes.pages | length > 0 %} · {{ notes.pages | length }} {{ trans(key="depth_notes", lang=lang) }}{% endif %}</span>
+        <span class="evidence-tile__title">{{ x.evidence_lab_title }}</span>
+        <span class="evidence-tile__text">{{ x.evidence_lab_text }}</span>
+        <span class="evidence-tile__go">{{ trans(key="cta_learn_more", lang=lang) }} →</span>
+      </a>
+      <a class="evidence-tile" href="{{ get_url(path='@/abstimmungen.md', lang=lang) }}">
+        <span class="evidence-tile__label">{{ trans(key="nav_abstimmungen", lang=lang) }}</span>
+        <span class="evidence-tile__title">{{ x.evidence_votes_title }}</span>
+        <span class="evidence-tile__text">{{ x.evidence_votes_text }}</span>
+        <span class="evidence-tile__go">{{ trans(key="cta_learn_more", lang=lang) }} →</span>
+      </a>
+    </div>
+    <p class="layer__more"><a class="link-arrow" href="{{ news.permalink }}">{{ trans(key="news_all", lang=lang) }}</a></p>
+  </div>
+</section>
+
+{# ===== 0x0006 · Mitmachen ===== #}
+{% if x.cta_title %}
+<section class="canvas layer join" data-hex="0x0006" aria-labelledby="join-title">
+  <div class="container">
+    <p class="eyebrow">{{ x.cta_title }}</p>
+    <h2 class="join__statement" id="join-title">{{ x.cta_statement }}</h2>
+    {% if x.cta_text %}<p class="join__text">{{ x.cta_text }}</p>{% endif %}
+    <div class="join__actions">
+      <a class="btn btn--glow btn--lg" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+      <a class="btn btn--outline btn--lg" href="https://opencollective.com/die-zukunft" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_donate", lang=lang) }}</a>
+      <a class="link-arrow" href="https://collective.die-zukunft.ch" target="_blank" rel="noopener noreferrer">{{ trans(key="footer_collective", lang=lang) }}</a>
     </div>
   </div>
 </section>
 {% endif %}
 
 <script>
-(function() {
-  var canvas = document.getElementById('hero-mesh');
-  if (!canvas) return;
-  SwissCross.create(canvas, { cameraZ: 22, cubeSize: 0.88, fov: 35 });
-})();
-
-// Hero subline — page starts locked, first scroll gesture reveals subline, then unlocks
-(function() {
-  var subline = document.getElementById('hero-subline');
-  var hero = document.getElementById('hero');
-  if (!subline || !hero) return;
-  var done = false;
-  var root = document.documentElement;
-
-  // Reduced-motion: don't lock scroll or stage the reveal — just show the
-  // subline and let the page scroll freely from the start.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    subline.classList.add('is-visible');
-    return;
-  }
-
-  // Lock scroll immediately on page load
-  root.style.overflow = 'hidden';
-
-  function unlock() {
-    root.style.overflow = '';
-  }
-
-  function reveal() {
-    if (done) return;
-    done = true;
-    subline.classList.add('is-visible');
-    setTimeout(function() {
-      unlock();
-      cleanup();
-    }, 800);
-  }
-
-  function cleanup() {
-    window.removeEventListener('wheel', onWheel);
-    window.removeEventListener('touchstart', onRevealTouch);
-    window.removeEventListener('keydown', onKeyDown);
-  }
-
-  function onWheel(e) {
-    if (done) return;
-    if (e.deltaY > 0) {
-      e.preventDefault();
-      reveal();
-    }
-  }
-  function onRevealTouch(e) {
-    if (done) return;
-    reveal();
-  }
-  function onKeyDown(e) {
-    if (done) return;
-    var keys = ['ArrowDown', 'PageDown', ' '];
-    if (keys.indexOf(e.key) !== -1) {
-      e.preventDefault();
-      reveal();
-    }
-  }
-
-  window.addEventListener('wheel', onWheel, { passive: false });
-  window.addEventListener('touchstart', onRevealTouch, { passive: true });
-  window.addEventListener('keydown', onKeyDown);
-})();
-
-// Reveal-on-scroll
+// Reveal-on-scroll (progressive: content is visible without JS via <noscript> rule)
 (function() {
   var els = document.querySelectorAll('.reveal-up');
-  if (!els.length) return;
+  if (!els.length || !('IntersectionObserver' in window)) {
+    els.forEach(function(el) { el.classList.add('is-visible'); });
+    return;
+  }
   var io = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
-      if (e.isIntersecting) {
-        e.target.classList.add('is-visible');
-        io.unobserve(e.target);
-      }
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.12 });
   els.forEach(function(el) { io.observe(el); });
 })();
-
-// Pillar carousel — continuous slow scroll, swipeable by touch/mouse drag
-(function() {
-  var track = document.querySelector('.carousel__track');
-  if (!track) return;
-  var cards = track.children;
-  var half = cards.length / 2;
-  var totalWidth = 0;
-  for (var i = 0; i < half; i++) {
-    totalWidth += cards[i].offsetWidth;
-  }
-  var gap = parseFloat(getComputedStyle(track).gap) || 24;
-  totalWidth += gap * half;
-
-  var pos = 0;
-  // Respect reduced-motion: the global CSS rule can't stop a JS RAF transform,
-  // so disable the continuous auto-scroll here (drag/swipe still works).
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var speed = reduceMotion ? 0 : 0.5;
-  var raf;
-  var dragging = false;
-  var hoverPaused = false;
-  var offscreen = false;
-
-  // Drag/swipe state
-  var dragStartX = 0;
-  var dragStartY = 0;
-  var dragStartPos = 0;
-  var dragLocked = false;   // true once we know it's a horizontal swipe
-  var dragRejected = false; // true once we know it's a vertical scroll
-  var lastX = 0;
-  var lastTime = 0;
-  var velocity = 0;
-
-  function isRunning() { return !dragging && !hoverPaused && !offscreen; }
-
-  function wrapPos() { while (pos > 0) pos -= totalWidth; while (pos < -totalWidth) pos += totalWidth; }
-
-  function animate() {
-    raf = requestAnimationFrame(animate);
-    if (!dragging) {
-      if (Math.abs(velocity) > 0.3) {
-        pos += velocity;
-        velocity *= 0.95;
-        wrapPos();
-      } else {
-        velocity = 0;
-        pos -= speed;
-        wrapPos();
-      }
-    }
-    track.style.transform = 'translateX(' + pos + 'px)';
-  }
-
-  function start() { if (!raf) animate(); }
-  function stop() { cancelAnimationFrame(raf); raf = null; }
-
-  function sync() { isRunning() ? start() : stop(); }
-
-  // Pointer helpers (unified touch + mouse)
-  function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
-  function getY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
-
-  function onDragStart(e) {
-    dragging = true;
-    dragLocked = false;
-    dragRejected = false;
-    dragStartX = getX(e);
-    dragStartY = getY(e);
-    dragStartPos = pos;
-    lastX = dragStartX;
-    lastTime = Date.now();
-    velocity = 0;
-    track.style.cursor = 'grabbing';
-    sync();
-  }
-
-  function onDragMove(e) {
-    if (!dragging || dragRejected) return;
-    var cx = getX(e);
-    var cy = getY(e);
-    var dx = cx - dragStartX;
-    var dy = cy - dragStartY;
-
-    if (!dragLocked) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-      if (Math.abs(dy) > Math.abs(dx)) {
-        dragRejected = true;
-        dragging = false;
-        track.style.cursor = '';
-        sync();
-        return;
-      }
-      dragLocked = true;
-    }
-
-    if (e.cancelable) e.preventDefault();
-    var now = Date.now();
-    var dt = now - lastTime;
-    if (dt > 0) velocity = (cx - lastX) / dt * 16;
-    lastX = cx;
-    lastTime = now;
-    pos = dragStartPos + dx;
-    wrapPos();
-    track.style.transform = 'translateX(' + pos + 'px)';
-  }
-
-  function onDragEnd() {
-    if (!dragging && !dragLocked) return;
-    dragging = false;
-    dragLocked = false;
-    track.style.cursor = '';
-    sync();
-  }
-
-  // Touch events
-  track.addEventListener('touchstart', function(e) { onDragStart(e); }, { passive: true });
-  track.addEventListener('touchmove', function(e) { onDragMove(e); }, { passive: false });
-  track.addEventListener('touchend', onDragEnd);
-  track.addEventListener('touchcancel', onDragEnd);
-
-  // Mouse drag
-  track.addEventListener('mousedown', function(e) { e.preventDefault(); onDragStart(e); });
-  document.addEventListener('mousemove', function(e) { if (dragging) onDragMove(e); });
-  document.addEventListener('mouseup', onDragEnd);
-
-  // Pause on hover (non-drag)
-  track.addEventListener('mouseenter', function() { if (!dragging) { hoverPaused = true; sync(); } });
-  track.addEventListener('mouseleave', function() { hoverPaused = false; sync(); });
-
-  // Pause when not visible
-  var section = track.closest('.canvas--carousel');
-  if (section) {
-    var io = new IntersectionObserver(function(entries) {
-      offscreen = !entries[0].isIntersecting;
-      sync();
-    }, { threshold: 0 });
-    io.observe(section);
-  } else {
-    sync();
-  }
-})();
 </script>
-
 {% endblock %}
