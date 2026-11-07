@@ -2,6 +2,7 @@
 {% import "macros/icons.html" as icons %}
 {% import "macros/pin.html" as pin %}
 {% import "macros/brand.html" as brandmark %}
+{% import "macros/maps.html" as maps %}
 
 {% block title %}{{ section.title | default(value=section.extra.hero_title | default(value=config.title)) }}{% endblock %}
 
@@ -159,7 +160,7 @@
     <ol class="horizon__track">
       {% for step in x.timeline %}
       <li class="horizon__step{% if loop.first %} is-now{% endif %} reveal-up reveal-delay-{{ loop.index }}" style="--i: {{ loop.index }}">
-        <span class="horizon__ring" aria-hidden="true"></span>
+        <div class="horizon__tile horizon__tile--{{ step.map | default(value='none') }}">{% if step.map %}{{ maps::map(name=step.map) }}{% endif %}{% if step.area %}<span class="horizon__area">{{ step.area }}</span>{% endif %}{% if step.reach %}<span class="horizon__reach">{{ step.reach }}</span>{% endif %}</div>
         <p class="horizon__phase">{{ step.phase }}{% if loop.first %} <span class="horizon__now">{{ trans(key="horizon_now", lang=lang) }}</span>{% endif %}</p>
         <h3 class="horizon__title">{{ step.title }}</h3>
         <p class="horizon__text">{{ step.text }}</p>

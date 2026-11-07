@@ -747,20 +747,38 @@
     update();
   })();
 
-  // Colophon: what this page weighs, measured in the reader's own browser
+  // Colophon: what this page weighs, measured in the reader's own browser.
+  // 1) Resource Timing (Chrome/Firefox). 2) Fallback for Safari / service-worker
+  // responses, which report 0: re-read the same-origin files from the local cache
+  // and add up their sizes (uncompressed, so shown as "≈"). 3) If neither works,
+  // hide the item instead of showing a dash.
   (function() {
     var el = document.getElementById('page-weight');
-    if (!el || !window.performance || !performance.getEntriesByType) return;
-    function size(e) { return Math.max(e.transferSize || 0, e.encodedBodySize || 0); }
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        var total = 0;
-        var nav = performance.getEntriesByType('navigation')[0];
-        if (nav) total += size(nav);
-        performance.getEntriesByType('resource').forEach(function(r) { total += size(r); });
-        if (total > 0) el.textContent = Math.round(total / 1024) + ' kB';
-      }, 300);
-    });
+    if (!el) return;
+    var item = el.parentNode;
+    function show(bytes, approx) { el.textContent = (approx ? '≈ ' : '') + Math.round(bytes / 1024) + ' kB'; item.hidden = false; }
+    function hide() { item.hidden = true; }
+    function measure() {
+      if (!window.performance || !performance.getEntriesByType) return hide();
+      var entries = [performance.getEntriesByType('navigation')[0]].concat(performance.getEntriesByType('resource')).filter(Boolean);
+      var total = 0;
+      entries.forEach(function(e) { total += Math.max(e.transferSize || 0, e.encodedBodySize || 0); });
+      if (total > 2048) return show(total, false);
+      if (!window.fetch) return hide();
+      var seen = {}, urls = [window.location.href.split('#')[0]].concat(entries.map(function(e) { return e.name; }))
+        .filter(function(u) { if (u.indexOf(window.location.origin) !== 0 || seen[u]) return false; seen[u] = 1; return true; });
+      Promise.all(urls.map(function(u) {
+        return fetch(u, { cache: 'force-cache', credentials: 'same-origin' }).then(function(r) { return r.blob(); }).then(function(b) { return b.size; }, function() { return 0; });
+      })).then(function(sizes) {
+        var t = sizes.reduce(function(a, b) { return a + b; }, 0);
+        t > 2048 ? show(t, true) : hide();
+      }, hide);
+    }
+    function later() {
+      var go = function() { setTimeout(measure, 600); };
+      (document.fonts && document.fonts.ready) ? document.fonts.ready.then(go, go) : go();
+    }
+    document.readyState === 'complete' ? later() : window.addEventListener('load', later);
   })();
   </script>
 
@@ -810,6 +828,7 @@
       'aktuelles/platz-1-ist-kein-plan': 0x50, 'aktuelles/abstimmung-14-juni-2026': 0x51,
       'aktuelles/der-engpass-sind-die-daten': 0x52, 'aktuelles/1-august-2026': 0x53,
       'aktuelles/abstimmung-27-september-2026': 0x54, 'aktuelles/abstimmung-29-november-2026': 0x55,
+      'aktuelles/neues-gesicht': 0x56,
       'impressum': 0xF0, 'datenschutz': 0xF1,
       'info': 0xF2, 'aktuelles/_index': 0xF3
     };

@@ -911,3 +911,15 @@ select {
   .command-overlay__scroll { display: none !important; }
   .command-overlay__link { padding-top: 0.7rem; padding-bottom: 0.7rem; }
 }
+
+// Images inside articles: framed like a print, never wider than the column.
+.canvas--content .container--narrow img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: $space-6 0 $space-5;
+  border-radius: $radius-md;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 12px 32px -18px var(--shadow-color);
+  background: var(--color-surface);
+}
