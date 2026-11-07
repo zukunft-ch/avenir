@@ -15,7 +15,10 @@
     "addressLocality": "Basel",
     "addressCountry": "CH"
   },
-  "sameAs": [],
+  "slogan": "Wohlstand statt Mangeldenken. Sicherheit statt Angst. Souveränität statt Abhängigkeit.",
+  "description": "Neue Schweizer Partei aus Basel: KI und Robotik sollen Wohlstand für alle schaffen. Eigene Rechenkraft, souveräne KI, Talent, Produktion im Land und eine Dividende für alle.",
+  "knowsAbout": ["Artificial intelligence policy", "Sovereign AI", "Compute infrastructure", "Robotics and automation", "Reindustrialisation", "Universal basic income", "Digital sovereignty", "Open government", "Housing policy", "Energy resilience", "Swiss neutrality"],
+  "sameAs": ["https://github.com/zukunft-ch", "https://collective.die-zukunft.ch", "https://opencollective.com/die-zukunft", "https://the-future.world", "https://le-futur.ch", "https://il-futuro.ch"],
   "foundingLocation": {
     "@type": "Place",
     "name": "Basel, Switzerland"
@@ -35,6 +38,7 @@
   "url": "{{ config.base_url | trim_end_matches(pat='/') | safe }}",
   "inLanguage": "{{ lang }}",
   "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
+  "license": "https://creativecommons.org/licenses/by/4.0/",
   "potentialAction": {
     "@type": "SearchAction",
     "target": "{{ config.base_url | trim_end_matches(pat='/') | safe }}{% if lang != 'de' %}/{{ lang }}{% endif %}/#search={search_term_string}",
@@ -59,8 +63,9 @@
   "mainEntityOfPage": {{ url | json_encode() | safe }},
   "speakable": {
     "@type": "SpeakableSpecification",
-    "cssSelector": [".page-hero__title", ".page-hero__desc", ".hero__big", ".hero__subline"]
-  }
+    "cssSelector": [".page-hero__title", ".page-hero__desc", ".lede__claim", ".lede__lead", ".lede__trio"]
+  },
+  "license": "https://creativecommons.org/licenses/by/4.0/"
 }
 </script>
 {% endmacro %}
@@ -146,6 +151,28 @@
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
+}
+</script>
+{% endmacro %}
+
+{# ---- NewsArticle — dated posts (Aktuelles) ---- #}
+{% macro article(page, lang) %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": {{ page.title | json_encode() | safe }},
+  "description": {{ page.description | default(value="") | json_encode() | safe }},
+  "datePublished": "{{ page.date }}",
+  "dateModified": "{{ page.updated | default(value=page.date) }}",
+  "inLanguage": "{{ lang }}",
+  "url": {{ page.permalink | json_encode() | safe }},
+  "mainEntityOfPage": {{ page.permalink | json_encode() | safe }},
+  {% if page.extra.og_image %}"image": "{{ get_url(path=page.extra.og_image) }}",{% endif %}
+  "author": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
+  "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by/4.0/"
 }
 </script>
 {% endmacro %}

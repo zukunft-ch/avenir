@@ -3,6 +3,7 @@
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% if page.date and page.components is containing("aktuelles") %}{{ jsonld::article(page=page, lang=lang) }}{% endif %}
 {% if page.extra.faq is defined %}
 {{ jsonld::faqpage(faq_items=page.extra.faq) }}
 {% endif %}
