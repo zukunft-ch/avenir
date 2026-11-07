@@ -1,0 +1,6 @@
+{#
+  The wordmark, split into parts so the brandtype can style them independently:
+  .wm-a (article), .wm-b (noun), .brand-dot (full stop). Source text is title case;
+  CSS lowercases it by default.
+#}
+{% macro wordmark(lang) %}{% if lang == "fr" %}{% set a = "Le" %}{% set b = "Futur" %}{% elif lang == "it" %}{% set a = "Il" %}{% set b = "Futuro" %}{% elif lang == "en" %}{% set a = "The" %}{% set b = "Future" %}{% else %}{% set a = "Die" %}{% set b = "Zukunft" %}{% endif %}<span class="wm-a">{{ a }}</span> <span class="wm-b">{{ b }}</span><span class="brand-dot">.</span>{% endmacro wordmark %}

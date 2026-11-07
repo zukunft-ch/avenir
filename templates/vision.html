@@ -1,55 +1,210 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/pin.html" as pin %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
 {% endblock %}
 
 {% block content %}
-{# ===== Page hero ===== #}
-<section class="page-hero page-hero--brandmark" aria-label="{{ page.title }}">
-  <div class="container container--narrow">
-    <h1 class="page-hero__title">{{ page.title }}.</h1>
-    {% if page.description %}
-    <p class="page-hero__desc">{{ page.description }}</p>
-    {% endif %}
+{#
+  Vision = the argument in one page, built as a stack:
+    0x0100 hero · 0x0101 shift (what is happening) · 0x0102 outcomes (CH 2040)
+    0x0103 stack (the layers) · 0x0104 sectors (1/2/3) · 0x0105 guardrails
+    0x0106 why Switzerland · 0x0107 why us · 0x0108 targets · 0x0109 sources
+  Addresses are explicit and permanent.
+#}
+{% set x = page.extra %}
+
+<section class="page-hero page-hero--brandmark vision-hero" data-hex="0x0100" aria-labelledby="vision-title">
+  <div class="container">
+    <p class="eyebrow">{{ x.kicker }}</p>
+    <h1 class="page-hero__title wm wm--word" id="vision-title">{{ page.title }}<span class="brand-dot">.</span></h1>
+    <p class="vision-hero__lead">{{ x.lead }}</p>
+    <p class="vision-hero__sub">{{ page.description }}</p>
   </div>
 </section>
 
-{# ===== Sections — each its own canvas ===== #}
-{% if page.extra.sections %}
-  {% for sec in page.extra.sections %}
-  <section class="canvas canvas--content" aria-label="{{ sec.title }}">
-    <div class="container container--narrow">
-      <h2>{{ sec.title }}</h2>
-      <p>{{ sec.text }}</p>
-      {% if sec.points is defined %}
-      <ul>
-        {% for point in sec.points %}
-        <li>{{ point }}</li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-      {% if sec.subsections is defined %}
-        {% for sub in sec.subsections %}
-        <h3>{{ sub.title }}</h3>
-        <p>{{ sub.text }}</p>
-        {% endfor %}
-      {% endif %}
+{# ---- 0x0101 What is happening ---- #}
+<section class="canvas layer" data-hex="0x0101" aria-labelledby="v-shift">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.shift_eyebrow }}</p>
+      <h2 class="layer__title" id="v-shift">{{ x.shift_title }}</h2>
+      <p class="layer__intro">{{ x.shift_intro }}</p>
+    </header>
+    <div class="shift-grid">
+      {% for s in x.shift %}
+      <article class="shift-card reveal-up">
+        <p class="shift-card__figure">{{ s.figure }}</p>
+        <h3 class="shift-card__title">{{ s.title }}</h3>
+        <p class="shift-card__text">{{ s.text | safe }}</p>
+        {% if s.source %}<p class="shift-card__src"><a href="{{ s.source_url }}" target="_blank" rel="noopener noreferrer">{{ s.source }}</a></p>{% endif %}
+      </article>
+      {% endfor %}
     </div>
-  </section>
-  {% endfor %}
-{% endif %}
+    {% if x.shift_note %}<p class="vision-note">{{ x.shift_note | safe }}</p>{% endif %}
+  </div>
+</section>
 
-{# ===== CTA ===== #}
-{% if page.extra.show_cta %}
-<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
-  <div class="container container--narrow" style="text-align: center;">
-    {% if page.extra.cta_text is defined %}
-    <p class="cta-section__text">{{ page.extra.cta_text }}</p>
+{# ---- 0x0102 Switzerland 2040 ---- #}
+<section class="canvas layer" data-hex="0x0102" aria-labelledby="v-out">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.outcomes_eyebrow }}</p>
+      <h2 class="layer__title" id="v-out">{{ x.outcomes_title }}</h2>
+      <p class="layer__intro">{{ x.outcomes_intro }}</p>
+    </header>
+    <ol class="outcomes">
+      {% for o in x.outcomes %}
+      <li class="outcome reveal-up">
+        <span class="outcome__n" aria-hidden="true">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
+        <h3 class="outcome__title">{{ o.title }}</h3>
+        <p class="outcome__text">{{ o.text }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{# ---- 0x0103 The stack ---- #}
+<section class="canvas layer" data-hex="0x0103" aria-labelledby="v-stack">
+  <div class="container">
+    <header class="layer__head layer__head--split">
+      <div>
+        <p class="eyebrow">{{ x.stack_eyebrow }}</p>
+        <h2 class="layer__title" id="v-stack">{{ x.stack_title }}</h2>
+      </div>
+      <p class="layer__intro">{{ x.stack_intro }}</p>
+    </header>
+    <ol class="stack" reversed>
+      {% for l in x.stack %}
+      <li class="stack__layer reveal-up" style="--depth: {{ loop.index0 }}">
+        <span class="stack__n">{{ l.layer }}</span>
+        <div class="stack__body">
+          <h3 class="stack__title">{{ l.title }}</h3>
+          <p class="stack__text">{{ l.text }}</p>
+        </div>
+        {% if l.link %}<a class="stack__link" href="{{ get_url(path=l.link, lang=lang) }}">{{ l.link_text }} →</a>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{# ---- 0x0104 Three sectors ---- #}
+<section class="canvas layer" data-hex="0x0104" aria-labelledby="v-sectors">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.sectors_eyebrow }}</p>
+      <h2 class="layer__title" id="v-sectors">{{ x.sectors_title }}</h2>
+      <p class="layer__intro">{{ x.sectors_intro }}</p>
+    </header>
+    <div class="sectors">
+      {% for s in x.sectors %}
+      <article class="sector reveal-up">
+        <p class="sector__n">{{ s.label }}</p>
+        <h3 class="sector__title">{{ s.title }}</h3>
+        <p class="sector__text">{{ s.text }}</p>
+        <ul class="sector__list">
+          {% for e in s.examples %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+        {% if s.link %}<a class="link-arrow" href="{{ get_url(path=s.link, lang=lang) }}">{{ s.link_text }}</a>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---- 0x0105 Guardrails ---- #}
+<section class="canvas layer" data-hex="0x0105" aria-labelledby="v-guard">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.guardrails_eyebrow }}</p>
+      <h2 class="layer__title" id="v-guard">{{ x.guardrails_title }}</h2>
+      <p class="layer__intro">{{ x.guardrails_intro }}</p>
+    </header>
+    <ul class="not-list guardrails">
+      {% for g in x.guardrails %}<li><strong>{{ g.title }}</strong> {{ g.text }}</li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+{# ---- 0x0106 Why Switzerland ---- #}
+<section class="canvas layer" data-hex="0x0106" aria-labelledby="v-ch">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.why_ch_eyebrow }}</p>
+      <h2 class="layer__title" id="v-ch">{{ x.why_ch_title }}</h2>
+    </header>
+    <div class="why-grid">
+      {% for w in x.why_ch %}
+      <article class="why reveal-up">
+        <h3 class="why__title">{{ w.title }}</h3>
+        <p class="why__text">{{ w.text }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---- 0x0107 Why us ---- #}
+<section class="canvas layer why-us" data-hex="0x0107" aria-labelledby="v-us">
+  <div class="container">
+    <p class="eyebrow">{{ x.why_us_eyebrow }}</p>
+    <h2 class="why-us__statement" id="v-us">{{ x.why_us_title }}</h2>
+    <div class="why-us__body">
+      {% for p in x.why_us %}<p>{{ p | safe }}</p>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---- 0x0108 Targets ---- #}
+<section class="canvas layer" data-hex="0x0108" aria-labelledby="v-targets">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.targets_eyebrow }}</p>
+      <h2 class="layer__title" id="v-targets">{{ x.targets_title }}</h2>
+      <p class="layer__intro">{{ x.targets_intro }}</p>
+    </header>
+    <ol class="targets">
+      {% for t in x.targets %}
+      <li class="target reveal-up">
+        <span class="target__year">{{ t.year }}</span>
+        <p class="target__goal">{{ t.goal }}</p>
+        <p class="target__how">{{ t.how }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+    {% if page.extra.cta_text %}
+    <div class="manifest-cta vision-cta">
+      <p>{{ page.extra.cta_text }}</p>
+      <a class="btn btn--glow btn--lg" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+    </div>
     {% endif %}
-    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+
+{# ---- 0x0109 Sources ---- #}
+{% if x.sources %}
+<section class="canvas layer sources" data-hex="0x0109" data-no-pin aria-labelledby="v-src">
+  <div class="container">
+    <h2 class="manifest-log__title" id="v-src">{{ x.sources_title }}</h2>
+    <ol class="sources__list">
+      {% for s in x.sources %}<li><a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.label }}</a></li>{% endfor %}
+    </ol>
   </div>
 </section>
 {% endif %}
+
+<script>
+(function() {
+  var els = document.querySelectorAll('.reveal-up');
+  if (!('IntersectionObserver' in window)) { els.forEach(function(el) { el.classList.add('is-visible'); }); return; }
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(function(el) { io.observe(el); });
+})();
+</script>
 {% endblock %}

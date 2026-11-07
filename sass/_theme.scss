@@ -1,89 +1,125 @@
 // =============================================
 // Theme — CSS custom properties for light/dark
 // =============================================
+// Revamp (Nov 2026): "tangible future". A ceramic ground with charcoal ink
+// replaces the pastel canvases. The purple→blue→cyan brand gradient is kept
+// as *signal light* (brandmark, the background lattice, primary actions,
+// focus) and Swiss red is held in reserve as the one vivid accent: live
+// items and pins only, never decoration.
 
 :root {
   // Core colors
-  --color-bg: #ffffff;
-  --color-surface: #f5f5f5;
-  --color-text: #111111;
-  --color-text-muted: #555555; // darkened from #666 for AA contrast on glass cards over light gradients
-  --color-accent: #2563eb; // brand blue, deepened for AA link contrast on light gradients
-  --color-accent-hover: #1d4ed8;
+  --color-bg: #eef0ec;            // ceramic / platinum ground
+  --color-surface: #f8f9f6;       // panels lifted off the ground
+  --color-surface-2: #e4e7e2;     // recessed wells, code, inputs
+  --color-text: #121517;          // charcoal ink
+  --color-text-muted: #4f565b;    // AA on ground and surface
+  --color-text-faint: #6b7276;    // annotations (AA on ground at 14px+)
+  --color-accent: #6d28d9;        // links — violet, AA on ceramic
+  --color-accent-hover: #5b21b6;
+  --color-signal: #d52b1e;        // Swiss red — the single accent
+  --hairline: rgba(18, 21, 23, 0.14);
+  --hairline-strong: rgba(18, 21, 23, 0.28);
 
-  // Glass
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  // Glass (kept for overlays only)
+  --glass-bg: rgba(248, 249, 246, 0.78);
+  --glass-border: rgba(18, 21, 23, 0.12);
 
   // Interactive states
-  --hover-bg: rgba(0, 0, 0, 0.05);
-  --active-bg: rgba(0, 0, 0, 0.07);
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --selection-bg: rgba(59, 130, 246, 0.18);
-  --placeholder-color: rgba(0, 0, 0, 0.2);
-  --shadow-color: rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(18, 21, 23, 0.05);
+  --active-bg: rgba(18, 21, 23, 0.08);
+  --border-subtle: rgba(18, 21, 23, 0.10);
+  --selection-bg: rgba(192, 38, 211, 0.18);
+  --placeholder-color: rgba(18, 21, 23, 0.35);
+  --shadow-color: rgba(18, 21, 23, 0.08);
 
-  // Canvas gradients
-  --canvas-gradient-default: linear-gradient(135deg, #e8dff5 0%, #dde8f6 50%, #d6f0ef 100%);
-  --canvas-gradient-odd: linear-gradient(135deg, #fce4ec 0%, #e8def8 50%, #d1e9fc 100%);
-  --canvas-gradient-even: linear-gradient(135deg, #d6f0ef 0%, #dce8d6 50%, #f5eacc 100%);
+  // Former canvas gradients — the ground is now continuous
+  --canvas-gradient-default: transparent;
+  --canvas-gradient-odd: transparent;
+  --canvas-gradient-even: transparent;
+  --canvas-tint-default: transparent;
+  --canvas-tint-odd: transparent;
+  --canvas-tint-even: transparent;
 
-  // Plasma tint overlays (semi-transparent versions of canvas gradients)
-  --canvas-tint-default: linear-gradient(135deg, rgba(232,223,245,0.78) 0%, rgba(221,232,246,0.78) 50%, rgba(214,240,239,0.78) 100%);
-  --canvas-tint-odd:     linear-gradient(135deg, rgba(252,228,236,0.78) 0%, rgba(232,222,248,0.78) 50%, rgba(209,233,252,0.78) 100%);
-  --canvas-tint-even:    linear-gradient(135deg, rgba(214,240,239,0.78) 0%, rgba(220,232,214,0.78) 50%, rgba(245,234,204,0.78) 100%);
+  // Background lattice
+  --ground-glow: radial-gradient(120% 80% at 50% -10%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 60%);
+  --ground-ink: 0.42;              // lattice alpha on hero
 
   // Overlay
-  --overlay-bg: rgba(255, 255, 255, 0.75);
-  --backdrop-bg: rgba(0, 0, 0, 0.06);
+  --overlay-bg: rgba(244, 245, 242, 0.92);
+  --backdrop-bg: rgba(18, 21, 23, 0.18);
 
-  // Sparkle button
-  --sparkle-bg: rgba(240, 240, 240, 0.8);
-  --sparkle-border: rgba(0, 0, 0, 0.12);
-  --sparkle-hover-bg: rgba(230, 230, 230, 0.9);
-  --sparkle-hover-border: rgba(0, 0, 0, 0.18);
+  // Sparkle button (legacy names, still used by the menu button)
+  --sparkle-bg: rgba(248, 249, 246, 0.8);
+  --sparkle-border: rgba(18, 21, 23, 0.14);
+  --sparkle-hover-bg: rgba(255, 255, 255, 0.95);
+  --sparkle-hover-border: rgba(18, 21, 23, 0.24);
 
   // Switch / slider knob
   --switch-knob: #ffffff;
+
+  // Brand palette — single source. Light/dark tunings; JS may override the -l/-d
+  // sets (dev-only Brand Lab). --brand-stops is read by the canvas lattice.
+  // "Alpenglühen" (chosen Nov 2026): the Alps in first light — rose, magenta,
+  // violet, indigo. Warm and optimistic, distinct in the Swiss party landscape.
+  --brand-grad-l: linear-gradient(100deg, #f43f5e 0%, #c026d3 33%, #6d28d9 67%, #4338ca 100%);
+  --brand-grad-d: linear-gradient(100deg, #fb7185 0%, #e879f9 33%, #a78bfa 67%, #818cf8 100%);
+  --brand-gradv-l: linear-gradient(180deg, #f43f5e 0%, #c026d3 33%, #6d28d9 67%, #4338ca 100%);
+  --brand-gradv-d: linear-gradient(180deg, #fb7185 0%, #e879f9 33%, #a78bfa 67%, #818cf8 100%);
+  --brand-mid-l: #c026d3;
+  --brand-mid-d: #e879f9;
+  --brand-stops-l: #f43f5e,#c026d3,#6d28d9,#4338ca;
+  --brand-stops-d: #fb7185,#e879f9,#a78bfa,#818cf8;
+  --btn-grad: linear-gradient(135deg, #be123c 0%, #6d28d9 100%); // white text AA on both ends
+  --brand-glow: rgba(192, 38, 211, 0.45);
+  --brand-grad: var(--brand-grad-l);
+  --brand-gradv: var(--brand-gradv-l);
+  --brand-mid: var(--brand-mid-l);
+  --brand-stops: var(--brand-stops-l);
 
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --color-bg: #0d0d0d;
-  --color-surface: #1a1a1a;
-  --color-text: #eeeeee;
-  --color-text-muted: #999999;
-  --color-accent: #60a5fa;
-  --color-accent-hover: #93c5fd;
+  --color-bg: #0b0d0e;
+  --color-surface: #131618;
+  --color-surface-2: #1b1f22;
+  --color-text: #e7eae6;
+  --color-text-muted: #a2a9ad;
+  --color-text-faint: #8a9195;
+  --color-accent: #c4b5fd;
+  --color-accent-hover: #ddd6fe;
+  --color-signal: #ff5a4e;
+  --hairline: rgba(231, 234, 230, 0.13);
+  --hairline-strong: rgba(231, 234, 230, 0.26);
 
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-bg: rgba(19, 22, 24, 0.78);
+  --glass-border: rgba(231, 234, 230, 0.14);
 
   --hover-bg: rgba(255, 255, 255, 0.06);
   --active-bg: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --selection-bg: rgba(96, 165, 250, 0.22);
-  --placeholder-color: rgba(255, 255, 255, 0.25);
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --selection-bg: rgba(232, 121, 249, 0.25);
+  --placeholder-color: rgba(255, 255, 255, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.4);
 
-  --canvas-gradient-default: linear-gradient(135deg, #1e1230 0%, #121a2d 50%, #0e1f28 100%);
-  --canvas-gradient-odd: linear-gradient(135deg, #2a1235 0%, #151e3a 50%, #102535 100%);
-  --canvas-gradient-even: linear-gradient(135deg, #0e2520 0%, #172210 50%, #251e08 100%);
+  --ground-glow: radial-gradient(120% 80% at 50% -10%, rgba(109, 40, 217, 0.22) 0%, rgba(11, 13, 14, 0) 60%);
+  --ground-ink: 0.55;
 
-  --canvas-tint-default: linear-gradient(135deg, rgba(30,18,48,0.82) 0%, rgba(18,26,45,0.82) 50%, rgba(14,31,40,0.82) 100%);
-  --canvas-tint-odd:     linear-gradient(135deg, rgba(42,18,53,0.82) 0%, rgba(21,30,58,0.82) 50%, rgba(16,37,53,0.82) 100%);
-  --canvas-tint-even:    linear-gradient(135deg, rgba(14,37,32,0.82) 0%, rgba(23,34,16,0.82) 50%, rgba(37,30,8,0.82) 100%);
+  --overlay-bg: rgba(15, 17, 19, 0.94);
+  --backdrop-bg: rgba(0, 0, 0, 0.5);
 
-  --overlay-bg: rgba(20, 20, 20, 0.85);
-  --backdrop-bg: rgba(0, 0, 0, 0.4);
-
-  --sparkle-bg: rgba(255, 255, 255, 0.12);
-  --sparkle-border: rgba(255, 255, 255, 0.2);
-  --sparkle-hover-bg: rgba(255, 255, 255, 0.18);
-  --sparkle-hover-border: rgba(255, 255, 255, 0.28);
+  --sparkle-bg: rgba(255, 255, 255, 0.08);
+  --sparkle-border: rgba(255, 255, 255, 0.16);
+  --sparkle-hover-bg: rgba(255, 255, 255, 0.14);
+  --sparkle-hover-border: rgba(255, 255, 255, 0.26);
 
   --switch-knob: rgba(255, 255, 255, 0.18);
+
+  --brand-grad: var(--brand-grad-d);
+  --brand-gradv: var(--brand-gradv-d);
+  --brand-mid: var(--brand-mid-d);
+  --brand-stops: var(--brand-stops-d);
 
   color-scheme: dark;
 }

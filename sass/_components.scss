@@ -4,7 +4,7 @@
 
 // ---- Gradient text mixin (used by brandmark) ----
 @mixin gradient-text() {
-  background: linear-gradient(135deg, $gradient-purple, $gradient-blue, $gradient-teal);
+  background: var(--brand-grad);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1106,7 +1106,7 @@
   font-weight: $font-weight-semibold;
   color: #fff;
   // Brandmark gradient, using deeper stops so white text passes WCAG AA
-  background: linear-gradient(135deg, #9333ea 0%, #2563eb 100%);
+  background: var(--btn-grad);
   border: none;
   border-radius: $radius-pill;
   cursor: pointer;
