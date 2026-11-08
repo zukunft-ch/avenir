@@ -3,6 +3,7 @@
 {% import "macros/pin.html" as pin %}
 {% import "macros/brand.html" as brandmark %}
 {% import "macros/maps.html" as maps %}
+{% import "macros/visual.html" as visual %}
 
 {% block title %}{{ section.title | default(value=section.extra.hero_title | default(value=config.title)) }}{% endblock %}
 
@@ -70,6 +71,14 @@
 </section>
 
 {# ===== 0x0001 · Ebene 1 — Thesen ===== #}
+{% if config.extra.visuals_catalog is defined %}
+<div class="visual-stories container">
+  {{ visual::story(slot="vision-06-zeit", lang=lang, label_key="nav_vision") }}
+  {{ visual::story(slot="pillar-stadte-wohnen", lang=lang, label_key="nav_stadte_wohnen") }}
+  {{ visual::story(slot="pillar-robotik", lang=lang, label_key="nav_robotik") }}
+</div>
+{% endif %}
+
 {% if theses | length > 0 %}
 <section class="canvas layer theses" data-hex="0x0001" aria-labelledby="theses-title">
   <div class="container">

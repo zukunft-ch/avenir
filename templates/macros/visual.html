@@ -1,3 +1,4 @@
+{% import "macros/visual_picture.html" as visual_picture %}
 {# Optional site-owned catalogue: the shared theme also works without visuals. #}
 {% macro hero(url, lang) %}
 {% if config.extra.visuals_catalog is defined %}
@@ -5,14 +6,35 @@
 {% for visual in catalog.images %}
 {% set visual_url = get_url(path=visual.page, lang=lang) %}
 {% if url == visual_url %}
-<figure class="hero-visual">
-  <picture>
-    <source type="image/avif" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.avif') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.avif') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.avif') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw">
-    <source type="image/webp" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.webp') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.webp') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.webp') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw">
-    <img src="{{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }}" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.jpg') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.jpg') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw" width="{{ visual.width }}" height="{{ visual.height }}" alt="{{ visual.alt[lang] }}" loading="eager" fetchpriority="high" decoding="async">
-  </picture>
-  <figcaption><span>{{ catalog.captions[lang] }}</span> <span>{{ catalog.notes[lang] }}</span></figcaption>
-</figure>
+{{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="eager", priority="high", sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw") }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}
+
+
+
+{% macro story(slot, lang, label_key, target="") %}
+{% if config.extra.visuals_catalog is defined %}
+{% set catalog = load_data(path=config.extra.visuals_catalog) %}
+{% for visual in catalog.images %}
+{% if visual.slot == slot %}
+{% if target %}{% set story_path = target %}{% else %}{% set story_path = visual.page %}{% endif %}
+<article class="visual-story">
+  {{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes="(min-width: 1440px) 432px, (min-width: 769px) 30vw, (max-width: 500px) calc(100vw - 40px), 92vw") }}
+  <a class="visual-story__link link-arrow" href="{{ get_url(path=story_path, lang=lang) }}">{{ trans(key=label_key, lang=lang) }}</a>
+</article>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}
+
+{% macro scene(slot, lang) %}
+{% if config.extra.visuals_catalog is defined %}
+{% set catalog = load_data(path=config.extra.visuals_catalog) %}
+{% for visual in catalog.images %}
+{% if visual.slot == slot %}
+{{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes="(min-width: 1440px) 427px, (min-width: 993px) 30vw, (min-width: 577px) 44vw, (max-width: 500px) calc(100vw - 40px), 92vw") }}
 {% endif %}
 {% endfor %}
 {% endif %}

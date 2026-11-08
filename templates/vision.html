@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/pin.html" as pin %}
+{% import "macros/visual.html" as visual %}
 {% import "macros/spark.html" as spark %}
 
 {% block head_extra %}
@@ -58,11 +59,17 @@
       <h2 class="layer__title" id="v-out">{{ x.outcomes_title }}</h2>
       <p class="layer__intro">{{ x.outcomes_intro }}</p>
     </header>
+    {% if config.extra.visuals_catalog is defined %}
+    {% set visual_catalog = load_data(path=config.extra.visuals_catalog) %}
+    {% endif %}
     <ol class="outcomes">
       {% for o in x.outcomes %}
       <li class="outcome reveal-up">
         <span class="outcome__n" aria-hidden="true">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
         <h3 class="outcome__title">{{ o.title }}</h3>
+        {% if visual_catalog.vision_outcomes is defined and loop.index0 < visual_catalog.vision_outcomes | length %}
+        {{ visual::scene(slot=visual_catalog.vision_outcomes[loop.index0], lang=lang) }}
+        {% endif %}
         <p class="outcome__text">{{ o.text }}</p>
       </li>
       {% endfor %}

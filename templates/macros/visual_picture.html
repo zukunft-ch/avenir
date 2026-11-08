@@ -1,0 +1,10 @@
+{% macro figure(visual, catalog, lang, loading, priority, sizes) %}
+<figure class="hero-visual">
+  <picture>
+    <source type="image/avif" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.avif') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.avif') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.avif') }} 1536w" sizes="{{ sizes }}">
+    <source type="image/webp" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.webp') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.webp') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.webp') }} 1536w" sizes="{{ sizes }}">
+    <img src="{{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }}" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.jpg') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.jpg') }} 1536w" sizes="{{ sizes }}" width="{{ visual.width }}" height="{{ visual.height }}" alt="{{ visual.alt[lang] }}" loading="{{ loading }}" fetchpriority="{{ priority }}" decoding="async">
+  </picture>
+  <figcaption><span>{{ catalog.captions[lang] }}</span> <span>{{ catalog.notes[lang] }}</span></figcaption>
+</figure>
+{% endmacro %}
