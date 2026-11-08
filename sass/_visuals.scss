@@ -1,0 +1,49 @@
+// Topic heroes: preserve the complete landscape and reserve its space before load.
+.page-hero:has(.hero-visual) .page-hero__title {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1100px) {
+  .page-hero:has(.hero-visual) {
+    > .container {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 3rem;
+    }
+
+    .page-hero__title { grid-column: 1; font-size: clamp(3rem, 4.5vw, 5rem); }
+    .page-hero__desc, .page-hero__byline { grid-column: 1; }
+    .hero-visual { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; align-self: center; }
+  }
+}
+
+.hero-visual {
+  width: 100%;
+  margin: clamp(1.5rem, 4vw, 3rem) 0 0;
+  text-align: left;
+
+  picture { display: block; }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border-radius: $radius-md;
+    background: var(--color-surface);
+  }
+
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    justify-content: space-between;
+    margin-top: 0.65rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+}

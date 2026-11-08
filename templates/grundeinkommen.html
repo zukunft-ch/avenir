@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/evidence.html" as evidence %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/visual.html" as visual %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -17,6 +18,7 @@
     {% if page.description %}
     <p class="page-hero__desc">{{ page.description }}</p>
     {% endif %}
+    {{ visual::hero(url=page.permalink, lang=lang) }}
   </div>
 </section>
 

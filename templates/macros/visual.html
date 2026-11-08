@@ -1,0 +1,19 @@
+{# Optional site-owned catalogue: the shared theme also works without visuals. #}
+{% macro hero(url, lang) %}
+{% if config.extra.visuals_catalog is defined %}
+{% set catalog = load_data(path=config.extra.visuals_catalog) %}
+{% for visual in catalog.images %}
+{% set visual_url = get_url(path=visual.page, lang=lang) %}
+{% if url == visual_url %}
+<figure class="hero-visual">
+  <picture>
+    <source type="image/avif" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.avif') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.avif') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.avif') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw">
+    <source type="image/webp" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.webp') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.webp') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.webp') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw">
+    <img src="{{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }}" srcset="{{ get_url(path='visuals/' ~ visual.slot ~ '-600.jpg') }} 600w, {{ get_url(path='visuals/' ~ visual.slot ~ '-960.jpg') }} 960w, {{ get_url(path='visuals/' ~ visual.slot ~ '-1536.jpg') }} 1536w" sizes="(min-width: 1440px) 648px, (min-width: 1100px) calc(50vw - 72px), (max-width: 500px) calc(100vw - 40px), 92vw" width="{{ visual.width }}" height="{{ visual.height }}" alt="{{ visual.alt[lang] }}" loading="eager" fetchpriority="high" decoding="async">
+  </picture>
+  <figcaption><span>{{ catalog.captions[lang] }}</span> <span>{{ catalog.notes[lang] }}</span></figcaption>
+</figure>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}
