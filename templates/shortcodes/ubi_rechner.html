@@ -26,6 +26,9 @@
       <label class="calc__check">
         <input type="checkbox" data-in="r"> <span>{{ trans(key="calc_replace", lang=lang) }}</span>
       </label>
+      <label class="calc__check">
+        <input type="checkbox" data-in="b"> <span>{{ trans(key="calc_behav", lang=lang) }}</span>
+      </label>
       <button type="button" class="btn btn--sm btn--outline calc__reset" data-reset>{{ trans(key="calc_reset", lang=lang) }}</button>
     </div>
     <dl class="calc__kpis">
@@ -52,6 +55,9 @@
   var MEAN = 4659, ADULTS = 7e6, KIDS = 1.54e6, REPLACED_BN = 79;
   var TRANSFERS = [2900, 2200, 1700, 1300, 1000, 750, 550, 400, 250, 100];
   var CONS = [0.95, 0.92, 0.88, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55];
+  // Vivalt et al. (NBER w32719, rev. Sept 2025): per dollar received, individual income
+  // excluding the transfer fell by ~16 cents. Applied per person and capped at 60% of own income.
+  var BEHAV = 0.16;
   var inc = SHARES.map(function (s) { return Math.round(s / 100 * MEAN * 10); });
   var totalIncomeBn = MEAN * 12 * (ADULTS + KIDS) / 1e9;
   var totalConsBn = inc.reduce(function (a, x, i) { return a + x * CONS[i]; }, 0) * (ADULTS + KIDS) / 10 * 12 / 1e9;
@@ -90,10 +96,18 @@
   function run() {
     var u = +q('[data-in="u"]').value, cpct = +q('[data-in="c"]').value, m = +q('[data-in="m"]').value / 100, rep = q('[data-in="r"]').checked;
     var child = u * cpct / 100;
+    var beh = q('[data-in="b"]').checked;
     var cost = (ADULTS * u + KIDS * child) * 12 / 1e9;
     var rest = Math.max(0, cost - (rep ? REPLACED_BN : 0));
-    var t = m * rest / totalIncomeBn, v = (1 - m) * rest / totalConsBn;
-    var net = inc.map(function (x, i) { var base = rep ? x - TRANSFERS[i] : x; return base * (1 - t) - x * CONS[i] * v + u; });
+    // own income after the behavioural response (work income falls by BEHAV per franc of basic income)
+    var own = inc.map(function (x, i) {
+      var work = Math.max(0, x - TRANSFERS[i]);
+      return beh ? x - Math.min(BEHAV * u, work * 0.6) : x;
+    });
+    var baseIncBn = totalIncomeBn * own.reduce(function (a, b) { return a + b; }, 0) / inc.reduce(function (a, b) { return a + b; }, 0);
+    var baseConsBn = own.reduce(function (a, x, i) { return a + x * CONS[i]; }, 0) * (ADULTS + KIDS) / 10 * 12 / 1e9;
+    var t = m * rest / baseIncBn, v = (1 - m) * rest / baseConsBn;
+    var net = own.map(function (x, i) { var base = rep ? x - TRANSFERS[i] : x; return base * (1 - t) - x * CONS[i] * v + u; });
     var delta = net.map(function (n, i) { return Math.round(n - inc[i]); });
     q('[data-out="u"]').textContent = nf.format(u);
     q('[data-out="c"]').textContent = nf.format(child);
@@ -107,7 +121,7 @@
   }
   root.addEventListener('input', run);
   q('[data-reset]').addEventListener('click', function () {
-    q('[data-in="u"]').value = 2500; q('[data-in="c"]').value = 25; q('[data-in="m"]').value = 100; q('[data-in="r"]').checked = false; run();
+    q('[data-in="u"]').value = 2500; q('[data-in="c"]').value = 25; q('[data-in="m"]').value = 100; q('[data-in="r"]').checked = false; q('[data-in="b"]').checked = false; run();
   });
   run();
 })();

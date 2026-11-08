@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% set f = page.extra.founder %}
+{% set base = config.base_url | trim_end_matches(pat='/') %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "{{ base | safe }}/menschen/#raffael-schneider",
+  "name": "{{ f.name }}",
+  "jobTitle": "{{ f.role }}",
+  "image": "{{ base | safe }}{{ f.photo }}.jpg",
+  "homeLocation": { "@type": "Place", "name": "{{ f.place }}, Switzerland" },
+  "worksFor": { "@id": "{{ base | safe }}/#organization" },
+  "url": "{{ page.permalink | safe }}",
+  "sameAs": [{% for l in f.links %}"{{ l.url | safe }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{#
+  People: the founder and president as a profile (portrait, role, statement, links),
+  then the bodies under construction (board, advisory council) from extra.sections.
+#}
+{% set f = page.extra.founder %}
+<section class="page-hero" aria-label="{{ page.title }}">
+  <div class="container">
+    <h1 class="page-hero__title">{{ page.title }}</h1>
+    {% if page.description %}<p class="page-hero__desc">{{ page.description }}</p>{% endif %}
+  </div>
+</section>
+
+<section class="canvas layer" id="raffael-schneider" aria-labelledby="founder-name">
+  <div class="container">
+    <article class="founder">
+      <div class="founder__portrait">
+        <picture>
+          <source srcset="{{ f.photo }}.avif" type="image/avif">
+          <source srcset="{{ f.photo }}.webp" type="image/webp">
+          <img src="{{ f.photo }}.jpg" alt="{{ f.alt }}" width="520" height="520" loading="eager" decoding="async">
+        </picture>
+      </div>
+      <div class="founder__body">
+        <p class="founder__role">{{ f.role }} · {{ f.place }}</p>
+        <h2 class="founder__name" id="founder-name">{{ f.name }}</h2>
+        <p class="founder__text">{{ f.text }}</p>
+        {% if f.why_title %}
+        <h3 class="founder__why-title">{{ f.why_title }}</h3>
+        <p class="founder__why">{{ f.why_text }}</p>
+        {% endif %}
+        <ul class="founder__links">
+          <li><a href="mailto:hey@die-zukunft.ch">{{ f.contact_label }}</a></li>
+          {% for l in f.links %}<li><a href="{{ l.url }}" target="_blank" rel="noopener noreferrer me">{{ l.label }} ↗</a></li>{% endfor %}
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+{% if page.extra.sections is defined %}
+<section class="canvas layer" aria-labelledby="team-title">
+  <div class="container">
+    <header class="layer__head"><h2 class="layer__title" id="team-title">{{ page.extra.team_title }}</h2></header>
+    <div class="team-grid">
+      {% for sec in page.extra.sections %}
+      <div class="team-card">
+        <h3>{{ sec.title }}</h3>
+        {% if sec.text %}<p>{{ sec.text | safe }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if page.extra.show_cta %}
+<section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
+  <div class="container container--narrow" style="text-align: center;">
+    {% if page.extra.cta_text is defined %}<p class="cta-section__text">{{ page.extra.cta_text }}</p>{% endif %}
+    <a class="btn btn--glow" href="{{ get_url(path='@/mitmachen.md', lang=lang) }}">{{ trans(key="cta_join", lang=lang) }}</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

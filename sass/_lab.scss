@@ -348,3 +348,25 @@
 
 // odd number of lab areas: the last card spans the row
 .bento-grid > .lab-area-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+// ---- People: founder profile (menschen.html) ----
+.founder { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center;
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; } }
+.founder__portrait {
+  position: relative; width: min(100%, 26rem); aspect-ratio: 1; justify-self: center;
+  border-radius: 50%; padding: 4px; background: var(--brand-grad-l);
+  picture, img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  img { background: var(--color-surface); }
+}
+.founder__role { margin: 0 0 $space-3; font-family: $font-mono; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-signal); }
+.founder__name { margin: 0 0 $space-5; font-family: $font-family-headline; font-weight: 650; letter-spacing: -0.04em; line-height: 1;
+  font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.6rem); }
+.founder__text { font-size: clamp(1.05rem, 1rem + 0.3vw, 1.25rem); line-height: 1.55; max-width: 38rem; margin: 0 0 $space-5; }
+.founder__why-title { margin: 0 0 $space-2; font-size: 1.05rem; }
+.founder__why { color: var(--color-text-muted); line-height: 1.6; max-width: 38rem; margin: 0 0 $space-5; }
+.founder__links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: $space-2;
+  a { display: inline-block; padding: 0.45rem 0.9rem; border-radius: $radius-pill; border: 1px solid var(--glass-border); background: var(--glass-bg);
+      color: var(--color-text); text-decoration: none; font-size: 0.9rem; &:hover, &:focus-visible { border-color: var(--color-text); } } }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
+.team-card { padding: $space-5; border: 1px dashed var(--hairline-strong); border-radius: $radius-lg;
+  h3 { margin: 0 0 $space-2; } p { margin: 0; color: var(--color-text-muted); line-height: 1.55; } }
