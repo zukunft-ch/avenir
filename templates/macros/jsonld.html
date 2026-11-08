@@ -100,7 +100,7 @@
 {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": "{% if lang == 'fr' %}Programme{% elif lang == 'it' %}Programma{% elif lang == 'en' %}Program{% else %}Programm{% endif %}",
+  "name": "{% if lang == 'fr' %}Programme{% elif lang == 'it' %}Programma{% elif lang == 'en' %}Programme{% else %}Programm{% endif %}",
   "numberOfItems": {{ chapters | length }},
   "itemListElement": [
     {% for ch in chapters %}
