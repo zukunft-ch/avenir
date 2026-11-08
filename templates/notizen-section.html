@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/notecard.html" as notecard %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=section.title, url=section.permalink, lang=lang) }}
@@ -16,53 +17,45 @@
   </div>
 </section>
 
-{# ===== Notizen listing ===== #}
-<section class="canvas canvas--content">
+{# ===== Notizen: filterable grid of note cards (lead figure as thumbnail) ===== #}
+{% set pages = section.pages %}
+<section class="canvas canvas--content notes-hub">
   <div class="container">
-    {% set pages = paginator.pages | default(value=section.pages) %}
     {% if pages | length > 0 %}
-      <div class="section-list" role="list" aria-label="{{ section.title }}">
-        {% for page in pages %}
-        <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}" role="listitem">
-          <div class="lab-notiz-card__meta">
-            {% if page.extra.evidence is defined %}
-            <span class="lab-badge lab-badge--{{ page.extra.evidence }}">
-              {{ trans(key="lab_evidence_" ~ page.extra.evidence, lang=lang) }}
-            </span>
-            {% endif %}
-            {% if page.extra.category is defined %}
-            <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
-            {% endif %}
-          </div>
-          <h2>{{ page.title }}</h2>
-          {% if page.date %}<time datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
-          {% if page.description %}<p>{{ page.description }}</p>{% endif %}
-          {% if page.taxonomies.tags is defined %}
-          <div class="lab-tags">
-            {% for tag in page.taxonomies.tags %}
-            <span class="lab-tag">{{ tag }}</span>
-            {% endfor %}
-          </div>
-          {% endif %}
-        </a>
-        {% endfor %}
-      </div>
-
-      {# Pagination #}
-      {% if paginator is defined and paginator.number_pagers > 1 %}
-      <nav class="lab-pagination" aria-label="Pagination">
-        {% if paginator.previous %}
-        <a class="btn btn--sm btn--outline" href="{{ paginator.previous }}">&larr;</a>
-        {% endif %}
-        <span class="lab-pagination__current">{{ paginator.current_index }} / {{ paginator.number_pagers }}</span>
-        {% if paginator.next %}
-        <a class="btn btn--sm btn--outline" href="{{ paginator.next }}">&rarr;</a>
-        {% endif %}
-      </nav>
-      {% endif %}
+    {% set_global pillars = [] %}
+    {% for p in pages %}{% if p.extra.pillar and p.extra.pillar not in pillars %}{% set_global pillars = pillars | concat(with=p.extra.pillar) %}{% endif %}{% endfor %}
+    <div class="notes-filter" role="group" aria-label="{{ section.title }}" hidden>
+      <button type="button" class="notes-filter__chip is-active" data-filter="" aria-pressed="true">{{ trans(key="lab_filter_all", lang=lang) }} <span>{{ pages | length }}</span></button>
+      {% for pk in pillars %}
+      {% if lang == "de" %}{% set pp = pk ~ ".md" %}{% else %}{% set pp = pk ~ "." ~ lang ~ ".md" %}{% endif %}
+      {% set pt = get_page(path=pp) %}
+      <button type="button" class="notes-filter__chip" data-filter="{{ pk }}" aria-pressed="false">{{ pt.title }} <span>{{ pages | filter(attribute="extra.pillar", value=pk) | length }}</span></button>
+      {% endfor %}
+    </div>
+    <div class="notes-grid">
+      {% for page in pages %}{{ notecard::card(page=page, lang=lang) }}{% endfor %}
+    </div>
     {% else %}
-      <p>{{ trans(key="news_empty", lang=lang) }}</p>
+    <p>{{ trans(key="news_empty", lang=lang) }}</p>
     {% endif %}
   </div>
 </section>
+<script>
+(function () {
+  var bar = document.querySelector('.notes-filter'); if (!bar) return;
+  bar.hidden = false;
+  var cards = document.querySelectorAll('.notes-grid .note-card');
+  function apply(f) {
+    bar.querySelectorAll('.notes-filter__chip').forEach(function (c) { var on = c.getAttribute('data-filter') === f; c.classList.toggle('is-active', on); c.setAttribute('aria-pressed', on); });
+    cards.forEach(function (c) { c.hidden = !!f && c.getAttribute('data-pillar') !== f; });
+  }
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('.notes-filter__chip'); if (!b) return;
+    var f = b.getAttribute('data-filter'); apply(f);
+    history.replaceState(null, '', f ? '#' + f : location.pathname);
+  });
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (h && bar.querySelector('[data-filter="' + h + '"]')) apply(h);
+})();
+</script>
 {% endblock %}

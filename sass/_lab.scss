@@ -225,3 +225,126 @@
   .page-hero:has(.hero-visual) .hero-stat { grid-column: 1 / -1; grid-row: 4; width: 100%; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
 }
 .page-hero:has(.hero-visual) .hero-stat { width: 100%; }
+
+// ---- Note cards & notes hub (macros/notecard.html) ----
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
+.notes-grid--more { margin-top: clamp(1rem, 2vw, 1.5rem); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+.notes-more { margin-top: $space-6; text-align: center; }
+.note-card {
+  display: flex; flex-direction: column; text-decoration: none; color: inherit;
+  border: 1px solid var(--glass-border); border-radius: $radius-lg; overflow: hidden;
+  background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  transition: border-color $transition-fast, transform $transition-fast;
+  &:hover, &:focus-visible { border-color: var(--hairline-strong); transform: translateY(-2px); }
+  &[hidden] { display: none; }
+}
+.note-card__thumb {
+  display: block; aspect-ratio: 16 / 8; padding: $space-4 $space-4 $space-2; border-bottom: 1px solid var(--glass-border);
+  background: var(--color-surface); overflow: hidden;
+}
+.note-card__img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center top; }
+.note-card__img--dark { display: none; }
+:root[data-theme="dark"] { .note-card__img--light { display: none; } .note-card__img--dark { display: block; } }
+.note-card__body { display: flex; flex-direction: column; gap: $space-2; padding: $space-4 $space-5 $space-5; flex: 1; }
+.note-card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: $space-2; }
+.note-card__pillar { font-family: $font-mono; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-signal); }
+.note-card__title { font-family: $font-family-headline; font-weight: 600; font-size: 1.08rem; line-height: 1.3; letter-spacing: -0.01em; }
+.note-card__desc { color: var(--color-text-muted); font-size: 0.9rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.note-card__date { margin-top: auto; padding-top: $space-2; font-family: $font-mono; font-size: 0.7rem; color: var(--color-text-muted); }
+.note-card--xl {
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); margin-top: $space-3; position: relative;
+  &::before { content: ""; position: absolute; inset: 0 auto auto 0; width: 100%; height: 2px; background: var(--brand-grad-l); }
+  .note-card__thumb { aspect-ratio: auto; min-height: 18rem; padding: $space-6; border-bottom: 0; border-right: 1px solid var(--glass-border); }
+  .note-card__body { justify-content: center; padding: clamp(1.25rem, 3vw, 2.5rem); }
+  .note-card__title { font-size: clamp(1.4rem, 1rem + 1.2vw, 2rem); }
+  .note-card__desc { -webkit-line-clamp: 5; font-size: 1rem; }
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; .note-card__thumb { border-right: 0; border-bottom: 1px solid var(--glass-border); min-height: 12rem; } }
+}
+.notes-filter { display: flex; flex-wrap: wrap; gap: $space-2; margin-bottom: $space-6; }
+.notes-filter__chip {
+  font: inherit; font-size: 0.85rem; padding: 0.4rem 0.85rem; border-radius: $radius-pill; cursor: pointer;
+  border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--color-text-muted);
+  span { font-family: $font-mono; font-size: 0.72rem; margin-left: 0.25rem; opacity: 0.7; }
+  &:hover { color: var(--color-text); border-color: var(--hairline-strong); }
+  &.is-active { color: var(--color-text); border-color: var(--color-text); }
+}
+
+// ---- Lab landing: monitor at a glance ----
+.glance__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: $space-3; margin-bottom: $space-5; }
+.glance__title { margin: 0; font-size: clamp(1.4rem, 1rem + 1vw, 2rem); a { color: inherit; text-decoration: none; &:hover { text-decoration: underline; } } }
+.glance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.5rem); @media (max-width: $bp-md) { grid-template-columns: 1fr; } }
+.glance__tile {
+  display: flex; flex-direction: column; gap: $space-2; padding: $space-5; text-decoration: none; color: inherit;
+  border: 1px solid var(--glass-border); border-radius: $radius-lg; background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  &:hover, &:focus-visible { border-color: var(--hairline-strong); }
+}
+.glance__value { font-family: $font-family-headline; font-weight: 650; letter-spacing: -0.05em; font-size: clamp(2.4rem, 1.8rem + 1.6vw, 3.2rem); line-height: 1;
+  background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; width: fit-content; }
+.glance__label { font-size: 0.92rem; color: var(--color-text-muted); }
+
+// ---- Review status + change log (notes) ----
+.review {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: $space-1 $space-3;
+  margin: $space-4 auto 0; max-width: 46rem; font-size: 0.85rem; color: var(--color-text-muted);
+}
+.review__status, .note-card__status {
+  font-family: $font-mono; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 0.15rem 0.55rem; border-radius: $radius-pill; border: 1px solid currentColor;
+}
+.review--aktuell .review__status { color: #0f766e; }
+.review--teilweise-veraltet .review__status, .note-card__status.review--teilweise-veraltet { color: #b45309; }
+.review--in-ueberarbeitung .review__status, .note-card__status.review--in-ueberarbeitung { color: var(--color-signal); }
+:root[data-theme="dark"] { .review--aktuell .review__status { color: #2dd4bf; } .review--teilweise-veraltet .review__status, .note-card__status.review--teilweise-veraltet { color: #fbbf24; } }
+.review__date { font-family: $font-mono; font-size: 0.72rem; }
+.review__note { flex-basis: 100%; text-align: center; }
+.review__log { font-size: 0.8rem; color: var(--color-text-muted); }
+.changelog__title { margin-top: $space-6; }
+.changelog { list-style: none; padding: 0; margin: 0 0 $space-5; border-top: 1px solid var(--hairline);
+  li { padding: $space-2 0; border-bottom: 1px solid var(--hairline); font-size: 0.92rem; }
+  time { font-family: $font-mono; font-size: 0.72rem; color: var(--color-text-muted); margin-right: $space-2; } }
+
+// ---- Calculator (shortcodes/ubi_rechner.html) ----
+.calc__intro { margin: 0 0 $space-5; color: var(--color-text-muted); font-size: 0.95rem; max-width: 62ch; }
+.calc__grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: $space-6; align-items: start;
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; } }
+.calc__controls { display: flex; flex-direction: column; gap: $space-4; }
+.calc__field { display: flex; flex-direction: column; gap: $space-2; font-size: 0.9rem;
+  output { font-family: $font-mono; font-weight: 600; color: var(--color-text); }
+  input[type=range] { width: 100%; accent-color: #c026d3; } }
+.calc__check { display: flex; gap: $space-2; align-items: flex-start; font-size: 0.88rem; color: var(--color-text-muted); input { margin-top: 0.2rem; accent-color: #c026d3; } }
+.calc__reset { align-self: flex-start; }
+.calc__kpis { margin: 0; display: grid; gap: 0;
+  div { display: flex; justify-content: space-between; gap: $space-3; padding: $space-3 0; border-bottom: 1px solid var(--hairline); }
+  dt { color: var(--color-text-muted); font-size: 0.88rem; }
+  dd { margin: 0; font-family: $font-mono; font-weight: 600; text-align: right; } }
+.calc__chart { margin-top: $space-6; svg { display: block; width: 100%; height: clamp(180px, 30vw, 260px); overflow: visible; } }
+.calc__axis { margin: 0 0 $space-2; font-family: $font-mono; font-size: 0.72rem; color: var(--color-text-muted); &--x { margin: $space-2 0 0; text-align: center; } }
+.calc__zero { stroke: var(--hairline-strong); stroke-width: 1; }
+.calc__bar { fill: url(#calc-pos); &--neg { fill: var(--color-text-muted); opacity: 0.55; } }
+.calc__val { font-family: $font-mono; font-size: 11px; fill: var(--color-text); }
+
+// ---- Agenda page ----
+.agenda-cta { display: flex; flex-wrap: wrap; gap: $space-3; margin-top: $space-5; }
+.agenda { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--hairline-strong); }
+.agenda__item { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: $space-1 $space-5; padding: $space-4 0; border-bottom: 1px solid var(--hairline);
+  .ms__status { grid-row: 1 / span 2; align-self: start; }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; .ms__status { grid-row: auto; } } }
+.agenda__text { margin: 0; font-family: $font-family-headline; font-weight: 600; font-size: 1.05rem; line-height: 1.35; }
+.agenda__meta { margin: 0; font-family: $font-mono; font-size: 0.72rem; color: var(--color-text-muted); a { color: inherit; } }
+.ms--geplant .ms__status { color: var(--color-text-muted); }
+.issues { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--hairline); }
+.issues__item { display: flex; flex-wrap: wrap; gap: $space-2 $space-3; align-items: baseline; padding: $space-3 0; border-bottom: 1px solid var(--hairline);
+  a { color: var(--color-text); font-weight: 600; } }
+.issues__kind, .issues__state { font-family: $font-mono; font-size: 0.7rem; text-transform: uppercase; color: var(--color-text-muted); }
+.issues__item--open .issues__state { color: var(--color-signal); }
+.issues__empty { color: var(--color-text-muted); }
+.corrlog { list-style: none; padding: 0; margin: 0; display: grid; gap: $space-4; }
+.corrlog__note { padding: $space-4 $space-5; border: 1px solid var(--glass-border); border-radius: $radius-md; background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  ul { list-style: none; padding: 0; margin: $space-2 0 0; }
+  li li { font-size: 0.9rem; padding: $space-1 0; color: var(--color-text-muted); }
+  time { font-family: $font-mono; font-size: 0.72rem; margin-right: $space-2; } }
+.corrlog__title { font-family: $font-family-headline; font-weight: 600; color: var(--color-text); }
+.corrlog__status { margin-left: $space-2; }
+
+// odd number of lab areas: the last card spans the row
+.bento-grid > .lab-area-card:last-child:nth-child(odd) { grid-column: 1 / -1; }

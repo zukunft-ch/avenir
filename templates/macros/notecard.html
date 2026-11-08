@@ -1,0 +1,31 @@
+{#
+  Note card for the Zukunftslabor: lead figure as thumbnail (static SVG, light + dark),
+  pillar, title, summary, evidence + date. size = "md" (grid) | "xl" (featured).
+#}
+{% macro card(page, lang, size="md") %}
+{%- set lead = "" -%}
+{%- if page.extra.charts and page.extra.charts | length > 0 -%}{%- set lead = page.extra.charts | first | replace(from=".svg", to="") -%}{%- endif -%}
+{%- set pillar_title = "" -%}
+{%- if page.extra.pillar -%}
+  {%- if lang == "de" -%}{%- set pp = page.extra.pillar ~ ".md" -%}{%- else -%}{%- set pp = page.extra.pillar ~ "." ~ lang ~ ".md" -%}{%- endif -%}
+  {%- set ptarget = get_page(path=pp) -%}{%- set pillar_title = ptarget.title -%}
+{%- endif -%}
+<a class="note-card note-card--{{ size }}" href="{{ page.permalink }}" data-pillar="{{ page.extra.pillar | default(value='') }}">
+  {% if lead %}
+  <span class="note-card__thumb" aria-hidden="true">
+    <img class="note-card__img note-card__img--light" src="/zukunftslabor/charts/{{ lead }}.svg" alt="" loading="lazy" width="1000" height="460">
+    <img class="note-card__img note-card__img--dark" src="/zukunftslabor/charts/{{ lead }}.dark.svg" alt="" loading="lazy" width="1000" height="460">
+  </span>
+  {% endif %}
+  <span class="note-card__body">
+    <span class="note-card__meta">
+      {% if pillar_title %}<span class="note-card__pillar">{{ pillar_title }}</span>{% endif %}
+      {% if page.extra.review and page.extra.review.status != "aktuell" %}<span class="note-card__status review--{{ page.extra.review.status }}">{{ trans(key="lab_status_" ~ page.extra.review.status, lang=lang) }}</span>{% endif %}
+      {% if page.extra.evidence is defined %}<span class="lab-badge lab-badge--{{ page.extra.evidence }}">{{ trans(key="lab_evidence_" ~ page.extra.evidence, lang=lang) }}</span>{% endif %}
+    </span>
+    <span class="note-card__title">{{ page.title }}</span>
+    {% if page.description %}<span class="note-card__desc">{{ page.description }}</span>{% endif %}
+    {% if page.date %}<time class="note-card__date" datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
+  </span>
+</a>
+{%- endmacro card %}

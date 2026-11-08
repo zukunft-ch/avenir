@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/icons.html" as icons %}
+{% import "macros/notecard.html" as notecard %}
+{% import "macros/spark.html" as spark %}
 {% import "macros/visual.html" as visual %}
 
 {% block head_extra %}
@@ -45,37 +47,43 @@
 </section>
 {% endif %}
 
-{# ===== Latest notizen ===== #}
-{% set notizen_section = get_section(path="zukunftslabor/notizen/_index.md") %}
+{# ===== Latest notes: featured analysis (big lead figure) + the next four ===== #}
+{% set notizen_section = get_section(path="zukunftslabor/notizen/_index.md", lang=lang) %}
 {% if notizen_section.pages | length > 0 %}
 <section class="canvas canvas--content" aria-label="{{ trans(key='lab_latest_notes', lang=lang) }}">
   <div class="container">
-    <h2 style="text-align: center; margin-bottom: 1.5rem;">{{ trans(key="lab_latest_notes", lang=lang) }}</h2>
-    <div class="section-list">
-      {% for page in notizen_section.pages | slice(end=3) %}
-      <a class="section-list__item lab-notiz-card" href="{{ page.permalink }}">
-        <div class="lab-notiz-card__meta">
-          {% if page.extra.evidence is defined %}
-          <span class="lab-badge lab-badge--{{ page.extra.evidence }}">
-            {{ trans(key="lab_evidence_" ~ page.extra.evidence, lang=lang) }}
-          </span>
-          {% endif %}
-          {% if page.extra.category is defined %}
-          <span class="lab-category">{{ trans(key="lab_category_" ~ page.extra.category, lang=lang) }}</span>
-          {% endif %}
-        </div>
-        <h2>{{ page.title }}</h2>
-        {% if page.date %}<time datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>{% endif %}
-        {% if page.description %}<p>{{ page.description }}</p>{% endif %}
-      </a>
-      {% endfor %}
+    <p class="eyebrow">{{ trans(key="lab_featured", lang=lang) }}</p>
+    {{ notecard::card(page=notizen_section.pages | first, lang=lang, size="xl") }}
+    <div class="notes-grid notes-grid--more">
+      {% for page in notizen_section.pages | slice(start=1, end=5) %}{{ notecard::card(page=page, lang=lang) }}{% endfor %}
     </div>
-    <div style="text-align: center; margin-top: 1.5rem;">
-      <a class="btn btn--outline" href="{{ notizen_section.permalink }}">{{ trans(key="lab_all_notes", lang=lang) }}</a>
-    </div>
+    <div class="notes-more"><a class="btn btn--outline" href="{{ notizen_section.permalink }}">{{ trans(key="lab_all_notes", lang=lang) }} ({{ notizen_section.pages | length }})</a></div>
   </div>
 </section>
 {% endif %}
+
+{# ===== Monitor at a glance: three indicators with sparklines ===== #}
+{% set mdata = load_data(path="data/monitor.toml") %}
+{% if lang == "de" %}{% set mpath = "zukunftslabor/monitor.md" %}{% else %}{% set mpath = "zukunftslabor/monitor." ~ lang ~ ".md" %}{% endif %}
+{% set mpage = get_page(path=mpath) %}
+<section class="canvas canvas--content" aria-label="{{ mpage.title }}">
+  <div class="container">
+    <header class="glance__head">
+      <p class="eyebrow">{{ trans(key="lab_glance", lang=lang) }}</p>
+      <h2 class="glance__title"><a href="{{ mpage.permalink }}">{{ mpage.title }} →</a></h2>
+    </header>
+    <div class="glance">
+      {% for id in ["robot_density", "egdi_rank", "public_ai_compute"] %}
+      {% set ind = mdata.indicator | filter(attribute="id", value=id) | first %}{% set latest = ind.series | last %}
+      <a class="glance__tile" href="{{ mpage.permalink }}#mon-{{ ind.id }}">
+        <span class="glance__value">{% if latest.value >= 1000 %}{{ latest.value | num_format(locale="de-CH") }}{% else %}{{ latest.value }}{% endif %}</span>
+        <span class="glance__label">{{ ind.title[lang] }}</span>
+        {{ spark::spark(ind=ind, lang=lang, w=300, h=70, target_label=mpage.extra.target_label) }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 
 {# ===== CTA ===== #}
 <section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">

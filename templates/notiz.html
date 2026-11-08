@@ -26,6 +26,14 @@
     {% if page.date %}
     <time class="lab-category" style="display: block; margin-top: 1rem;" datetime="{{ page.date }}">{{ page.date | date(format="%d.%m.%Y") }}</time>
     {% endif %}
+    {% if page.extra.review %}
+    <p class="review review--{{ page.extra.review.status }}">
+      <span class="review__status">{{ trans(key="lab_status_" ~ page.extra.review.status, lang=lang) }}</span>
+      <span class="review__date">{{ trans(key="lab_review_checked", lang=lang) }} {{ page.extra.review.checked | date(format="%d.%m.%Y") }}</span>
+      {% if page.extra.review.note %}<span class="review__note">{{ page.extra.review.note }}</span>{% endif %}
+      {% if page.extra.changelog %}<a class="review__log" href="#changelog">{{ trans(key="lab_changelog", lang=lang) }} ({{ page.extra.changelog | length }})</a>{% endif %}
+    </p>
+    {% endif %}
   </div>
 </section>
 
@@ -52,6 +60,12 @@
       {% if page.extra.notebook %}<li><a href="https://github.com/zukunft-ch/zukunftslabor/tree/main/notebooks/{{ page.extra.notebook }}" target="_blank" rel="noopener noreferrer">{{ trans(key="lab_notebook", lang=lang) }}</a></li>{% endif %}
       {% if page.extra.code_path %}<li><a href="https://github.com/zukunft-ch/zukunftslabor/tree/main/{{ page.extra.code_path }}" target="_blank" rel="noopener noreferrer">{{ trans(key="lab_notebook", lang=lang) }}</a></li>{% endif %}
     </ul>
+    {% if page.extra.changelog %}
+    <h3 id="changelog" class="changelog__title">{{ trans(key="lab_changelog", lang=lang) }}</h3>
+    <ol class="changelog">
+      {% for c in page.extra.changelog | reverse %}<li><time datetime="{{ c.date }}">{{ c.date | date(format="%d.%m.%Y") }}</time> {{ c.text }}</li>{% endfor %}
+    </ol>
+    {% endif %}
     <p class="lab-cite"><strong>{{ trans(key="lab_cite", lang=lang) }}:</strong> Die Zukunft, Zukunftslabor ({{ page.date | date(format="%Y") }}): «{{ page.title }}». {{ page.permalink | replace(from="https://die-zukunft.ch/fr/", to="https://le-futur.ch/") | replace(from="https://die-zukunft.ch/it/", to="https://il-futuro.ch/") }} · CC BY 4.0</p>
   </div>
 </section>

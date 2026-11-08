@@ -1,0 +1,114 @@
+{#- Basic-income financing calculator. Same model as notebooks/01_grundeinkommen (zukunftslabor repo):
+    decile incomes = BFS income shares × mean CHF 4'659 × 10; flat income-tax and/or VAT surcharge;
+    optional replacement of CHF 79 bn of existing transfers. With the defaults it reproduces the
+    note's scenarios A, B and C exactly. No behavioural responses (stated in the UI). -#}
+{%- if lang == "en" -%}{%- set loc = "en-GB" -%}{%- elif lang == "fr" -%}{%- set loc = "fr-CH" -%}{%- elif lang == "it" -%}{%- set loc = "it-CH" -%}{%- else -%}{%- set loc = "de-CH" -%}{%- endif -%}
+<figure class="calc fig" data-ubi-calc data-locale="{{ loc }}" data-bn="{{ trans(key='calc_bn', lang=lang) }}" data-month="{{ trans(key='calc_month', lang=lang) }}" data-year="{{ trans(key='calc_year', lang=lang) }}">
+  <header class="fig__head">
+    <span class="fig__num">{{ trans(key="calc_mix", lang=lang) }} · CHF</span>
+    <p class="fig__title">{{ trans(key="calc_title", lang=lang) }}</p>
+  </header>
+  <p class="calc__intro">{{ trans(key="calc_intro", lang=lang) }}</p>
+  <div class="calc__grid">
+    <div class="calc__controls">
+      <label class="calc__field">
+        <span>{{ trans(key="calc_amount", lang=lang) }} <output data-out="u">2'500</output> / {{ trans(key="calc_month", lang=lang) }}</span>
+        <input type="range" min="500" max="4000" step="100" value="2500" data-in="u">
+      </label>
+      <label class="calc__field">
+        <span>{{ trans(key="calc_child", lang=lang) }} <output data-out="c">625</output> / {{ trans(key="calc_month", lang=lang) }}</span>
+        <input type="range" min="0" max="100" step="5" value="25" data-in="c">
+      </label>
+      <label class="calc__field">
+        <span>{{ trans(key="calc_mix", lang=lang) }}: <output data-out="m">100 % {{ trans(key="calc_mix_income", lang=lang) }}</output></span>
+        <input type="range" min="0" max="100" step="5" value="100" data-in="m" data-income="{{ trans(key='calc_mix_income', lang=lang) }}" data-vat="{{ trans(key='calc_mix_vat', lang=lang) }}">
+      </label>
+      <label class="calc__check">
+        <input type="checkbox" data-in="r"> <span>{{ trans(key="calc_replace", lang=lang) }}</span>
+      </label>
+      <button type="button" class="btn btn--sm btn--outline calc__reset" data-reset>{{ trans(key="calc_reset", lang=lang) }}</button>
+    </div>
+    <dl class="calc__kpis">
+      <div><dt>{{ trans(key="calc_cost", lang=lang) }}</dt><dd data-kpi="cost">–</dd></div>
+      <div><dt>{{ trans(key="calc_rate_income", lang=lang) }}</dt><dd data-kpi="t">–</dd></div>
+      <div><dt>{{ trans(key="calc_rate_vat", lang=lang) }}</dt><dd data-kpi="v">–</dd></div>
+      <div><dt>{{ trans(key="calc_gini", lang=lang) }}</dt><dd data-kpi="g">–</dd></div>
+    </dl>
+  </div>
+  <div class="calc__chart" role="img" aria-label="{{ trans(key='calc_change', lang=lang) }}">
+    <p class="calc__axis">{{ trans(key="calc_change", lang=lang) }} (CHF)</p>
+    <svg data-chart viewBox="0 0 640 260" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="calc-pos" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#6d28d9"/><stop offset="1" stop-color="#c026d3"/></linearGradient></defs>
+    </svg>
+    <p class="calc__axis calc__axis--x">{{ trans(key="calc_decile", lang=lang) }} 1 → 10</p>
+  </div>
+  <noscript><p class="calc__intro">JavaScript.</p></noscript>
+</figure>
+<script>
+(function () {
+  var root = document.currentScript.previousElementSibling;
+  if (!root || !root.hasAttribute('data-ubi-calc')) return;
+  var SHARES = [2.69, 5.26, 6.43, 7.35, 8.48, 9.64, 10.79, 12.39, 14.54, 22.43];
+  var MEAN = 4659, ADULTS = 7e6, KIDS = 1.54e6, REPLACED_BN = 79;
+  var TRANSFERS = [2900, 2200, 1700, 1300, 1000, 750, 550, 400, 250, 100];
+  var CONS = [0.95, 0.92, 0.88, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60, 0.55];
+  var inc = SHARES.map(function (s) { return Math.round(s / 100 * MEAN * 10); });
+  var totalIncomeBn = MEAN * 12 * (ADULTS + KIDS) / 1e9;
+  var totalConsBn = inc.reduce(function (a, x, i) { return a + x * CONS[i]; }, 0) * (ADULTS + KIDS) / 10 * 12 / 1e9;
+  var loc = root.getAttribute('data-locale');
+  var nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 0 });
+  var nf1 = new Intl.NumberFormat(loc, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  var nf3 = new Intl.NumberFormat(loc, { maximumFractionDigits: 3, minimumFractionDigits: 3 });
+  function q(s) { return root.querySelector(s); }
+  function gini(v) {
+    var s = v.slice().sort(function (a, b) { return a - b; }), T = s.reduce(function (a, b) { return a + b; }, 0), L = 0, c = 0;
+    s.forEach(function (x) { var L2 = L + x / T; c += (L + L2) / 2 / s.length; L = L2; });
+    return 1 - 2 * c;
+  }
+  var svg = q('[data-chart]'), NS = 'http://www.w3.org/2000/svg';
+  function draw(delta) {
+    while (svg.lastChild && svg.lastChild.nodeName !== 'defs') svg.removeChild(svg.lastChild);
+    var W = 640, H = 260, pad = 6, max = Math.max(500, Math.max.apply(null, delta.map(Math.abs)));
+    var zero = H / 2, bw = (W - pad * 2) / 10;
+    var z = document.createElementNS(NS, 'line');
+    z.setAttribute('x1', 0); z.setAttribute('x2', W); z.setAttribute('y1', zero); z.setAttribute('y2', zero); z.setAttribute('class', 'calc__zero');
+    svg.appendChild(z);
+    delta.forEach(function (d, i) {
+      var h = Math.abs(d) / max * (H / 2 - 22), x = pad + i * bw + bw * 0.16, w = bw * 0.68;
+      var r = document.createElementNS(NS, 'rect');
+      r.setAttribute('x', x); r.setAttribute('width', w); r.setAttribute('rx', 3);
+      r.setAttribute('y', d >= 0 ? zero - h : zero); r.setAttribute('height', Math.max(h, 1));
+      r.setAttribute('class', d >= 0 ? 'calc__bar' : 'calc__bar calc__bar--neg');
+      svg.appendChild(r);
+      var t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', x + w / 2); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'calc__val');
+      t.setAttribute('y', d >= 0 ? zero - h - 6 : zero + h + 14);
+      t.textContent = (d > 0 ? '+' : '') + nf.format(d);
+      svg.appendChild(t);
+    });
+  }
+  function run() {
+    var u = +q('[data-in="u"]').value, cpct = +q('[data-in="c"]').value, m = +q('[data-in="m"]').value / 100, rep = q('[data-in="r"]').checked;
+    var child = u * cpct / 100;
+    var cost = (ADULTS * u + KIDS * child) * 12 / 1e9;
+    var rest = Math.max(0, cost - (rep ? REPLACED_BN : 0));
+    var t = m * rest / totalIncomeBn, v = (1 - m) * rest / totalConsBn;
+    var net = inc.map(function (x, i) { var base = rep ? x - TRANSFERS[i] : x; return base * (1 - t) - x * CONS[i] * v + u; });
+    var delta = net.map(function (n, i) { return Math.round(n - inc[i]); });
+    q('[data-out="u"]').textContent = nf.format(u);
+    q('[data-out="c"]').textContent = nf.format(child);
+    var mi = q('[data-in="m"]');
+    q('[data-out="m"]').textContent = Math.round(m * 100) + ' % ' + mi.getAttribute('data-income') + ' · ' + Math.round((1 - m) * 100) + ' % ' + mi.getAttribute('data-vat');
+    q('[data-kpi="cost"]').textContent = 'CHF ' + nf.format(cost) + ' ' + root.getAttribute('data-bn') + ' / ' + root.getAttribute('data-year');
+    q('[data-kpi="t"]').textContent = nf1.format(t * 100) + ' %';
+    q('[data-kpi="v"]').textContent = nf1.format(v * 100) + ' %';
+    q('[data-kpi="g"]').textContent = nf3.format(gini(inc)) + ' → ' + nf3.format(gini(net));
+    draw(delta);
+  }
+  root.addEventListener('input', run);
+  q('[data-reset]').addEventListener('click', function () {
+    q('[data-in="u"]').value = 2500; q('[data-in="c"]').value = 25; q('[data-in="m"]').value = 100; q('[data-in="r"]').checked = false; run();
+  });
+  run();
+})();
+</script>

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+
+{% block head_extra %}
+{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
+{% endblock %}
+
+{% block content %}
+{#
+  Lab agenda + transparency: what the lab works on next (data/agenda.toml), questions from the
+  public and reported errors (GitHub issues → data/lab_issues.json), and the change log of every
+  note in one place (extra.changelog of each note).
+#}
+{% set ag = load_data(path="data/agenda.toml") %}
+{% set gh = load_data(path="data/lab_issues.json", required=false) %}
+{% set x = page.extra %}
+{% set repo = "https://github.com/zukunft-ch/zukunftslabor" %}
+
+<section class="page-hero" aria-labelledby="ag-title">
+  <div class="container">
+    <p class="eyebrow">{{ trans(key="nav_zukunftslabor", lang=lang) }} · {{ x.kicker }}</p>
+    <h1 class="page-hero__title" id="ag-title">{{ page.title }}</h1>
+    <p class="page-hero__desc">{{ page.description }}</p>
+    <p class="agenda-cta">
+      <a class="btn btn--glow" href="{{ repo }}/issues/new?template=frage-ans-labor.yml" target="_blank" rel="noopener noreferrer">{{ x.ask_label }}</a>
+      <a class="btn btn--outline" href="{{ repo }}/issues/new?template=korrektur.yml" target="_blank" rel="noopener noreferrer">{{ x.correct_label }}</a>
+    </p>
+  </div>
+</section>
+
+<section class="canvas layer" aria-labelledby="ag-agenda">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.agenda_eyebrow }}</p>
+      <h2 class="layer__title" id="ag-agenda">{{ x.agenda_title }}</h2>
+      <p class="layer__intro">{{ x.agenda_intro }}</p>
+    </header>
+    <ol class="agenda">
+      {% for it in ag.item %}
+      <li class="agenda__item ms--{{ it.status | slugify }}">
+        <span class="ms__status">{% if it.status == "erledigt" %}{{ x.status_done }}{% elif it.status == "in Arbeit" %}{{ x.status_progress }}{% else %}{{ x.status_planned }}{% endif %}</span>
+        <p class="agenda__text">{{ it.text[lang] }}</p>
+        <p class="agenda__meta">
+          {% if it.due %}{{ x.due_label }} {{ it.due }}{% endif %}
+          {% if it.pillar %}{% if lang == "de" %}{% set pp = it.pillar ~ ".md" %}{% else %}{% set pp = it.pillar ~ "." ~ lang ~ ".md" %}{% endif %}{% set pt = get_page(path=pp) %} · <a href="{{ pt.permalink }}">{{ pt.title }}</a>{% endif %}
+        </p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="canvas layer" aria-labelledby="ag-q">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.questions_eyebrow }}</p>
+      <h2 class="layer__title" id="ag-q">{{ x.questions_title }}</h2>
+      <p class="layer__intro">{{ x.questions_intro }}</p>
+    </header>
+    {% set qs = [] %}{% if gh and gh.issues %}{% set qs = gh.issues %}{% endif %}
+    {% if qs | length > 0 %}
+    <ul class="issues">
+      {% for i in qs %}
+      <li class="issues__item issues__item--{{ i.state }}">
+        <span class="issues__kind">{% if i.label == "korrektur" %}{{ x.correct_kind }}{% else %}{{ x.question_kind }}{% endif %}</span>
+        <a href="{{ i.url }}" target="_blank" rel="noopener noreferrer">#{{ i.number }} {{ i.title }}</a>
+        <span class="issues__state">{% if i.state == "open" %}{{ x.open_label }}{% else %}{{ x.closed_label }} {{ i.closed }}{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="issues__empty">{{ x.questions_empty }} <a href="{{ repo }}/issues/new?template=frage-ans-labor.yml" target="_blank" rel="noopener noreferrer">{{ x.ask_label }} →</a></p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="canvas layer" aria-labelledby="ag-log">
+  <div class="container">
+    <header class="layer__head">
+      <p class="eyebrow">{{ x.corrections_eyebrow }}</p>
+      <h2 class="layer__title" id="ag-log">{{ x.corrections_title }}</h2>
+      <p class="layer__intro">{{ x.corrections_intro }}</p>
+    </header>
+    {% set notes = get_section(path="zukunftslabor/notizen/_index.md", lang=lang) %}
+    <ol class="corrlog">
+      {% for n in notes.pages %}{% if n.extra.changelog %}
+      <li class="corrlog__note">
+        <a class="corrlog__title" href="{{ n.permalink }}#changelog">{{ n.title }}</a>
+        {% if n.extra.review %}<span class="review--{{ n.extra.review.status }} corrlog__status"><span class="review__status">{{ trans(key="lab_status_" ~ n.extra.review.status, lang=lang) }}</span></span>{% endif %}
+        <ul>{% for c in n.extra.changelog | reverse %}<li><time datetime="{{ c.date }}">{{ c.date | date(format="%d.%m.%Y") }}</time> {{ c.text }}</li>{% endfor %}</ul>
+      </li>
+      {% endif %}{% endfor %}
+    </ol>
+  </div>
+</section>
+{% endblock %}
