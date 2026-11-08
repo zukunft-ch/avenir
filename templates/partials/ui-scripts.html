@@ -1,0 +1,372 @@
+{# Shared by die-zukunft.ch and the-future.world (both base.html include it). Pins (DZPins), command overlay, theme switch. #}
+  <script>
+  // Pins — the reader's own index of the site. Stored on this device only
+  // (localStorage, key dz-pins-v1); nothing is sent anywhere. A pin is a
+  // pathname + hex address, so it survives redesigns as long as addresses do.
+  window.DZPins = (function() {
+    var KEY = 'dz-pins-v1';
+    var T = {
+      add: '{{ trans(key="pin_add", lang=lang) }}',
+      remove: '{{ trans(key="pin_remove", lang=lang) }}',
+      added: '{{ trans(key="pin_added", lang=lang) }}',
+      removed: '{{ trans(key="pin_removed", lang=lang) }}',
+      copied: '{{ trans(key="link_copied", lang=lang) }}',
+      pinned: '{{ trans(key="pinned_by_you", lang=lang) }}',
+      importMsg: '{{ trans(key="pins_import", lang=lang) }}',
+      accept: '{{ trans(key="pins_accept", lang=lang) }}',
+      dismiss: '{{ trans(key="pins_dismiss", lang=lang) }}'
+    };
+    var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>';
+
+    function norm(u) { try { return new URL(u || window.location.pathname, window.location.href).pathname; } catch (e) { return u; } }
+    function idOf(u, hex) { return norm(u) + '#' + hex; }
+    function load() {
+      try { var v = JSON.parse(window.localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; }
+      catch (e) { return []; }
+    }
+    var pins = load();
+    function persist() { try { window.localStorage.setItem(KEY, JSON.stringify(pins)); } catch (e) {} sync(); }
+    function has(id) { for (var i = 0; i < pins.length; i++) if (pins[i].id === id) return true; return false; }
+    function add(p) {
+      var id = idOf(p.url, p.hex);
+      if (has(id)) return;
+      pins.unshift({ id: id, url: norm(p.url), hex: p.hex, title: p.title || p.hex, page: p.page || '', t: Date.now() });
+      persist();
+    }
+    function remove(id) { pins = pins.filter(function(p) { return p.id !== id; }); persist(); }
+    function toggle(p) { var id = idOf(p.url, p.hex); if (has(id)) { remove(id); return false; } add(p); return true; }
+
+    function esc(s) { return String(s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+    function button(p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pin-btn';
+      b.setAttribute('data-pin', '');
+      b.setAttribute('data-pin-url', p.url);
+      b.setAttribute('data-pin-hex', p.hex);
+      b.setAttribute('data-pin-title', p.title);
+      b.setAttribute('data-pin-page', p.page || '');
+      b.setAttribute('aria-pressed', 'false');
+      b.setAttribute('aria-label', T.add + ': ' + p.title);
+      b.title = T.add;
+      b.innerHTML = ICON + '<span class="pin-btn__label">' + esc(T.add) + '</span>';
+      return b;
+    }
+
+    var toastTimer;
+    function toast(msg) {
+      var el = document.getElementById('pins-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() { el.classList.remove('is-visible'); }, 1800);
+    }
+
+    function sync() {
+      document.querySelectorAll('[data-pin]').forEach(function(b) {
+        var on = has(idOf(b.getAttribute('data-pin-url'), b.getAttribute('data-pin-hex')));
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var title = b.getAttribute('data-pin-title') || '';
+        b.setAttribute('aria-label', (on ? T.remove : T.add) + ': ' + title);
+        b.title = on ? T.remove : T.add;
+        var l = b.querySelector('.pin-btn__label');
+        if (l) l.textContent = on ? T.pinned : T.add;
+      });
+      var count = document.getElementById('pins-count');
+      var toggleBtn = document.getElementById('pins-toggle');
+      if (count) count.textContent = pins.length;
+      if (toggleBtn) toggleBtn.classList.toggle('has-pins', pins.length > 0);
+      var list = document.getElementById('pins-list');
+      var empty = document.getElementById('pins-empty');
+      var foot = document.getElementById('pins-foot');
+      if (list) {
+        list.innerHTML = pins.map(function(p) {
+          return '<li class="pins-tray__item"><span class="pins-tray__hex">' + esc(p.hex) + '</span>' +
+            '<a href="' + esc(p.url + '#' + p.hex) + '"><span class="pins-tray__title">' + esc(p.title) + '</span><span class="pins-tray__page">' + esc(p.page) + '</span></a>' +
+            '<button class="pins-tray__remove" type="button" data-unpin="' + esc(p.id) + '" aria-label="' + esc(T.remove + ': ' + p.title) + '">×</button></li>';
+        }).join('');
+      }
+      if (empty) empty.hidden = pins.length > 0;
+      if (foot) foot.hidden = pins.length === 0;
+      var cmd = document.getElementById('command-pins');
+      if (cmd) {
+        cmd.innerHTML = pins.length ? '<p>' + esc(T.pinned) + '</p>' + pins.slice(0, 6).map(function(p) {
+          return '<a class="command-overlay__link" href="' + esc(p.url + '#' + p.hex) + '"><span>' + esc(p.hex) + '</span>' + esc(p.title) + '</a>';
+        }).join('') : '';
+      }
+    }
+
+    // Shareable pin sets: /#pins=<base64url(JSON)>
+    function encode(list) {
+      var json = JSON.stringify(list.map(function(p) { return [p.url, p.hex, p.title, p.page]; }));
+      return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function decode(str) {
+      try {
+        var b = str.replace(/-/g, '+').replace(/_/g, '/');
+        while (b.length % 4) b += '=';
+        var arr = JSON.parse(decodeURIComponent(escape(atob(b))));
+        return Array.isArray(arr) ? arr.slice(0, 50).filter(function(a) { return Array.isArray(a) && /^0x[0-9A-F]{4}$/i.test(a[1]) && /^\//.test(a[0]); }) : [];
+      } catch (e) { return []; }
+    }
+
+    function copy(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() { toast(T.copied); }, function() { window.prompt('', text); });
+      }
+    }
+
+    var tray, trayBtn;
+    function setTray(open) {
+      if (!tray) return;
+      tray.classList.toggle('is-open', open);
+      tray.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (trayBtn) trayBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    document.addEventListener('click', function(e) {
+      var b = e.target.closest('[data-pin]');
+      if (b) {
+        e.preventDefault();
+        e.stopPropagation();
+        var on = toggle({ url: b.getAttribute('data-pin-url'), hex: b.getAttribute('data-pin-hex'), title: b.getAttribute('data-pin-title'), page: b.getAttribute('data-pin-page') });
+        b.classList.remove('is-popping'); void b.offsetWidth; b.classList.add('is-popping');
+        toast(on ? T.added : T.removed);
+        return;
+      }
+      var c = e.target.closest('[data-copy-link]');
+      if (c) { copy(window.location.origin + window.location.pathname + c.getAttribute('data-copy-link')); return; }
+      var u = e.target.closest('[data-unpin]');
+      if (u) { remove(u.getAttribute('data-unpin')); return; }
+      if (tray && tray.classList.contains('is-open') && !e.target.closest('#pins-tray') && !e.target.closest('#pins-toggle')) setTray(false);
+    });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') setTray(false); });
+    window.addEventListener('storage', function(e) { if (e.key === KEY) { pins = load(); sync(); } });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      tray = document.getElementById('pins-tray');
+      trayBtn = document.getElementById('pins-toggle');
+      if (trayBtn) trayBtn.addEventListener('click', function() { setTray(!tray.classList.contains('is-open')); });
+      var share = document.getElementById('pins-share');
+      if (share) share.addEventListener('click', function() { copy(window.location.origin + '/#pins=' + encode(pins)); });
+      var clear = document.getElementById('pins-clear');
+      if (clear) {
+        var label = clear.textContent;
+        clear.addEventListener('click', function() {
+          if (clear.getAttribute('data-armed')) { pins = []; persist(); clear.removeAttribute('data-armed'); clear.textContent = label; return; }
+          clear.setAttribute('data-armed', '1');
+          clear.textContent = clear.getAttribute('data-confirm');
+          setTimeout(function() { clear.removeAttribute('data-armed'); clear.textContent = label; }, 3000);
+        });
+      }
+      // Incoming shared set
+      var m = window.location.hash.match(/^#pins=([A-Za-z0-9_-]+)/);
+      if (m) {
+        var incoming = decode(m[1]);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        var box = document.getElementById('pins-import');
+        if (incoming.length && box) {
+          box.className = 'pins-tray__import';
+          box.innerHTML = '<p>' + esc(T.importMsg.replace('{n}', incoming.length)) + '</p><div><button class="btn btn--sm" type="button" data-import="1">' + esc(T.accept) + '</button><button class="btn btn--sm btn--outline" type="button" data-import="0">' + esc(T.dismiss) + '</button></div>';
+          box.addEventListener('click', function(ev) {
+            var d = ev.target.closest('[data-import]');
+            if (!d) return;
+            if (d.getAttribute('data-import') === '1') incoming.slice().reverse().forEach(function(a) { add({ url: a[0], hex: a[1], title: a[2], page: a[3] }); });
+            box.className = ''; box.innerHTML = '';
+          });
+          setTray(true);
+        }
+      }
+      sync();
+    });
+
+    return { button: button, sync: sync, toggle: toggle, all: function() { return pins.slice(); } };
+  })();
+  </script>
+
+  <script>
+  (function() {
+    var btns = document.querySelectorAll('[data-menu-toggle]');
+    var overlay = document.getElementById('command-overlay');
+    var backdrop = document.getElementById('overlay-backdrop');
+    var searchInput = document.getElementById('command-search');
+    var nav = document.getElementById('command-nav');
+    var topnav = document.querySelector('.topnav');
+    var links = nav ? nav.querySelectorAll('.command-overlay__link') : [];
+
+    function open() {
+      /* Close share overlay if open */
+      var shareOv = document.getElementById('share-overlay');
+      if (shareOv && shareOv.classList.contains('is-open')) {
+        shareOv.classList.remove('is-open');
+        shareOv.setAttribute('aria-hidden', 'true');
+      }
+      overlay.classList.add('is-open');
+      backdrop.classList.add('is-open');
+      btns.forEach(function(b) { b.classList.add('is-open'); b.setAttribute('aria-expanded', 'true'); });
+      overlay.setAttribute('aria-hidden', 'false');
+      setTimeout(function() { searchInput.focus(); }, 150);
+    }
+
+    function close() {
+      overlay.classList.remove('is-open');
+      backdrop.classList.remove('is-open');
+      btns.forEach(function(b) { b.classList.remove('is-open'); b.setAttribute('aria-expanded', 'false'); });
+      overlay.setAttribute('aria-hidden', 'true');
+      searchInput.value = '';
+      filterLinks('');
+      if (triggerBtn) { triggerBtn.focus(); triggerBtn = null; }
+    }
+
+    var liveRegion = document.getElementById('search-live');
+    var searchResultOne = '{{ trans(key="search_result_one", lang=lang) }}';
+    var searchResultMany = '{{ trans(key="search_result_many", lang=lang) }}';
+
+    function filterLinks(q) {
+      q = q.toLowerCase().trim();
+      var count = 0;
+      links.forEach(function(link) {
+        var match = !q || link.textContent.toLowerCase().includes(q);
+        link.style.display = match ? '' : 'none';
+        if (match) count++;
+      });
+      if (liveRegion) {
+        liveRegion.textContent = q ? (count + ' ' + (count === 1 ? searchResultOne : searchResultMany)) : '';
+      }
+    }
+
+    var triggerBtn = null;
+
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (overlay.classList.contains('is-open')) {
+          close();
+        } else {
+          triggerBtn = btn;
+          open();
+        }
+      });
+    });
+
+    backdrop.addEventListener('click', close);
+
+    // Close on Escape + focus trap
+    document.addEventListener('keydown', function(e) {
+      if (!overlay.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
+        close();
+        return;
+      }
+      // Focus trap: keep Tab within overlay
+      if (e.key === 'Tab') {
+        var focusable = overlay.querySelectorAll('a:not([style*="display: none"]), button, input, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
+    });
+
+    // Clicking inside the overlay only closes if it's a nav link
+    overlay.addEventListener('click', function(e) {
+      var link = e.target.closest('.command-overlay__link');
+      if (link) {
+        close();
+      }
+    });
+
+    // Prevent lang switcher and settings from closing overlay
+    var settings = overlay.querySelector('.command-overlay__settings');
+    if (settings) {
+      settings.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        filterLinks(this.value);
+        updateScrollArrows();
+      });
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          var visible = nav.querySelector('.command-overlay__link:not([style*="display: none"])');
+          if (visible) window.location.href = visible.href;
+        }
+      });
+    }
+
+    // Nav scroll arrows
+    var scrollUp = document.getElementById('nav-scroll-up');
+    var scrollDown = document.getElementById('nav-scroll-down');
+
+    function updateScrollArrows() {
+      if (!nav) return;
+      var atTop = nav.scrollTop <= 0;
+      var atBottom = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 1;
+      var canScroll = nav.scrollHeight > nav.clientHeight;
+      if (scrollUp) scrollUp.classList.toggle('is-visible', canScroll && !atTop);
+      if (scrollDown) scrollDown.classList.toggle('is-visible', canScroll && !atBottom);
+    }
+
+    if (nav) {
+      nav.addEventListener('scroll', updateScrollArrows);
+    }
+    if (scrollUp) {
+      scrollUp.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nav.scrollBy({ top: -120, behavior: 'smooth' });
+      });
+    }
+    if (scrollDown) {
+      scrollDown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nav.scrollBy({ top: 120, behavior: 'smooth' });
+      });
+    }
+
+    // Update arrows when overlay opens
+    var origOpen = open;
+    open = function() {
+      origOpen();
+      setTimeout(updateScrollArrows, 50);
+    };
+
+    // Theme switch
+    var themeBtn = document.getElementById('theme-toggle');
+    function setThemeColor(color) {
+      var old = document.getElementById('meta-theme-color');
+      if (old) old.remove();
+      var m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.id = 'meta-theme-color';
+      m.content = color;
+      document.head.appendChild(m);
+    }
+    if (themeBtn) {
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        themeBtn.setAttribute('aria-checked', 'true');
+      }
+      themeBtn.addEventListener('click', function() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          try { localStorage.setItem('dz-theme', 'light'); } catch (e) {}
+          themeBtn.setAttribute('aria-checked', 'false');
+          setThemeColor('#eef0ec');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          try { localStorage.setItem('dz-theme', 'dark'); } catch (e) {}
+          themeBtn.setAttribute('aria-checked', 'true');
+          setThemeColor('#0b0d0e');
+        }
+      });
+    }
+  })();
+  </script>
