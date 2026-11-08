@@ -81,6 +81,7 @@
 {% endblock content %}
 
 {% block body_end %}
+<script src="/js/dz-charts.js"></script>
 <script>
 (function() {
   // Vega (~278 KB gzip) is NOT on the critical path. Each chart shows its
@@ -111,84 +112,45 @@
   var specCache = {};
   var viewCache = {};
 
-  function getThemeConfig() {
-    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    return {
-      background: 'transparent',
-      font: 'Switzer, system-ui, sans-serif',
-      axis: {
-        labelLimit: 280,
-        labelColor: isDark ? '#a2a9ad' : '#4f565b',
-        titleColor: isDark ? '#e7eae6' : '#121517',
-        gridColor: isDark ? 'rgba(231,234,230,0.1)' : 'rgba(18,21,23,0.08)',
-        domainColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.08)'
-      },
-      legend: {
-        labelColor: isDark ? '#999999' : '#666666',
-        titleColor: isDark ? '#eeeeee' : '#111111'
-      },
-      title: {
-        color: isDark ? '#eeeeee' : '#111111'
-      },
-      view: { stroke: 'transparent' },
-      // Alpenglühen: brand hues first, then two neutral/warm partners for 5+ series
-      range: {
-        category: isDark
-          ? ['#e879f9', '#a78bfa', '#fb7185', '#818cf8', '#94a3b8', '#fbbf24']
-          : ['#c026d3', '#6d28d9', '#f43f5e', '#4338ca', '#64748b', '#d97706'],
-        ramp: isDark ? ['#3b0764', '#e879f9'] : ['#ede9fe', '#6d28d9']
-      },
-      mark: { color: isDark ? '#a78bfa' : '#6d28d9' },
-      bar: { color: isDark ? '#a78bfa' : '#6d28d9' },
-      line: { color: isDark ? '#e879f9' : '#c026d3', strokeWidth: 2.5 },
-      point: { color: isDark ? '#e879f9' : '#c026d3' },
-      area: { color: isDark ? '#a78bfa' : '#6d28d9', opacity: 0.85 },
-      rule: { color: isDark ? '#94a3b8' : '#64748b' }
-    };
-  }
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function getThemeConfig() { return window.DZCharts.config(isDark()); }
 
   function addInteractivity(spec) {
+    if (spec && spec.layer && spec.layer[0] && spec.layer[0].mark) { addInteractivity(spec.layer[0]); return spec; }
     if (!spec || !spec.mark) return spec;
     var markType = typeof spec.mark === 'string' ? spec.mark : spec.mark.type;
     if (markType === 'bar' && spec.encoding) {
       spec.params = spec.params || [];
       spec.params.push({
         name: 'highlight',
-        select: { type: 'point', encodings: ['x'] }
+        select: { type: 'point', on: 'pointerover', clear: 'pointerout', encodings: ['x'] }
       });
       spec.mark = typeof spec.mark === 'string'
         ? { type: spec.mark, cursor: 'pointer' }
         : Object.assign({}, spec.mark, { cursor: 'pointer' });
       spec.encoding.opacity = spec.encoding.opacity || {
         condition: { param: 'highlight', value: 1 },
-        value: 0.7
+        value: 0.4
       };
     }
     return spec;
   }
 
   function fallbackSvg(el, jsonSrc) {
-    var loading = el.querySelector('.chart-interactive__loading');
-    if (loading) loading.remove();
-    if (el.querySelector('img')) return; // static SVG already present
-    var img = document.createElement('img');
-    img.src = jsonSrc.replace(/\.json$/, '.svg');
-    img.alt = el.closest('.chart-interactive')
-      ? el.closest('.chart-interactive').getAttribute('aria-label') || 'Chart'
-      : 'Chart';
-    img.loading = 'lazy';
-    img.width = 720;
-    img.className = 'chart-fallback-svg';
-    img.onerror = function() { img.remove(); }; // missing SVG: wait for interactive upgrade
-    el.appendChild(img);
+    var img = el.querySelector('img.chart-fallback-svg');
+    var want = jsonSrc.replace(/\.json$/, isDark() ? '.dark.svg' : '.svg');
+    if (img) { if (img.getAttribute('src') !== want) img.setAttribute('src', want); return; }
+    img = document.createElement('img');
+    img.src = want; img.alt = ''; img.className = 'chart-fallback-svg';
+    el.innerHTML = ''; el.appendChild(img);
   }
 
   function embed(el, spec) {
     var src = el.getAttribute('data-chart-src');
-    spec.width = 'container';
-    spec.autosize = { type: 'fit', contains: 'padding' };
-    if (spec.encoding && spec.encoding.tooltip === undefined) {
-      spec.encoding.tooltip = { content: 'data' };
+    spec = window.DZCharts.prepare(spec, { dark: isDark(), lead: el.hasAttribute('data-lead'), narrow: window.innerWidth < 640, width: el.clientWidth }).spec;
+    var main = spec.layer ? spec.layer[0] : spec;
+    if (main.encoding && main.encoding.tooltip === undefined) {
+      main.encoding.tooltip = { content: 'data' };
     }
     spec = addInteractivity(spec);
     el.innerHTML = '';

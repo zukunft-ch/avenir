@@ -1,11 +1,19 @@
-<figure class="chart-interactive" role="img" aria-label="{{ alt | default(value='Chart') }}">
-  <div class="chart-interactive__render" data-chart-src="/zukunftslabor/charts/{{ spec }}.json">
-    <div class="chart-interactive__loading" aria-hidden="true"></div>
+{#- Figure: number + title (from the spec; translated alt text outside DE), plot, caption.
+    The static SVG shows immediately; notiz.html upgrades it to interactive Vega near the viewport.
+    The first figure of a note is the lead figure (wider, taller). -#}
+{%- set s = load_data(path="static/zukunftslabor/charts/" ~ spec ~ ".json", required=false) -%}
+{%- set t = "" -%}
+{%- if s and s.title -%}{%- if s.title.text -%}{%- set t = s.title.text -%}{%- else -%}{%- set t = s.title -%}{%- endif -%}{%- endif -%}
+{%- if lang != "de" or not t -%}{%- set t = alt | default(value="") -%}{%- endif -%}
+{%- set t = t | replace(from=" — ", to=": ") -%}
+<figure class="fig{% if nth == 1 %} fig--lead{% endif %}" aria-labelledby="fig-{{ spec }}">
+  <header class="fig__head">
+    <span class="fig__num">{{ trans(key="lab_fig", lang=lang) }} {{ nth }}</span>
+    <p class="fig__title" id="fig-{{ spec }}">{{ t }}</p>
+    <a class="fig__data" href="/zukunftslabor/charts/{{ spec }}.json">{{ trans(key="lab_fig_data", lang=lang) }} ↗</a>
+  </header>
+  <div class="fig__plot chart-interactive__render" data-chart-src="/zukunftslabor/charts/{{ spec }}.json"{% if nth == 1 %} data-lead{% endif %}>
+    <img class="chart-fallback-svg" src="/zukunftslabor/charts/{{ spec }}.svg" alt="{{ alt | default(value=t) }}" loading="{% if nth == 1 %}eager{% else %}lazy{% endif %}" width="1040" height="{% if nth == 1 %}460{% else %}380{% endif %}">
   </div>
-  {% if body %}
-  <figcaption class="chart-interactive__caption">{{ body }}</figcaption>
-  {% endif %}
-  <noscript>
-    <img src="/zukunftslabor/charts/{{ spec }}.svg" alt="{{ alt | default(value='Chart') }}" loading="lazy" width="720">
-  </noscript>
+  {% if body %}<figcaption class="fig__caption">{{ body | markdown(inline=true) | safe }}</figcaption>{% endif %}
 </figure>

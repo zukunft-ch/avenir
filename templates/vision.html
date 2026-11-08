@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/pin.html" as pin %}
+{% import "macros/spark.html" as spark %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -37,6 +38,8 @@
       {% for s in x.shift %}
       <article class="shift-card reveal-up">
         <p class="shift-card__figure">{{ s.figure }}</p>
+        {% if s.monitor %}{% set sdata = load_data(path="data/monitor.toml") %}{% set sind = sdata.indicator | filter(attribute="id", value=s.monitor) | first %}
+        <div class="shift-card__spark">{{ spark::spark(ind=sind, lang=lang, w=260, h=58, target_label="") }}</div>{% endif %}
         <h3 class="shift-card__title">{{ s.title }}</h3>
         <p class="shift-card__text">{{ s.text | safe }}</p>
         {% if s.source %}<p class="shift-card__src"><a href="{{ s.source_url }}" target="_blank" rel="noopener noreferrer">{{ s.source }}</a></p>{% endif %}
@@ -167,12 +170,26 @@
       <h2 class="layer__title" id="v-targets">{{ x.targets_title }}</h2>
       <p class="layer__intro">{{ x.targets_intro }}</p>
     </header>
+    {% set mdata = load_data(path="data/monitor.toml") %}
+    {% if lang == "de" %}{% set mpath = "zukunftslabor/monitor.md" %}{% else %}{% set mpath = "zukunftslabor/monitor." ~ lang ~ ".md" %}{% endif %}
+    {% set mpage = get_page(path=mpath) %}
     <ol class="targets">
       {% for t in x.targets %}
       <li class="target reveal-up">
         <span class="target__year">{{ t.year }}</span>
         <p class="target__goal">{{ t.goal }}</p>
         <p class="target__how">{{ t.how }}</p>
+        {# where Switzerland stands today: sparkline (indicator) or status (milestone), linked to the monitor #}
+        {% if t.monitor %}{% set ind = mdata.indicator | filter(attribute="id", value=t.monitor) | first %}
+        <a class="target__now" href="{{ mpage.permalink }}#mon-{{ ind.id }}" aria-label="{{ mpage.title }}: {{ ind.title[lang] }}">
+          {{ spark::spark(ind=ind, lang=lang, w=220, h=64, target_label=mpage.extra.target_label) }}
+        </a>
+        {% elif t.milestone %}{% set ms = mdata.milestone | filter(attribute="id", value=t.milestone) | first %}
+        <a class="target__now target__now--ms ms--{{ ms.status | slugify }}" href="{{ mpage.permalink }}" title="{{ ms.text[lang] }}">
+          <span class="ms__status">{% if ms.status == "erreicht" %}{{ mpage.extra.status_done }}{% elif ms.status == "in Arbeit" %}{{ mpage.extra.status_progress }}{% else %}{{ mpage.extra.status_open }}{% endif %}</span>
+          <span class="target__asof">{{ mpage.extra.asof_label }} {{ ms.date }}</span>
+        </a>
+        {% endif %}
       </li>
       {% endfor %}
     </ol>

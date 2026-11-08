@@ -52,6 +52,7 @@
 }
 
 .shift-card {
+  position: relative;
   background: var(--color-surface);
   padding: $space-6 $space-5 $space-5;
   display: flex;
@@ -61,11 +62,14 @@
 .shift-card__figure {
   font-family: $font-family-headline;
   font-weight: 650;
-  font-size: clamp(2.2rem, 1.6rem + 1.8vw, 3.4rem);
-  letter-spacing: -0.045em;
-  line-height: 1;
+  font-size: clamp(2.8rem, 1.9rem + 2.4vw, 4.4rem);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
   margin-bottom: $space-4;
+  width: fit-content;
+  background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
+.shift-card__spark { margin: -#{$space-2} 0 $space-4; .spark { max-width: 260px; } }
 
 .shift-card__title { font-size: 1.1rem; letter-spacing: -0.015em; margin-bottom: $space-2; }
 .shift-card__text { color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.55; margin-bottom: $space-4; }
@@ -206,18 +210,27 @@
 
 .target {
   display: grid;
-  grid-template-columns: 6rem minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: 6rem minmax(0, 1.2fr) minmax(0, 1fr) 13.75rem;
   gap: $space-5;
   padding: $space-5 0;
   border-bottom: 1px solid var(--hairline);
   align-items: baseline;
 
-  @media (max-width: $bp-md) { grid-template-columns: 4.5rem 1fr; .target__how { grid-column: 2; } }
+  @media (max-width: $bp-xl) { grid-template-columns: 6rem minmax(0, 1fr) 13.75rem; .target__how { grid-column: 2; grid-row: 2; } .target__now { grid-column: 3; grid-row: 1 / span 2; } }
+  @media (max-width: $bp-md) { grid-template-columns: 4.5rem 1fr; .target__how, .target__now { grid-column: 2; grid-row: auto; } }
 }
 
 .target__year { font-family: $font-mono; font-size: 0.85rem; color: var(--color-signal); letter-spacing: 0.04em; }
 .target__goal { font-family: $font-family-headline; font-weight: 600; font-size: clamp(1.15rem, 1rem + 0.5vw, 1.45rem); letter-spacing: -0.02em; line-height: 1.25; margin: 0; }
 .target__how { color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.55; margin: 0; }
+.target__now {
+  align-self: center; display: block; text-decoration: none; color: inherit; max-width: 13.75rem;
+  border-radius: $radius-sm; transition: opacity $transition-fast;
+  &:hover, &:focus-visible { opacity: 0.8; }
+  .spark { max-width: 220px; }
+}
+.target__now--ms { display: flex; flex-direction: column; gap: $space-1; align-items: flex-start; }
+.target__asof { font-family: $font-mono; font-size: 0.7rem; color: var(--color-text-muted); }
 
 // ---- Sources ----
 .sources { padding-top: $space-7; padding-bottom: $space-7; }

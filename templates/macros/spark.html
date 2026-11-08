@@ -1,0 +1,71 @@
+{#
+  Sparkline for one Zukunftsmonitor indicator (data/monitor.toml), drawn in Tera, no JS.
+  Same geometry everywhere (monitor tiles, pillar heroes): series as a brand-gradient line with a
+  soft area, uncertain points hollow, the target as a dashed Swiss-red level with its year,
+  an optional projection range as a capsule. Lower-is-better indicators are drawn inverted
+  (up = better) so "rising" always reads as progress.
+#}
+{% macro spark(ind, lang, w=320, h=96, target_label="") %}
+{%- set vals = ind.series | map(attribute="value") -%}
+{%- set years = ind.series | map(attribute="year") -%}
+{%- set vmin = vals | sort | first -%}{%- set vmax = vals | sort | last -%}
+{%- if ind.target and not ind.lower_is_better and ind.target.value > vmax -%}{%- set vmax = ind.target.value -%}{%- endif -%}
+{%- if ind.target and ind.lower_is_better and ind.target.value < vmin -%}{%- set vmin = ind.target.value -%}{%- endif -%}
+{%- if ind.target and not ind.lower_is_better and ind.target.value < vmin -%}{%- set vmin = ind.target.value -%}{%- endif -%}
+{%- if ind.projection and ind.projection.max > vmax -%}{%- set vmax = ind.projection.max -%}{%- endif -%}
+{%- if not ind.lower_is_better and vmin > 0 and (vmin < vmax * 0.6 or vmin == vmax) -%}{%- set vmin = 0 -%}{%- endif -%}
+{%- set ymin = years | first -%}{%- set ymax = years | last -%}
+{%- if ind.target and ind.target.year > ymax -%}{%- set ymax = ind.target.year -%}{%- endif -%}
+{%- if ind.projection and ind.projection.year > ymax -%}{%- set ymax = ind.projection.year -%}{%- endif -%}
+{%- if ymax == ymin -%}{%- set ymax = ymin + 1 -%}{%- endif -%}
+{%- set vspan = vmax - vmin -%}{%- if vspan == 0 -%}{%- set vspan = 1 -%}{%- endif -%}
+{%- set yspan = ymax - ymin -%}
+{%- set pl = 6 -%}{%- set pr = 6 -%}{%- set pt = 14 -%}{%- set pb = 18 -%}
+{%- set iw = w - pl - pr -%}{%- set ih = h - pt - pb -%}
+{%- set gid = "sg-" ~ ind.id ~ "-" ~ w -%}
+{%- set_global pts = "" -%}{%- set_global x0 = 0 -%}{%- set_global xl = 0 -%}{%- set_global yl = 0 -%}
+{%- for p in ind.series -%}
+  {%- set x = (p.year - ymin) / yspan * iw + pl -%}
+  {%- set f = (p.value - vmin) / vspan -%}
+  {%- if ind.lower_is_better -%}{%- set y = pt + f * ih -%}{%- else -%}{%- set y = pt + ih - f * ih -%}{%- endif -%}
+  {%- set xr = x | round(precision=1) -%}{%- set yr = y | round(precision=1) -%}
+  {%- set_global pts = pts ~ xr ~ "," ~ yr ~ " " -%}{%- set_global yl = yr -%}
+  {%- if loop.first -%}{%- set_global x0 = x -%}{%- endif -%}{%- set_global xl = x -%}
+{%- endfor -%}
+<svg class="spark" viewBox="0 0 {{ w }} {{ h }}" width="{{ w }}" height="{{ h }}" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="{{ gid }}" gradientUnits="userSpaceOnUse" x1="{{ pl }}" y1="0" x2="{{ w - pr }}" y2="0">
+      <stop offset="0" class="spark__s1"/><stop offset=".45" class="spark__s2"/><stop offset="1" class="spark__s3"/>
+    </linearGradient>
+    <linearGradient id="{{ gid }}-a" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="spark__a1"/><stop offset="1" class="spark__a2"/>
+    </linearGradient>
+  </defs>
+  <line class="spark__base" x1="{{ pl }}" x2="{{ w - pr }}" y1="{{ pt + ih }}" y2="{{ pt + ih }}"/>
+  {%- if ind.target %}
+  {%- set tf = (ind.target.value - vmin) / vspan -%}
+  {%- if ind.lower_is_better -%}{%- set ty = pt + tf * ih -%}{%- else -%}{%- set ty = pt + ih - tf * ih -%}{%- endif -%}
+  {%- set tx = (ind.target.year - ymin) / yspan * iw + pl %}
+  <line class="spark__goal" x1="{{ pl }}" x2="{{ w - pr }}" y1="{{ ty }}" y2="{{ ty }}"/>
+  <line class="spark__bridge" x1="{{ xl }}" x2="{{ tx }}" y1="{{ yl }}" y2="{{ ty }}"/>
+  <circle class="spark__goal-pt" cx="{{ tx }}" cy="{{ ty }}" r="4"/>
+  {%- endif %}
+  {%- if ind.projection %}
+  {%- set px = (ind.projection.year - ymin) / yspan * iw + pl -%}
+  {%- set py1 = pt + ih - (ind.projection.min - vmin) / vspan * ih -%}{%- set py2 = pt + ih - (ind.projection.max - vmin) / vspan * ih %}
+  <line class="spark__proj" x1="{{ px }}" x2="{{ px }}" y1="{{ py1 }}" y2="{{ py2 }}"/>
+  {%- endif %}
+  {%- if ind.series | length > 1 %}
+  <polygon class="spark__area" fill="url(#{{ gid }}-a)" points="{{ x0 }},{{ pt + ih }} {{ pts }}{{ xl }},{{ pt + ih }}"/>
+  <polyline class="spark__line" stroke="url(#{{ gid }})" points="{{ pts }}"/>
+  {%- endif %}
+  {%- for p in ind.series %}
+  {%- set x = (p.year - ymin) / yspan * iw + pl -%}
+  {%- set f = (p.value - vmin) / vspan -%}
+  {%- if ind.lower_is_better -%}{%- set y = pt + f * ih -%}{%- else -%}{%- set y = pt + ih - f * ih -%}{%- endif %}
+  <circle class="spark__pt{% if p.uncertain %} is-uncertain{% endif %}{% if loop.last %} is-last{% endif %}" cx="{{ x }}" cy="{{ y }}" r="{% if loop.last %}4.5{% else %}2.4{% endif %}"/>
+  {%- endfor %}
+  <text class="spark__yr" x="{{ pl }}" y="{{ h - 3 }}">{{ ymin | int }}</text>
+  <text class="spark__yr spark__yr--end" x="{{ w - pr }}" y="{{ h - 3 }}" text-anchor="end">{% if ind.target and ind.target.year == ymax %}{{ target_label }} {% endif %}{{ ymax | int }}</text>
+</svg>
+{%- endmacro %}

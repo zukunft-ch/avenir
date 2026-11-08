@@ -31,6 +31,8 @@
       <span>{{ author }}</span>
     </p>
     {% endif %}
+    {% set hero_pillar = page.relative_path | split(pat="/") | last | split(pat=".") | first %}
+    {{ evidence::hero_stat(pillar=hero_pillar, lang=lang) }}
     {{ visual::hero(url=page.permalink, lang=lang) }}
   </div>
 </section>

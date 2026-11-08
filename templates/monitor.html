@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/spark.html" as spark %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -33,17 +34,6 @@
     </header>
     <div class="monitor-grid">
       {% for ind in m.indicator %}
-      {% set vals = ind.series | map(attribute="value") %}
-      {% set years = ind.series | map(attribute="year") %}
-      {% set vmin = vals | sort | first %}{% set vmax = vals | sort | last %}
-      {% if ind.target and not ind.lower_is_better and ind.target.value > vmax %}{% set vmax = ind.target.value %}{% endif %}
-      {% if ind.target and ind.lower_is_better and ind.target.value < vmin %}{% set vmin = ind.target.value %}{% endif %}
-      {% if ind.projection and ind.projection.max > vmax %}{% set vmax = ind.projection.max %}{% endif %}
-      {% set ymin = years | first %}{% set ymax = years | last %}
-      {% if ind.target and ind.target.year > ymax %}{% set ymax = ind.target.year %}{% endif %}
-      {% if ind.projection and ind.projection.year > ymax %}{% set ymax = ind.projection.year %}{% endif %}
-      {% set vspan = vmax - vmin %}{% if vspan == 0 %}{% set vspan = 1 %}{% endif %}
-      {% set yspan = ymax - ymin %}{% if yspan == 0 %}{% set yspan = 1 %}{% endif %}
       {% set latest = ind.series | last %}
       {% set first = ind.series | first %}
       <article class="mon reveal-up" id="mon-{{ ind.id }}">
@@ -55,34 +45,7 @@
           {% if latest.value >= 1000 %}{{ latest.value | num_format(locale="de-CH") }}{% else %}{{ latest.value | as_str | replace(from=".", to=dec) }}{% endif %}
           <span class="mon__year">{{ latest.year | int }}</span>
         </p>
-        <svg class="mon__spark" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-          {% set_global pts = "" %}
-          {% for pnt in ind.series %}
-            {% set x = (pnt.year - ymin) / yspan * 192 + 4 %}
-            {% set f = (pnt.value - vmin) / vspan %}
-            {% if ind.lower_is_better %}{% set y = 6 + f * 52 %}{% else %}{% set y = 58 - f * 52 %}{% endif %}
-            {% set_global pts = pts ~ x ~ "," ~ y ~ " " %}
-          {% endfor %}
-          {% if ind.target %}
-            {% set tf = (ind.target.value - vmin) / vspan %}
-            {% if ind.lower_is_better %}{% set ty = 6 + tf * 52 %}{% else %}{% set ty = 58 - tf * 52 %}{% endif %}
-            {% set tx = (ind.target.year - ymin) / yspan * 192 + 4 %}
-            <line class="mon__target-line" x1="4" x2="196" y1="{{ ty }}" y2="{{ ty }}"/>
-            <circle class="mon__target" cx="{{ tx }}" cy="{{ ty }}" r="3.2"/>
-          {% endif %}
-          {% if ind.projection %}
-            {% set px = (ind.projection.year - ymin) / yspan * 192 + 4 %}
-            {% set py1 = 58 - (ind.projection.min - vmin) / vspan * 52 %}{% set py2 = 58 - (ind.projection.max - vmin) / vspan * 52 %}
-            <line class="mon__proj" x1="{{ px }}" x2="{{ px }}" y1="{{ py1 }}" y2="{{ py2 }}"/>
-          {% endif %}
-          {% if ind.series | length > 1 %}<polyline class="mon__line" points="{{ pts }}" vector-effect="non-scaling-stroke"/>{% endif %}
-          {% for pnt in ind.series %}
-            {% set x = (pnt.year - ymin) / yspan * 192 + 4 %}
-            {% set f = (pnt.value - vmin) / vspan %}
-            {% if ind.lower_is_better %}{% set y = 6 + f * 52 %}{% else %}{% set y = 58 - f * 52 %}{% endif %}
-            <circle class="mon__pt{% if pnt.uncertain %} is-uncertain{% endif %}{% if loop.last %} is-last{% endif %}" cx="{{ x }}" cy="{{ y }}" r="{% if loop.last %}3.4{% else %}2.2{% endif %}"/>
-          {% endfor %}
-        </svg>
+        <div class="mon__spark">{{ spark::spark(ind=ind, lang=lang, target_label=page.extra.target_label) }}</div>
         <dl class="mon__facts">
           {% if ind.series | length > 1 %}<div><dt>{{ page.extra.since_label }} {{ first.year | int }}</dt><dd>{% if first.value >= 1000 %}{{ first.value | num_format(locale="de-CH") }}{% else %}{{ first.value | as_str | replace(from=".", to=dec) }}{% endif %} → {% if latest.value >= 1000 %}{{ latest.value | num_format(locale="de-CH") }}{% else %}{{ latest.value | as_str | replace(from=".", to=dec) }}{% endif %}</dd></div>{% endif %}
           {% if ind.target %}<div class="mon__goal"><dt>{{ page.extra.target_label }}</dt><dd>{{ ind.target.label[lang] }}</dd></div>{% endif %}

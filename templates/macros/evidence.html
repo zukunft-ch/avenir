@@ -1,3 +1,4 @@
+{% import "macros/spark.html" as spark %}
 {#
   Evidence from the Zukunftslabor for one pillar: notes whose extra.pillar matches,
   plus monitor indicators with the same pillar. Notes fall back to German when a
@@ -39,3 +40,30 @@
 {% endmacro block %}
 
 {% macro has(pillar, lang) %}{% set notes_de = get_section(path="zukunftslabor/notizen/_index.md") %}{% set m = load_data(path="data/monitor.toml") %}{% set_global n = 0 %}{% for p in notes_de.pages %}{% if p.extra.pillar == pillar %}{% set_global n = n + 1 %}{% endif %}{% endfor %}{% for i in m.indicator %}{% if i.pillar == pillar %}{% set_global n = n + 1 %}{% endif %}{% endfor %}{{ n }}{% endmacro has %}
+
+{#
+  Hero stat for a pillar page: the first Zukunftsmonitor indicator tagged with this pillar, as a big
+  number with its sparkline and target. Renders nothing when the pillar has no indicator.
+#}
+{% macro hero_stat(pillar, lang) %}
+{%- set m = load_data(path="data/monitor.toml") -%}
+{%- set inds = m.indicator | filter(attribute="pillar", value=pillar) -%}
+{%- if inds | length > 0 -%}
+{%- set ind = inds | first -%}
+{%- set latest = ind.series | last -%}
+{%- if lang == "en" -%}{%- set dec = "." -%}{%- else -%}{%- set dec = "," -%}{%- endif -%}
+{%- if lang == "de" -%}{%- set mon_path = "/zukunftslabor/monitor/" -%}{%- elif lang == "fr" -%}{%- set mon_path = "/fr/zukunftslabor/moniteur/" -%}{%- else -%}{%- set mon_path = "/" ~ lang ~ "/zukunftslabor/monitor/" -%}{%- endif -%}
+<aside class="hero-stat" aria-label="{{ trans(key='lab_hero_stat', lang=lang) }}">
+  <p class="hero-stat__eyebrow">{{ trans(key="lab_hero_stat", lang=lang) }} · <a href="{{ mon_path }}#mon-{{ ind.id }}">{{ trans(key="lab_monitor", lang=lang) }} →</a></p>
+  <div class="hero-stat__body">
+    <div class="hero-stat__num">
+      <p class="hero-stat__value">{% if latest.value >= 1000 %}{{ latest.value | num_format(locale="de-CH") }}{% else %}{{ latest.value | as_str | replace(from=".", to=dec) }}{% endif %}<span class="hero-stat__year">{{ latest.year | int }}</span></p>
+      <p class="hero-stat__title">{{ ind.title[lang] }}</p>
+      <p class="hero-stat__unit">{{ ind.unit[lang] }}</p>
+      {% if ind.target %}<p class="hero-stat__goal"><span>{{ trans(key="lab_target", lang=lang) }}</span> {{ ind.target.label[lang] }}</p>{% endif %}
+    </div>
+    <div class="hero-stat__spark">{{ spark::spark(ind=ind, lang=lang, w=520, h=150, target_label=trans(key="lab_target", lang=lang)) }}</div>
+  </div>
+</aside>
+{%- endif -%}
+{% endmacro hero_stat %}

@@ -32,12 +32,28 @@
   width: fit-content;
 }
 .mon__year { font-family: $font-mono; font-size: 0.75rem; letter-spacing: 0.04em; -webkit-text-fill-color: var(--color-text-faint); margin-left: 0.4rem; }
-.mon__spark { width: 100%; height: 64px; overflow: visible; }
-.mon__line { fill: none; stroke: var(--brand-mid); stroke-width: 1.8px; stroke-linejoin: round; }
-.mon__pt { fill: var(--brand-mid); &.is-uncertain { fill: var(--color-surface); stroke: var(--brand-mid); stroke-width: 1.2px; } &.is-last { fill: var(--color-text); } }
-.mon__target-line { stroke: var(--color-signal); stroke-width: 1px; stroke-dasharray: 3 3; opacity: 0.6; vector-effect: non-scaling-stroke; }
-.mon__target { fill: none; stroke: var(--color-signal); stroke-width: 1.5px; }
-.mon__proj { stroke: var(--color-text-faint); stroke-width: 6px; stroke-linecap: round; opacity: 0.35; }
+.mon__spark { margin: $space-1 0 0; }
+
+// ---- Sparkline (macros/spark.html) ----
+.spark {
+  display: block; width: 100%; height: auto; overflow: visible;
+  .spark__s1 { stop-color: #f43f5e; } .spark__s2 { stop-color: #c026d3; } .spark__s3 { stop-color: #4338ca; }
+  .spark__a1 { stop-color: #c026d3; stop-opacity: 0.16; } .spark__a2 { stop-color: #c026d3; stop-opacity: 0; }
+  .spark__base { stroke: var(--hairline, rgba(18,21,23,.12)); stroke-width: 1; }
+  .spark__line { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+  .spark__pt { fill: var(--brand-mid); stroke: var(--color-surface); stroke-width: 1.5;
+    &.is-uncertain { fill: var(--color-surface); stroke: var(--brand-mid); stroke-width: 1.4; }
+    &.is-last { fill: var(--color-text); stroke: var(--color-surface); stroke-width: 2.5; } }
+  .spark__goal { stroke: var(--color-signal); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.55; }
+  .spark__bridge { stroke: var(--color-signal); stroke-width: 1.4; stroke-dasharray: 1 4; stroke-linecap: round; opacity: 0.9; }
+  .spark__goal-pt { fill: var(--color-surface); stroke: var(--color-signal); stroke-width: 1.8; }
+  .spark__proj { stroke: var(--brand-mid); stroke-width: 7; stroke-linecap: round; opacity: 0.22; }
+  .spark__yr { font-family: $font-mono; font-size: 10px; fill: var(--color-text-muted); }
+}
+:root[data-theme="dark"] .spark {
+  .spark__s1 { stop-color: #fb7185; } .spark__s2 { stop-color: #e879f9; } .spark__s3 { stop-color: #818cf8; }
+  .spark__a1 { stop-color: #e879f9; stop-opacity: 0.18; } .spark__a2 { stop-color: #e879f9; }
+}
 .mon__facts { margin: 0; display: grid; gap: $space-1;
   div { display: flex; justify-content: space-between; gap: $space-3; padding: $space-1 0; border-top: 1px solid var(--hairline); font-size: 0.88rem; }
   dt { color: var(--color-text-muted); } dd { margin: 0; text-align: right; font-weight: $font-weight-medium; }
@@ -99,3 +115,113 @@
 .lab-cite { font-size: 0.9rem !important; color: var(--color-text-muted); margin-top: $space-4; word-break: break-word; }
 .canvas--content .container--narrow .evidence-list,
 .canvas--content .container--narrow .dossier__inds { padding-left: 0; }
+
+// ---- Figures (Zukunftslabor charts): one house style, see static/js/dz-charts.js ----
+// Figures break out of the narrow text column to the wide container; the first one in a
+// note is the lead figure: wider, taller, on a quiet surface.
+.fig {
+  // text column starts at max(gutter, (100vw - 84rem) / 2); figures share its left edge and
+  // may extend right up to the same inset on the other side.
+  --fig-room: calc(100vw - 2 * max(#{$gutter}, (100vw - 84rem) / 2));
+  --fig-w: min(1040px, var(--fig-room));
+  width: var(--fig-w);
+  max-width: none;
+  margin: $space-7 0;
+  padding: clamp(1rem, 2.4vw, 1.75rem) clamp(1rem, 2.6vw, 2rem) clamp(0.9rem, 2vw, 1.4rem);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-lg;
+  background: color-mix(in oklab, var(--color-surface, #fff) 72%, transparent);
+  position: relative;
+}
+.fig--lead {
+  --fig-w: min(1180px, var(--fig-room));
+  margin-top: $space-6;
+  padding-top: clamp(1.25rem, 3vw, 2.25rem);
+  // brand hairline across the top: the lead figure is the note's hero
+  &::before {
+    content: "";
+    position: absolute; left: clamp(1rem, 2.6vw, 2rem); right: clamp(1rem, 2.6vw, 2rem); top: 0; height: 2px;
+    background: var(--brand-grad-l); border-radius: 0 0 2px 2px;
+  }
+  .fig__title { font-size: clamp(1.15rem, 0.9rem + 1vw, 1.6rem); max-width: 42ch; }
+}
+.fig__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "num data" "title title";
+  align-items: baseline;
+  gap: $space-1 $space-3;
+  margin-bottom: $space-4;
+}
+.fig__num {
+  grid-area: num;
+  font-family: $font-mono; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--color-signal);
+}
+.fig__data {
+  grid-area: data;
+  font-family: $font-mono; font-size: 0.72rem; color: var(--color-text-muted); text-decoration: none;
+  &:hover, &:focus-visible { color: var(--color-text); text-decoration: underline; }
+}
+.fig__title {
+  grid-area: title;
+  margin: 0;
+  font-family: $font-family-headline; font-weight: 600;
+  font-size: clamp(1.02rem, 0.92rem + 0.4vw, 1.2rem); line-height: 1.25; letter-spacing: -0.01em;
+  color: var(--color-text);
+  max-width: 60ch;
+}
+.fig__plot {
+  width: 100%;
+  min-height: 0;
+  .vega-embed { width: 100%; display: block; }
+  .vega-embed summary { display: none; }
+  svg { display: block; }
+  .chart-fallback-svg { display: block; width: 100%; height: auto; }
+}
+.fig__caption {
+  margin-top: $space-4; padding-top: $space-3;
+  border-top: 1px dashed var(--glass-border);
+  font-size: $font-size-sm; line-height: 1.6; color: var(--color-text-muted);
+  max-width: 72ch;
+}
+@media (max-width: 640px) {
+  .fig { border-radius: $radius-md; margin-top: $space-5; margin-bottom: $space-5; }
+  .fig__head { grid-template-areas: "num data" "title title"; }
+}
+@media print {
+  .fig { width: 100%; margin-left: 0; border: 0; padding: 0; background: none; break-inside: avoid; }
+}
+
+// ---- Pillar hero stat (macros/evidence.html → hero_stat) ----
+.hero-stat {
+  margin-top: $space-6;
+  width: min(1040px, calc(100vw - 2 * max(#{$gutter}, (100vw - 84rem) / 2)));
+  padding: clamp(1rem, 2.4vw, 1.75rem) clamp(1rem, 2.6vw, 2rem);
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-lg;
+  background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  position: relative;
+  &::before { content: ""; position: absolute; left: clamp(1rem, 2.6vw, 2rem); right: clamp(1rem, 2.6vw, 2rem); top: 0; height: 2px; background: var(--brand-grad-l); }
+}
+.hero-stat__eyebrow {
+  margin: 0 0 $space-4; font-family: $font-mono; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-signal);
+  a { color: var(--color-text-muted); text-decoration: none; &:hover, &:focus-visible { color: var(--color-text); text-decoration: underline; } }
+}
+.hero-stat__body { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); gap: $space-6; align-items: end; }
+.hero-stat__value {
+  margin: 0; line-height: 0.95; font-family: $font-family-headline; font-weight: 650; letter-spacing: -0.05em;
+  font-size: clamp(3.2rem, 2rem + 4.5vw, 5.75rem);
+  background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; width: fit-content;
+}
+.hero-stat__year { font-family: $font-mono; font-size: 0.8rem; letter-spacing: 0; margin-left: $space-2; -webkit-text-fill-color: var(--color-text-muted); color: var(--color-text-muted); vertical-align: top; }
+.hero-stat__title { margin: $space-3 0 0; font-family: $font-family-headline; font-weight: 600; font-size: 1.05rem; }
+.hero-stat__unit { margin: $space-1 0 0; font-family: $font-mono; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); }
+.hero-stat__goal { margin: $space-3 0 0; font-size: 0.92rem; color: var(--color-text);
+  span { font-family: $font-mono; font-size: 0.72rem; text-transform: uppercase; color: var(--color-signal); margin-right: $space-1; } }
+@media (max-width: 720px) { .hero-stat__body { grid-template-columns: 1fr; gap: $space-4; } }
+// With a hero visual (two-column hero ≥1100px) the stat spans under both columns.
+@media (min-width: 1100px) {
+  .page-hero:has(.hero-visual) .hero-stat { grid-column: 1 / -1; grid-row: 4; width: 100%; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+}
+.page-hero:has(.hero-visual) .hero-stat { width: 100%; }
