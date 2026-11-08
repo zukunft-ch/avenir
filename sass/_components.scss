@@ -1334,6 +1334,8 @@
     color: var(--color-text);
   }
 
+  // input:not([type]): Zola's minifier drops the default type="text"
+  input:not([type]),
   input[type="text"],
   input[type="email"],
   textarea {
