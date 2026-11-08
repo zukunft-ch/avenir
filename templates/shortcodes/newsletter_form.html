@@ -32,14 +32,14 @@
     }).then(function(r) {
       if (!r.ok) throw new Error(r.status);
       form.reset();
-      status.textContent = '{{ trans(key="sub_success", lang=lang) }}';
+      status.textContent = {{ trans(key="sub_success", lang=lang) | json_encode | safe }};
       status.className = 'form-status form-status--ok';
     }).catch(function() {
-      status.textContent = '{{ trans(key="form_error", lang=lang) }}';
+      status.textContent = {{ trans(key="form_error", lang=lang) | json_encode | safe }};
       status.className = 'form-status form-status--err';
     }).finally(function() {
       btn.disabled = false;
-      btn.textContent = '{{ trans(key="btn_subscribe", lang=lang) }}';
+      btn.textContent = {{ trans(key="btn_subscribe", lang=lang) | json_encode | safe }};
     });
   });
 })();

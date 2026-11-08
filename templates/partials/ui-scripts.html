@@ -6,15 +6,15 @@
   window.DZPins = (function() {
     var KEY = 'dz-pins-v1';
     var T = {
-      add: '{{ trans(key="pin_add", lang=lang) }}',
-      remove: '{{ trans(key="pin_remove", lang=lang) }}',
-      added: '{{ trans(key="pin_added", lang=lang) }}',
-      removed: '{{ trans(key="pin_removed", lang=lang) }}',
-      copied: '{{ trans(key="link_copied", lang=lang) }}',
-      pinned: '{{ trans(key="pinned_by_you", lang=lang) }}',
-      importMsg: '{{ trans(key="pins_import", lang=lang) }}',
-      accept: '{{ trans(key="pins_accept", lang=lang) }}',
-      dismiss: '{{ trans(key="pins_dismiss", lang=lang) }}'
+      add: {{ trans(key="pin_add", lang=lang) | json_encode | safe }},
+      remove: {{ trans(key="pin_remove", lang=lang) | json_encode | safe }},
+      added: {{ trans(key="pin_added", lang=lang) | json_encode | safe }},
+      removed: {{ trans(key="pin_removed", lang=lang) | json_encode | safe }},
+      copied: {{ trans(key="link_copied", lang=lang) | json_encode | safe }},
+      pinned: {{ trans(key="pinned_by_you", lang=lang) | json_encode | safe }},
+      importMsg: {{ trans(key="pins_import", lang=lang) | json_encode | safe }},
+      accept: {{ trans(key="pins_accept", lang=lang) | json_encode | safe }},
+      dismiss: {{ trans(key="pins_dismiss", lang=lang) | json_encode | safe }}
     };
     var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>';
 
@@ -221,8 +221,8 @@
     }
 
     var liveRegion = document.getElementById('search-live');
-    var searchResultOne = '{{ trans(key="search_result_one", lang=lang) }}';
-    var searchResultMany = '{{ trans(key="search_result_many", lang=lang) }}';
+    var searchResultOne = {{ trans(key="search_result_one", lang=lang) | json_encode | safe }};
+    var searchResultMany = {{ trans(key="search_result_many", lang=lang) | json_encode | safe }};
 
     function filterLinks(q) {
       q = q.toLowerCase().trim();
