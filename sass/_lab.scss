@@ -1,0 +1,101 @@
+// =============================================
+// Zukunftslabor: monitor, dossiers, evidence blocks
+// =============================================
+
+.monitor-hero { min-height: auto; padding-bottom: clamp(3rem, 6vw, 4.5rem); }
+.monitor-hero__meta { @include mono-label; margin-top: $space-4; a { color: inherit; } }
+
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-4;
+  @media (max-width: $bp-xl) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+
+.mon {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-5;
+  background: var(--color-surface);
+  border: 1px solid var(--hairline);
+  border-radius: $radius-md;
+  scroll-margin-top: 6rem;
+}
+.mon__title { font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1.2; }
+.mon__unit { @include mono-label; font-size: 0.68rem; margin: 0.2rem 0 0; }
+.mon__value {
+  font-family: $font-family-headline; font-weight: 650; letter-spacing: -0.045em;
+  font-size: clamp(2.2rem, 1.6rem + 1.6vw, 3rem); line-height: 1; margin: 0;
+  background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  width: fit-content;
+}
+.mon__year { font-family: $font-mono; font-size: 0.75rem; letter-spacing: 0.04em; -webkit-text-fill-color: var(--color-text-faint); margin-left: 0.4rem; }
+.mon__spark { width: 100%; height: 64px; overflow: visible; }
+.mon__line { fill: none; stroke: var(--brand-mid); stroke-width: 1.8px; stroke-linejoin: round; }
+.mon__pt { fill: var(--brand-mid); &.is-uncertain { fill: var(--color-surface); stroke: var(--brand-mid); stroke-width: 1.2px; } &.is-last { fill: var(--color-text); } }
+.mon__target-line { stroke: var(--color-signal); stroke-width: 1px; stroke-dasharray: 3 3; opacity: 0.6; vector-effect: non-scaling-stroke; }
+.mon__target { fill: none; stroke: var(--color-signal); stroke-width: 1.5px; }
+.mon__proj { stroke: var(--color-text-faint); stroke-width: 6px; stroke-linecap: round; opacity: 0.35; }
+.mon__facts { margin: 0; display: grid; gap: $space-1;
+  div { display: flex; justify-content: space-between; gap: $space-3; padding: $space-1 0; border-top: 1px solid var(--hairline); font-size: 0.88rem; }
+  dt { color: var(--color-text-muted); } dd { margin: 0; text-align: right; font-weight: $font-weight-medium; }
+  .mon__goal dd { color: var(--color-signal); }
+}
+.mon__note { font-size: 0.85rem; line-height: 1.5; color: var(--color-text-muted); margin: 0; }
+.mon__src { @include mono-label; font-size: 0.64rem; text-transform: none; letter-spacing: 0.02em; margin: auto 0 0;
+  a { color: inherit; } }
+.mon__legend-unc { white-space: nowrap; }
+.mon__pillar { font-weight: $font-weight-semibold; font-size: 0.88rem; color: var(--color-text); text-decoration: none; &:hover { text-decoration: underline; } }
+
+.milestones { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--hairline-strong); }
+.ms {
+  display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: $space-2 $space-5;
+  padding: $space-4 0; border-bottom: 1px solid var(--hairline);
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.ms__status {
+  @include mono-label; font-size: 0.68rem; align-self: start; justify-self: start;
+  padding: 0.25rem 0.55rem; border-radius: $radius-pill; border: 1px solid currentColor;
+  .ms--offen & { color: var(--color-signal); }
+  .ms--in-arbeit & { color: #b45309; }
+  .ms--erreicht & { color: #0f766e; }
+}
+[data-theme="dark"] { .ms--in-arbeit .ms__status { color: #fbbf24; } .ms--erreicht .ms__status { color: #2dd4bf; } }
+.ms__text { margin: 0; font-size: 1.02rem; line-height: 1.5; }
+.ms__meta { grid-column: 2; margin: 0; @include mono-label; font-size: 0.64rem; text-transform: none; letter-spacing: 0.02em;
+  a { color: inherit; } @media (max-width: $bp-sm) { grid-column: 1; } }
+
+// ---- Evidence block on pillar pages + dossiers ----
+.evidence-list { list-style: none; padding: 0; margin: $space-4 0 0; display: grid; gap: $space-3; }
+.evidence-item {
+  display: grid; gap: $space-1; padding: $space-4; border-radius: $radius-md;
+  background: var(--color-surface); border: 1px solid var(--hairline); text-decoration: none; color: var(--color-text);
+  &:hover { color: var(--color-text); border-color: var(--hairline-strong); }
+}
+.evidence-item__meta { @include mono-label; font-size: 0.66rem; }
+.evidence-item__title { font-family: $font-family-headline; font-weight: 650; font-size: 1.1rem; letter-spacing: -0.02em; line-height: 1.25; }
+.evidence-item__text { font-size: 0.92rem; color: var(--color-text-muted); line-height: 1.5; }
+
+.dossier-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: $space-5;
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; } }
+.dossier { padding: $space-5; border: 1px solid var(--hairline); border-radius: $radius-md; background: var(--color-surface); scroll-margin-top: 6rem; }
+.dossier__head { display: flex; justify-content: space-between; align-items: baseline; gap: $space-3; margin-bottom: $space-3; }
+.dossier__title { font-size: 1.35rem; letter-spacing: -0.03em; a { color: var(--color-text); text-decoration: none; } a:hover { text-decoration: underline; } }
+.dossier__hex { @include mono-label; }
+.dossier__inds { display: flex; flex-wrap: wrap; gap: $space-2; margin: $space-3 0 0; padding: 0; list-style: none;
+  a { @include mono-label; font-size: 0.66rem; text-decoration: none; padding: 0.25rem 0.55rem; border-radius: $radius-pill; border: 1px solid var(--hairline-strong); }
+  a:hover { color: var(--color-text); } }
+.dossier__empty { color: var(--color-text-faint); font-size: 0.9rem; }
+
+// note titles: allow proper German hyphenation instead of mid-word breaks
+.notiz-hero .page-hero__title, .page-hero__title { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: normal; }
+
+.lab-downloads { list-style: none; padding-left: 0 !important; display: flex; flex-wrap: wrap; gap: $space-2;
+  li { margin: 0 !important; }
+  a { display: inline-flex; @include mono-label; font-size: 0.7rem; padding: 0.4rem 0.7rem; border-radius: $radius-pill; border: 1px solid var(--hairline-strong); text-decoration: none; color: var(--color-text); }
+  a:hover { border-color: var(--color-text); } }
+.lab-cite { font-size: 0.9rem !important; color: var(--color-text-muted); margin-top: $space-4; word-break: break-word; }
+.canvas--content .container--narrow .evidence-list,
+.canvas--content .container--narrow .dossier__inds { padding-left: 0; }

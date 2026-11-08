@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "macros/jsonld.html" as jsonld %}
+{% import "macros/evidence.html" as evidence %}
+
+{% block head_extra %}{{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}{% endblock %}
+
+{% block content %}
+{# Dossiers: the evidence behind each of the 13 pillars, in programme order (from programm chapters). #}
+{% if lang == "de" %}{% set ppath = "programm.md" %}{% else %}{% set ppath = "programm." ~ lang ~ ".md" %}{% endif %}
+{% set prog = get_page(path=ppath) %}
+<section class="page-hero monitor-hero" aria-labelledby="dos-title">
+  <div class="container">
+    <p class="eyebrow">{{ trans(key="nav_zukunftslabor", lang=lang) }} · {{ page.extra.kicker }}</p>
+    <h1 class="page-hero__title" id="dos-title">{{ page.title }}</h1>
+    <p class="page-hero__desc">{{ page.description }}</p>
+  </div>
+</section>
+<section class="canvas layer" aria-label="{{ page.title }}">
+  <div class="container">
+    <div class="dossier-grid">
+      {% for c in prog.extra.chapters %}
+      {% set key = c.link | trim_start_matches(pat="@/") | trim_end_matches(pat=".md") %}
+      <article class="dossier reveal-up" id="dossier-{{ key }}">
+        <header class="dossier__head">
+          <h2 class="dossier__title"><a href="{{ get_url(path=c.link, lang=lang) }}">{{ c.title }}</a></h2>
+          <span class="dossier__hex">{{ evidence::has(pillar=key, lang=lang) | trim }} {{ page.extra.items_label }}</span>
+        </header>
+        {{ evidence::block(pillar=key, lang=lang, compact=true) }}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% if page.content %}<section class="canvas canvas--content"><div class="container container--narrow">{{ page.content | safe }}</div></section>{% endif %}
+<script>
+(function(){var els=document.querySelectorAll('.reveal-up');if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('is-visible')});return;}var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-visible');io.unobserve(e.target);}})},{threshold:0.1});els.forEach(function(e){io.observe(e)});})();
+</script>
+{% endblock %}

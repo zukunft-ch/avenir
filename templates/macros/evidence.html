@@ -1,0 +1,41 @@
+{#
+  Evidence from the Zukunftslabor for one pillar: notes whose extra.pillar matches,
+  plus monitor indicators with the same pillar. Notes fall back to German when a
+  translation does not exist yet (marked as such).
+#}
+{% macro block(pillar, lang, compact=false) %}
+{% set notes_l = get_section(path="zukunftslabor/notizen/_index.md", lang=lang) %}
+{% set notes_de = get_section(path="zukunftslabor/notizen/_index.md") %}
+{% set_global found = [] %}
+{% for p in notes_l.pages %}{% if p.extra.pillar == pillar %}{% set_global found = found | concat(with=p) %}{% endif %}{% endfor %}
+{% set_global fallback = false %}
+{% if found | length == 0 and lang != "de" %}
+  {% for p in notes_de.pages %}{% if p.extra.pillar == pillar %}{% set_global found = found | concat(with=p) %}{% set_global fallback = true %}{% endif %}{% endfor %}
+{% endif %}
+{% set m = load_data(path="data/monitor.toml") %}
+{% set_global inds = [] %}
+{% for i in m.indicator %}{% if i.pillar == pillar %}{% set_global inds = inds | concat(with=i) %}{% endif %}{% endfor %}
+{% set monitor_url = get_url(path="@/zukunftslabor/monitor.md", lang=lang) %}
+{% if found | length > 0 or inds | length > 0 %}
+  {% if found | length > 0 %}
+  <ul class="evidence-list">
+    {% for p in found %}
+    <li><a class="evidence-item" href="{{ p.permalink }}">
+      <span class="evidence-item__meta">{{ p.date | date(format="%d.%m.%Y") }} · {% if p.extra.evidence == "stark" %}{{ trans(key="lab_evidence_strong", lang=lang) }}{% else %}{{ trans(key="lab_evidence_medium", lang=lang) }}{% endif %}{% if fallback %} · {{ trans(key="lab_in_german", lang=lang) }}{% endif %}</span>
+      <span class="evidence-item__title">{{ p.title }}</span>
+      {% if not compact and p.description %}<span class="evidence-item__text">{{ p.description }}</span>{% endif %}
+    </a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if inds | length > 0 %}
+  <ul class="dossier__inds" aria-label="{{ trans(key='lab_monitor', lang=lang) }}">
+    {% for i in inds %}<li><a href="{{ monitor_url }}#mon-{{ i.id }}">{{ trans(key="lab_monitor", lang=lang) }}: {{ i.title[lang] }}</a></li>{% endfor %}
+  </ul>
+  {% endif %}
+{% elif compact %}
+  <p class="dossier__empty">{{ trans(key="lab_no_evidence", lang=lang) }}</p>
+{% endif %}
+{% endmacro block %}
+
+{% macro has(pillar, lang) %}{% set notes_de = get_section(path="zukunftslabor/notizen/_index.md") %}{% set m = load_data(path="data/monitor.toml") %}{% set_global n = 0 %}{% for p in notes_de.pages %}{% if p.extra.pillar == pillar %}{% set_global n = n + 1 %}{% endif %}{% endfor %}{% for i in m.indicator %}{% if i.pillar == pillar %}{% set_global n = n + 1 %}{% endif %}{% endfor %}{{ n }}{% endmacro has %}

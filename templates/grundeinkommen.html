@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros/evidence.html" as evidence %}
 {% import "macros/jsonld.html" as jsonld %}
 
 {% block head_extra %}
@@ -318,6 +319,15 @@
 {% endif %}
 
 {# ===== CTA ===== #}
+{# ===== Evidence from the Zukunftslabor ===== #}
+<section class="canvas canvas--content" aria-label="{{ trans(key='lab_evidence_title', lang=lang) }}">
+  <div class="container container--narrow">
+    <h2>{{ trans(key="lab_evidence_title", lang=lang) }}</h2>
+    <p>{{ trans(key="lab_evidence_intro", lang=lang) }}</p>
+    {{ evidence::block(pillar="grundeinkommen", lang=lang) }}
+  </div>
+</section>
+
 {% if page.extra.show_cta %}
 <section class="canvas cta-section" aria-label="{{ trans(key='cta_join', lang=lang) }}">
   <div class="container container--narrow" style="text-align: center;">

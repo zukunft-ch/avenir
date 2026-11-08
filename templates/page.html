@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
+{% import "macros/evidence.html" as evidence %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -88,6 +89,18 @@
   </section>
   {% endif %}
   {% endfor %}
+{% endif %}
+
+{# ===== Evidence from the Zukunftslabor (pillar pages: notes + monitor indicators with matching pillar) ===== #}
+{% set pillar_key = page.relative_path | split(pat="/") | last | split(pat=".") | first %}
+{% if evidence::has(pillar=pillar_key, lang=lang) | int > 0 %}
+<section class="canvas canvas--content" aria-label="{{ trans(key='lab_evidence_title', lang=lang) }}">
+  <div class="container container--narrow">
+    <h2>{{ trans(key="lab_evidence_title", lang=lang) }}</h2>
+    <p>{{ trans(key="lab_evidence_intro", lang=lang) }}</p>
+    {{ evidence::block(pillar=pillar_key, lang=lang) }}
+  </div>
+</section>
 {% endif %}
 
 {# ===== FAQ ===== #}
