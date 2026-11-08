@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/pin.html" as pin %}
+{% import "macros/visual.html" as visual %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -68,6 +69,7 @@
     </div>
   </div>
 </section>
+{{ visual::interlude(hex=t.hex, lang=lang) }}
 {% endfor %}
 
 {# ---- Commitments ---- #}

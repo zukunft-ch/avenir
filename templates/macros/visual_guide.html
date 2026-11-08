@@ -1,0 +1,28 @@
+{# Semantic lists keep the diagrams readable without CSS or JavaScript. #}
+{% macro flow(steps, label) %}
+<ol class="visual-flow" aria-label="{{ label }}" role="list">
+  {% for step in steps %}
+  <li class="visual-flow__step">
+    <span class="visual-flow__number" aria-hidden="true">0{{ loop.index }}</span>
+    <h3>{{ step.label }}</h3>
+    <p>{{ step.text }}</p>
+    {% if not loop.last %}<span class="visual-flow__arrow" aria-hidden="true">→</span>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% endmacro %}
+
+{% macro evidence(items, label) %}
+<ul class="evidence-guide" aria-label="{{ label }}" role="list">
+  {% for item in items %}
+  {% set strength = 4 - loop.index %}
+  <li class="evidence-guide__level">
+    <span class="evidence-guide__bars" aria-hidden="true">
+      {% for bar in range(end=3) %}<i{% if bar < strength %} class="is-filled"{% endif %}></i>{% endfor %}
+    </span>
+    <h3>{{ item.label }}</h3>
+    <p>{{ item.text }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}

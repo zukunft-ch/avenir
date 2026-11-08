@@ -2,6 +2,7 @@
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/evidence.html" as evidence %}
 {% import "macros/visual.html" as visual %}
+{% import "macros/visual_guide.html" as visual_guide %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -72,11 +73,18 @@
       {% endif %}
 
       {% if sec.items is defined %}
+      {% if sec.presentation is defined and sec.presentation == "evidence" %}
+      {{ visual_guide::evidence(items=sec.items, label=sec.title) }}
+      {% else %}
       <ul>
         {% for item in sec.items %}
         <li><strong>{{ item.label }}</strong>: {{ item.text | safe }}</li>
         {% endfor %}
       </ul>
+      {% endif %}
+      {% endif %}
+      {% if sec.steps is defined %}
+      {{ visual_guide::flow(steps=sec.steps, label=sec.title) }}
       {% endif %}
     </div>
   </section>

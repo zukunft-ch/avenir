@@ -2,6 +2,7 @@
 {% import "macros/evidence.html" as evidence %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/visual.html" as visual %}
+{% import "macros/visual_guide.html" as visual_guide %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -69,6 +70,17 @@
 {% endif %}
 
 {# ===== Calculator ===== #}
+{% if page.extra.dividend_guide is defined %}
+{% set guide = page.extra.dividend_guide %}
+<section class="canvas canvas--content" aria-labelledby="dividend-title">
+  <div class="container container--narrow">
+    <p class="eyebrow">{{ guide.eyebrow }}</p>
+    <h2 id="dividend-title">{{ guide.title }}</h2>
+    {{ visual_guide::flow(steps=guide.steps, label=guide.title) }}
+    <p class="visual-guide-note">{{ guide.note }}</p>
+  </div>
+</section>
+{% endif %}
 <section class="canvas canvas--content sim" aria-label="{{ page.extra.sim_title }}">
   <div class="container">
 

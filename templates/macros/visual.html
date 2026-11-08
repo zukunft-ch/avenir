@@ -29,13 +29,43 @@
 {% endif %}
 {% endmacro %}
 
-{% macro scene(slot, lang) %}
+{% macro scene(slot, lang, sizes="(min-width: 1440px) 427px, (min-width: 993px) 30vw, (min-width: 577px) 44vw, (max-width: 500px) calc(100vw - 40px), 92vw") %}
 {% if config.extra.visuals_catalog is defined %}
 {% set catalog = load_data(path=config.extra.visuals_catalog) %}
 {% for visual in catalog.images %}
 {% if visual.slot == slot %}
-{{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes="(min-width: 1440px) 427px, (min-width: 993px) 30vw, (min-width: 577px) 44vw, (max-width: 500px) calc(100vw - 40px), 92vw") }}
+{{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes=sizes) }}
 {% endif %}
 {% endfor %}
+{% endif %}
+{% endmacro %}
+
+{% macro chapter(path, lang) %}
+{% if config.extra.visuals_catalog is defined %}
+{% set catalog = load_data(path=config.extra.visuals_catalog) %}
+{% for visual in catalog.images %}
+{% if visual.page == path %}
+{{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes="(min-width: 1100px) 320px, (min-width: 769px) 28vw, (max-width: 500px) calc(100vw - 88px), 80vw") }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}
+
+{% macro interlude(hex, lang) %}
+{% if config.extra.visuals_catalog is defined %}
+{% set catalog = load_data(path=config.extra.visuals_catalog) %}
+{% if catalog.manifest_interludes is defined %}
+{% for interlude in catalog.manifest_interludes %}
+{% if interlude.after == hex %}
+<div class="manifest-interlude container">
+  {% for visual in catalog.images %}
+  {% if visual.slot == interlude.slot %}
+  {{ visual_picture::figure(visual=visual, catalog=catalog, lang=lang, loading="lazy", priority="auto", sizes="(min-width: 1440px) 1200px, 90vw") }}
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
 {% endif %}
 {% endmacro %}
