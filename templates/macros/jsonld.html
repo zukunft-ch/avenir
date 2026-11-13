@@ -17,7 +17,7 @@
   },
   "slogan": "Wohlstand statt Mangeldenken. Sicherheit statt Angst. Souveränität statt Abhängigkeit.",
   "description": "Neue Schweizer Partei aus Basel: KI und Robotik sollen Wohlstand für alle schaffen. Eigene Rechenkraft, souveräne KI, Talent, Produktion im Land und eine Dividende für alle.",
-  "knowsAbout": ["Artificial intelligence policy", "Sovereign AI", "Compute infrastructure", "Robotics and automation", "Reindustrialisation", "Universal basic income", "Digital sovereignty", "Open government", "Housing policy", "Energy resilience", "Swiss neutrality"],
+  "knowsAbout": ["Artificial intelligence policy", "Sovereign AI", "Compute infrastructure", "Robotics and automation", "Reindustrialisation", "Universal basic income", "AI dividend", "Automation dividend", "Universal basic wealth", "Digital sovereignty", "Open government", "Housing policy", "Energy resilience", "Swiss neutrality"],
   "sameAs": ["https://github.com/zukunft-ch", "https://collective.die-zukunft.ch", "https://opencollective.com/die-zukunft", "https://the-future.world", "https://le-futur.ch", "https://il-futuro.ch"],
   "foundingLocation": {
     "@type": "Place",
@@ -50,7 +50,7 @@
 {% endmacro %}
 
 {# ---- WebPage — every page ---- #}
-{% macro webpage(title, description, url, lang) %}
+{% macro webpage(title, description, url, lang, keywords="") %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -62,7 +62,9 @@
   "isPartOf": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#website" },
   "publisher": { "@id": "{{ config.base_url | trim_end_matches(pat='/') | safe }}/#organization" },
   "mainEntityOfPage": {{ url | json_encode() | safe }},
-  "speakable": {
+  {% if keywords %}"keywords": {{ keywords | json_encode() | safe }},
+  "about": [{% for k in keywords %}{ "@type": "Thing", "name": {{ k | json_encode() | safe }} }{% if not loop.last %}, {% endif %}{% endfor %}],
+  {% endif %}"speakable": {
     "@type": "SpeakableSpecification",
     "cssSelector": [".page-hero__title", ".page-hero__desc", ".lede__claim", ".lede__lead", ".lede__trio"]
   },

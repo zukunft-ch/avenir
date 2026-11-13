@@ -10,6 +10,8 @@
 
   <title>{% block title %}{{ page.title | default(value=section.title | default(value=config.title)) }}{% endblock %} — {% if lang == "fr" %}Le Futur{% elif lang == "it" %}Il Futuro{% elif lang == "en" %}The Future{% else %}Die Zukunft{% endif %}</title>
   <meta name="description" content="{% block description %}{{ page.description | default(value=section.description | default(value=config.description)) }}{% endblock %}">
+  {% set page_keywords = page.extra.keywords | default(value=section.extra.keywords | default(value="")) %}
+  {% if page_keywords %}<meta name="keywords" content="{{ page_keywords | join(sep=', ') }}">{% endif %}
   <meta name="author" content="{% if lang == 'fr' %}Le Futur{% elif lang == 'it' %}Il Futuro{% elif lang == 'en' %}The Future{% else %}Die Zukunft{% endif %}">
   <meta name="theme-color" content="#eef0ec" id="meta-theme-color">
   <script>
@@ -115,7 +117,7 @@
   {# JSON-LD structured data #}
   {{ jsonld::organization() }}
   {{ jsonld::website(lang=lang) }}
-  {{ jsonld::webpage(title=page.title | default(value=section.title | default(value=config.title)), description=page.description | default(value=section.description | default(value=config.description)), url=current_url | default(value=config.base_url), lang=lang) }}
+  {{ jsonld::webpage(title=page.title | default(value=section.title | default(value=config.title)), description=page.description | default(value=section.description | default(value=config.description)), url=current_url | default(value=config.base_url), lang=lang, keywords=page_keywords) }}
 
   {% block head_extra %}{% endblock %}
 
