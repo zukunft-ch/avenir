@@ -1,0 +1,183 @@
+{#
+  Membership application form (Verein «Die Zukunft»), posts to the form worker's /join.
+
+  j   = page.extra.join (all visible text, per language, in the mitmachen content file)
+  cfg = config.extra: membership_fee_regular / membership_fee_reduced (CHF per year;
+        empty = amount not shown) and membership_exclusive (true = the applicant must
+        declare not to be a member of another party, statutes Art. 3 Abs. 3).
+#}
+{% macro form(j, cfg, lang) %}
+<div class="glass-card">
+  <form class="contact-form join-form" id="join-form" novalidate>
+    {% if j.intro %}<p class="join-form__intro">{{ j.intro }}</p>{% endif %}
+
+    <fieldset>
+      <legend>{{ j.legend_person }}</legend>
+      <div class="join-form__row">
+        <div>
+          <label for="join-first">{{ j.label_first_name }}</label>
+          <input type="text" id="join-first" name="first_name" autocomplete="given-name" maxlength="100" required>
+        </div>
+        <div>
+          <label for="join-last">{{ j.label_last_name }}</label>
+          <input type="text" id="join-last" name="last_name" autocomplete="family-name" maxlength="100" required>
+        </div>
+      </div>
+      <div>
+        <label for="join-email">{{ j.label_email }}</label>
+        <input type="email" id="join-email" name="email" autocomplete="email" maxlength="320" required>
+      </div>
+      <div>
+        <label for="join-street">{{ j.label_street }}</label>
+        <input type="text" id="join-street" name="street" autocomplete="street-address" maxlength="200" required>
+      </div>
+      <div class="join-form__row">
+        <div>
+          <label for="join-zip">{{ j.label_zip_city }}</label>
+          <input type="text" id="join-zip" name="zip_city" maxlength="200" required>
+        </div>
+        <div>
+          <label for="join-country">{{ j.label_country }}</label>
+          <input type="text" id="join-country" name="country" autocomplete="country-name" maxlength="100" value="{{ j.country_default }}" required>
+        </div>
+      </div>
+      <div class="join-form__row">
+        <div>
+          <label for="join-phone">{{ j.label_phone }}</label>
+          <input type="tel" id="join-phone" name="phone" autocomplete="tel" maxlength="50">
+        </div>
+        <div>
+          <label for="join-lang">{{ j.label_lang }}</label>
+          <select id="join-lang" name="lang">
+            <option value="de"{% if lang == "de" %} selected{% endif %}>Deutsch</option>
+            <option value="fr"{% if lang == "fr" %} selected{% endif %}>Français</option>
+            <option value="it"{% if lang == "it" %} selected{% endif %}>Italiano</option>
+            <option value="en"{% if lang == "en" %} selected{% endif %}>English</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ j.legend_fee }}</legend>
+      <label class="checkbox-label">
+        <input type="radio" name="fee" value="regular" checked>
+        <span>{{ j.fee_regular }}{% if cfg.membership_fee_regular %}: CHF {{ cfg.membership_fee_regular }} {{ j.per_year }}{% endif %}</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="radio" name="fee" value="reduced">
+        <span>{{ j.fee_reduced }}{% if cfg.membership_fee_reduced %}: CHF {{ cfg.membership_fee_reduced }} {{ j.per_year }}{% endif %}</span>
+      </label>
+      <p class="join-form__hint">{{ j.fee_hint }}</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ j.legend_help }}</legend>
+      <p class="join-form__hint">{{ j.help_hint }}</p>
+      {% for opt in j.help_options %}
+      <label class="checkbox-label">
+        <input type="checkbox" name="help" value="{{ opt.value }}">
+        <span>{{ opt.label }}</span>
+      </label>
+      {% endfor %}
+      <div>
+        <label for="join-help-other">{{ j.label_help_other }}</label>
+        <textarea id="join-help-other" name="help_other" maxlength="500"></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{ j.legend_declarations }}</legend>
+      <label class="checkbox-label">
+        <input type="checkbox" name="age16" required>
+        <span>{{ j.decl_age }}</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="statutes" required>
+        <span>{{ j.decl_statutes_pre }}<a href="https://collective.die-zukunft.ch/governance/statuten/">{{ j.decl_statutes_link }}</a>{{ j.decl_statutes_post }}</span>
+      </label>
+      {% if cfg.membership_exclusive %}
+      <label class="checkbox-label">
+        <input type="checkbox" name="no_other_party" required>
+        <span>{{ j.decl_no_other_party }}</span>
+      </label>
+      {% endif %}
+      <label class="checkbox-label">
+        <input type="checkbox" name="consent" required>
+        <span>{{ j.decl_consent_pre }}<a href="{{ get_url(path='@/datenschutz.md', lang=lang) }}#mitgliedschaft">{{ j.decl_consent_link }}</a>{{ j.decl_consent_post }}</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="newsletter">
+        <span>{{ j.decl_newsletter }}</span>
+      </label>
+    </fieldset>
+
+    {# Honeypot — hidden from real users, bots fill it #}
+    <div aria-hidden="true" class="form__hp">
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button type="submit" class="btn btn--glow" id="join-submit">{{ j.btn_submit }}</button>
+    <p class="join-form__hint">{{ j.exit_note }}</p>
+    <p class="form-status" id="join-status" role="status" aria-live="polite" tabindex="-1"></p>
+  </form>
+</div>
+
+<script>
+(function() {
+  var form = document.getElementById('join-form');
+  var status = document.getElementById('join-status');
+  var btn = document.getElementById('join-submit');
+  var label = btn.textContent;
+  var success = {{ j.success | json_encode | safe }};
+  var failure = {{ j.error | json_encode | safe }};
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    var el = form.elements;
+    var help = [];
+    form.querySelectorAll('input[name="help"]:checked').forEach(function(c) { help.push(c.value); });
+    var payload = {
+      first_name: el.first_name.value,
+      last_name: el.last_name.value,
+      email: el.email.value,
+      street: el.street.value,
+      zip_city: el.zip_city.value,
+      country: el.country.value,
+      phone: el.phone.value,
+      lang: el.lang.value,
+      fee: form.querySelector('input[name="fee"]:checked').value,
+      help: help,
+      help_other: el.help_other.value,
+      age16: el.age16.checked,
+      statutes: el.statutes.checked,
+      no_other_party: el.no_other_party ? el.no_other_party.checked : false,
+      consent: el.consent.checked,
+      newsletter: el.newsletter.checked,
+      website: el.website.value
+    };
+    var first = payload.first_name;
+    btn.disabled = true;
+    btn.textContent = '...';
+    status.textContent = '';
+    fetch('https://api.die-zukunft.ch/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      form.reset();
+      status.textContent = success.replace('{name}', first);
+      status.className = 'form-status form-status--ok';
+      status.focus();
+    }).catch(function() {
+      status.textContent = failure;
+      status.className = 'form-status form-status--err';
+    }).finally(function() {
+      btn.disabled = false;
+      btn.textContent = label;
+    });
+  });
+})();
+</script>
+{% endmacro %}

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/jsonld.html" as jsonld %}
 {% import "macros/visual.html" as visual %}
+{% import "macros/join_form.html" as join %}
 
 {% block head_extra %}
 {{ jsonld::breadcrumb(title=page.title, url=page.permalink, lang=lang) }}
@@ -30,7 +31,7 @@
 {# ===== Sections — each its own canvas ===== #}
 {% if page.extra.sections %}
   {% for sec in page.extra.sections %}
-  <section class="canvas canvas--content" aria-label="{{ sec.title }}">
+  <section class="canvas canvas--content" aria-label="{{ sec.title }}"{% if sec.id is defined %} id="{{ sec.id }}"{% endif %}>
     <div class="container container--narrow">
       <h2>{{ sec.title }}</h2>
       <p>{{ sec.text }}</p>
@@ -81,6 +82,9 @@
         });
       })();
       </script>
+      {% endif %}
+      {% if sec.shortcode is defined and sec.shortcode == "join_form" and page.extra.join is defined %}
+      {{ join::form(j=page.extra.join, cfg=config.extra, lang=lang) }}
       {% endif %}
       {% if sec.link_text is defined %}
       <a class="btn btn--outline" href="{{ sec.link }}">{{ sec.link_text }}</a>

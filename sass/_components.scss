@@ -1380,6 +1380,65 @@
   }
 }
 
+// ---- Membership form (macros/join_form.html) ----
+.join-form {
+  fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  legend {
+    font-family: $font-family-headline;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-lg;
+    margin-bottom: $space-2;
+  }
+
+  input[type="tel"],
+  select {
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: var(--color-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: $radius-md;
+    color: var(--color-text);
+  }
+
+  textarea { min-height: 5rem; }
+
+  .checkbox-label {
+    color: var(--color-text);
+
+    input[type="radio"] {
+      margin-top: 0.2em;
+      accent-color: var(--color-accent);
+    }
+  }
+}
+
+.join-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4;
+
+  @media (max-width: $bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.join-form__intro { margin: 0; }
+
+// Beats `.canvas--content .container--narrow p` (body-text size).
+.container--narrow .join-form p.join-form__hint {
+  font-size: $font-size-sm;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
 .consent-label {
   display: flex;
   align-items: flex-start;
